@@ -1,0 +1,8 @@
+# For vscode
+.vscode/
+node_modules/
+
+# For OCaml/Reason
+*.install
+.merlin
+_build/

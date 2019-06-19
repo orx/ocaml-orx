@@ -1,0 +1,16 @@
+(rule
+ (targets g.ml)
+ (deps stubgen/orx_ml_types_stubgen.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps}))))
+
+(library
+ (public_name orx_types)
+ (flags
+  :standard
+  -w
+  -9-27
+  (:include ../orx-ocaml-link-flags.sexp))
+ (libraries orx_types_bindings))

@@ -1,0 +1,36 @@
+(rule
+ (targets generated.ml)
+ (deps stubgen/orx_stubgen.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps} -ml))))
+
+(rule
+ (targets orx_stubs.c)
+ (deps stubgen/orx_stubgen.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps} -c))))
+
+(rule
+ (targets orx_types.c)
+ (deps stubgen/orx_stubgen.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps} -t))))
+
+(library
+ (public_name orx)
+ (synopsis "Bindings for orx")
+ (flags
+  :standard
+  (:include ../orx-ocaml-link-flags.sexp))
+ (c_names orx_stubs)
+ (c_flags
+  (:include ../orx-c-include-flags.sexp))
+ (c_library_flags
+  (:include ../orx-c-link-flags.sexp))
+ (libraries orx_bindings))

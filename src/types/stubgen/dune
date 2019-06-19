@@ -1,0 +1,20 @@
+(executable
+ (name orx_types_stubgen)
+ (libraries orx_types_bindings ctypes.stubs))
+
+(rule
+ (targets orx_ml_types_stubgen.c)
+ (deps ./orx_types_stubgen.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps}))))
+
+(rule
+ (targets orx_ml_types_stubgen.exe)
+ (deps
+  (:c ./orx_ml_types_stubgen.c))
+ (action
+  (run %{cc} %{c} %{read-lines:../../orx-c-include-flags.txt}
+    %{read-lines:../../orx-c-link-flags.txt} -I %{ocaml_where}/../ctypes -I
+    %{ocaml_where} -o %{targets})))

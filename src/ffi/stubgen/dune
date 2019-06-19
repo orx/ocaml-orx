@@ -1,0 +1,3 @@
+(executable
+ (name orx_stubgen)
+ (libraries ctypes.stubs orx_bindings))

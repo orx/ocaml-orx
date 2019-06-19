@@ -1,0 +1,3 @@
+(library
+ (public_name orx_bindings)
+ (libraries ctypes ctypes.foreign.threaded orx_types fmt))

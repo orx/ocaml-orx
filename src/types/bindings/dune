@@ -1,0 +1,3 @@
+(library
+ (public_name orx_types_bindings)
+ (libraries ctypes fmt))
