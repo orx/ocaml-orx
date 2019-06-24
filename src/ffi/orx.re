@@ -7,9 +7,23 @@ let orx_error = (name: string) => {
 module Orx_gen = Orx_bindings.Bindings(Generated);
 
 module Input = Orx_gen.Input;
-module Vector = Orx_gen.Vector;
 module Resource = Orx_gen.Resource;
 module Viewport = Orx_gen.Viewport;
+
+module Vector = {
+  include Orx_gen.Vector;
+
+  // Rotate about the z-axis
+  let rotate = (v: t, angle: float): t => {
+    let sin_angle = sin(angle);
+    let cos_angle = cos(angle);
+    {
+      ...v,
+      x: cos_angle *. v.x -. sin_angle *. v.y,
+      y: sin_angle *. v.x +. cos_angle *. v.y,
+    };
+  };
+};
 
 module Object = {
   include Orx_gen.Object;

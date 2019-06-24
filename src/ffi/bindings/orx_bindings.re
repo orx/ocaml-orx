@@ -147,6 +147,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
         t @-> ptr(T.Vector.t) @-> returning(ptr(T.Vector.t)),
       );
 
+    // Position and orientation
+    let get_rotation = c("orxObject_GetRotation", t @-> returning(float));
+
     let set_position =
       c("orxObject_SetPosition", t @-> Vector.t @-> returning(Status.t));
 
@@ -163,11 +166,20 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxObject_AddTimeLineTrack", t @-> string @-> returning(Status.t));
 
     // Physics
+    let apply_force =
+      c(
+        "orxObject_ApplyForce",
+        t @-> Vector.t @-> Vector.t_opt @-> returning(Status.t),
+      );
+
     let apply_impulse =
       c(
         "orxObject_ApplyImpulse",
         t @-> Vector.t @-> Vector.t_opt @-> returning(Status.t),
       );
+
+    let apply_torque =
+      c("orxObject_ApplyTorque", t @-> float @-> returning(Status.t));
 
     // Animation
     let set_target_anim =
