@@ -95,6 +95,22 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxConfig_SetBaseName", string @-> returning(Status.t));
   };
 
+  module Clock = {
+    type t = ptr(unit);
+
+    let t: typ(t) = ptr(void);
+    let t_opt: typ(option(t)) = ptr_opt(void);
+
+    let find_first =
+      c("orxClock_FindFirst", float @-> T.Clock_type.t @-> returning(t_opt));
+
+    let set_modified =
+      c(
+        "orxClock_SetModifier",
+        t @-> T.Clock_modifier.t @-> float @-> returning(Status.t),
+      );
+  };
+
   module Resource = {
     type group =
       | Config;

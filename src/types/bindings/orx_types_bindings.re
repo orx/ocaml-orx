@@ -22,6 +22,46 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t = F.ptr(F.void);
   };
 
+  module Clock_modifier = {
+    type t =
+      | Fixed
+      | Multiply
+      | Maxed;
+
+    let fixed = F.constant("orxCLOCK_MOD_TYPE_FIXED", F.int64_t);
+    let multiply = F.constant("orxCLOCK_MOD_TYPE_MULTIPLY", F.int64_t);
+    let maxed = F.constant("orxCLOCK_MOD_TYPE_MAXED", F.int64_t);
+
+    let map_to_constant = [
+      (Fixed, fixed),
+      (Multiply, multiply),
+      (Maxed, maxed),
+    ];
+
+    let t =
+      F.enum("__orxCLOCK_MOD_TYPE_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported clock mod type enum: %Ld", i)
+      );
+  };
+
+  module Clock_type = {
+    type t =
+      | Core
+      | User
+      | Second;
+
+    let core = F.constant("orxCLOCK_TYPE_CORE", F.int64_t);
+    let user = F.constant("orxCLOCK_TYPE_USER", F.int64_t);
+    let second = F.constant("orxCLOCK_TYPE_SECOND", F.int64_t);
+
+    let map_to_constant = [(Core, core), (User, user), (Second, second)];
+
+    let t =
+      F.enum("__orxCLOCK_TYPE_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported clock mod type enum: %Ld", i)
+      );
+  };
+
   module Event_type = {
     type t =
       | Anim
