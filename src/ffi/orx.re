@@ -69,6 +69,35 @@ module Event = {
     );
 };
 
+module Clock = {
+  include Orx_gen.Clock;
+
+  let callback = Ctypes.(Info.t @-> ptr(void) @-> returning(void));
+
+  let c_register =
+    Ctypes.(
+      Foreign.foreign(
+        "orxClock_Register",
+        t
+        @-> Foreign.funptr(callback)
+        @-> ptr(void)
+        @-> Orx_types.Module_id.t
+        @-> Orx_types.Clock_priority.t
+        @-> returning(Orx_gen.Status.t),
+      )
+    );
+
+  let register = (clock: t, callback, module_, priority) => {
+    c_register(
+      clock,
+      (info, _ctx) => callback(info),
+      Ctypes.null,
+      module_,
+      priority,
+    );
+  };
+};
+
 module Config = {
   include Orx_gen.Config_generated;
   let bootstrap_function = Ctypes.(void @-> returning(Orx_gen.Status.t));

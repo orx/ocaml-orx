@@ -22,6 +22,22 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t = F.ptr(F.void);
   };
 
+  module Module_id = {
+    type t =
+      | Clock
+      | Main;
+
+    let clock = F.constant("orxMODULE_ID_CLOCK", F.int64_t);
+    let main = F.constant("orxMODULE_ID_MAIN", F.int64_t);
+
+    let map_to_constant = [(Clock, clock), (Main, main)];
+
+    let t =
+      F.enum("__orxMODULE_ID_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported module id enum: %Ld", i)
+      );
+  };
+
   module Clock_modifier = {
     type t =
       | Fixed
@@ -59,6 +75,53 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t =
       F.enum("__orxCLOCK_TYPE_t", map_to_constant, ~unexpected=i =>
         Fmt.invalid_arg("unsupported clock mod type enum: %Ld", i)
+      );
+  };
+
+  module Clock_info = {
+    type t;
+
+    let t: structure(t) = F.structure("__orxCLOCK_INFO_t");
+    let clock_type = F.field(t, "eType", Clock_type.t);
+    let tick_size = F.field(t, "fTickSize", F.float);
+    let modifier = F.field(t, "eModType", Clock_modifier.t);
+    let modifier_value = F.field(t, "fModValue", F.float);
+    let dt = F.field(t, "fDT", F.float);
+    let time = F.field(t, "fTime", F.float);
+    let () = F.seal(t);
+  };
+
+  module Clock_priority = {
+    type t =
+      | Lowest
+      | Lower
+      | Low
+      | Normal
+      | High
+      | Higher
+      | Highest;
+
+    let lowest = F.constant("orxCLOCK_PRIORITY_LOWEST", F.int64_t);
+    let lower = F.constant("orxCLOCK_PRIORITY_LOWER", F.int64_t);
+    let low = F.constant("orxCLOCK_PRIORITY_LOW", F.int64_t);
+    let normal = F.constant("orxCLOCK_PRIORITY_NORMAL", F.int64_t);
+    let high = F.constant("orxCLOCK_PRIORITY_HIGH", F.int64_t);
+    let higher = F.constant("orxCLOCK_PRIORITY_HIGHER", F.int64_t);
+    let highest = F.constant("orxCLOCK_PRIORITY_HIGHEST", F.int64_t);
+
+    let map_to_constant = [
+      (Lowest, lowest),
+      (Lower, lower),
+      (Low, low),
+      (Normal, normal),
+      (High, high),
+      (Higher, higher),
+      (Highest, highest),
+    ];
+
+    let t =
+      F.enum("__orxCLOCK_PRIORITY_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported clock priority enum: %Ld", i)
       );
   };
 

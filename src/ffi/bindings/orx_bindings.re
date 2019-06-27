@@ -96,6 +96,39 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Clock = {
+    module Info = {
+      type raw = ptr(structure(T.Clock_info.t));
+
+      type t = {
+        clock_type: T.Clock_type.t,
+        tick_size: float,
+        modifier: T.Clock_modifier.t,
+        modifier_value: float,
+        dt: float,
+        time: float,
+      };
+
+      let of_raw = (raw: raw): t => {
+        let raw' = !@raw;
+        let get = field => Ctypes.getf(raw', field);
+        {
+          clock_type: get(T.Clock_info.clock_type),
+          tick_size: get(T.Clock_info.tick_size),
+          modifier: get(T.Clock_info.modifier),
+          modifier_value: get(T.Clock_info.modifier_value),
+          dt: get(T.Clock_info.dt),
+          time: get(T.Clock_info.time),
+        };
+      };
+
+      let t =
+        Ctypes.view(
+          ~read=of_raw,
+          ~write=_ => assert(false),
+          ptr(T.Clock_info.t),
+        );
+    };
+
     type t = ptr(unit);
 
     let t: typ(t) = ptr(void);
@@ -104,7 +137,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let find_first =
       c("orxClock_FindFirst", float @-> T.Clock_type.t @-> returning(t_opt));
 
-    let set_modified =
+    let get_info = c("orxClock_GetInfo", t @-> returning(Info.t));
+
+    let set_modifier =
       c(
         "orxClock_SetModifier",
         t @-> T.Clock_modifier.t @-> float @-> returning(Status.t),
