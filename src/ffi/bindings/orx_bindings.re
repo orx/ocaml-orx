@@ -47,8 +47,7 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     type t_ptr = ptr(structure(T.Vector.t));
 
-    let allocate_raw = (): ptr(structure(T.Vector.t)) =>
-      allocate_n(T.Vector.t, ~count=1);
+    let allocate_raw = (): t_ptr => allocate_n(T.Vector.t, ~count=1);
 
     let of_raw = (v: t_ptr): t => {
       let v = !@v;
@@ -174,6 +173,19 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       );
   };
 
+  module Camera = {
+    type t = ptr(unit);
+
+    let t: typ(t) = ptr(void);
+    let t_opt: typ(option(t)) = ptr_opt(void);
+
+    let create_from_config =
+      c("orxCamera_CreateFromConfig", string @-> returning(t_opt));
+
+    let set_rotation =
+      c("orxCamera_SetRotation", t @-> float @-> returning(Status.t));
+  };
+
   module Object = {
     type t = ptr(unit);
 
@@ -184,22 +196,28 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       p;
     };
 
+    // Object creation and presence
     let create_from_config =
       c("orxObject_CreateFromConfig", string @-> returning(t_opt));
 
     let enable = c("orxObject_Enable", t @-> bool @-> returning(void));
 
+    // Basic attributes
     let get_name = c("orxObject_GetName", t @-> returning(string));
 
     let get_child_object = c("orxObject_GetChild", t @-> returning(t_opt));
+
+    // FX
+    let add_fx = c("orxObject_AddFX", t @-> string @-> returning(Status.t));
+
+    // Position and orientation
+    let get_rotation = c("orxObject_GetRotation", t @-> returning(float));
+
     let get_world_position =
       c(
         "orxObject_GetWorldPosition",
         t @-> ptr(T.Vector.t) @-> returning(ptr(T.Vector.t)),
       );
-
-    // Position and orientation
-    let get_rotation = c("orxObject_GetRotation", t @-> returning(float));
 
     let set_position =
       c("orxObject_SetPosition", t @-> Vector.t @-> returning(Status.t));
@@ -307,5 +325,13 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let t =
       Ctypes.view(~read=of_raw, ~write=_ => assert(false), ptr(T.Event.t));
+  };
+
+  module Physics = {
+    let get_gravity =
+      c("orxPhysics_GetGravity", Vector.t @-> returning(Vector.t_opt));
+
+    let set_gravity =
+      c("orxPhysics_SetGravity", Vector.t @-> returning(Status.t));
   };
 };
