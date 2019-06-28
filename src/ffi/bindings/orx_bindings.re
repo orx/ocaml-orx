@@ -269,6 +269,23 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let has_new_status =
       c("orxInput_HasNewStatus", string @-> returning(bool));
+
+    let get_binding =
+      c(
+        "orxInput_GetBinding",
+        string
+        @-> int
+        @-> ptr(T.Input_type.t)
+        @-> ptr(int)
+        @-> ptr(T.Input_mode.t)
+        @-> returning(Status.t),
+      );
+
+    let get_binding_name =
+      c(
+        "orxInput_GetBindingName",
+        T.Input_type.t @-> int @-> T.Input_mode.t @-> returning(string),
+      );
   };
 
   module Event = {

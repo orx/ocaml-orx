@@ -31,8 +31,8 @@ module Physics = {
   let get_gravity = () => {
     let v: Vector.t = {x: 0.0, y: 0.0, z: 0.0};
     get_gravity(v);
-  }
-}
+  };
+};
 
 module Object = {
   include Orx_gen.Object;

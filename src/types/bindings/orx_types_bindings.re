@@ -125,6 +125,63 @@ module Bindings = (F: Ctypes.TYPE) => {
       );
   };
 
+  module Input_type = {
+    type t =
+      | Keyboard_key
+      | Mouse_button
+      | Mouse_axis
+      | Joystick_button
+      | Joystick_axis
+      | External
+      | None;
+
+    let keyboard_key = F.constant("orxINPUT_TYPE_KEYBOARD_KEY", F.int64_t);
+    let mouse_button = F.constant("orxINPUT_TYPE_MOUSE_BUTTON", F.int64_t);
+    let mouse_axis = F.constant("orxINPUT_TYPE_MOUSE_AXIS", F.int64_t);
+    let joystick_button =
+      F.constant("orxINPUT_TYPE_JOYSTICK_BUTTON", F.int64_t);
+    let joystick_axis = F.constant("orxINPUT_TYPE_JOYSTICK_AXIS", F.int64_t);
+    let external_ = F.constant("orxINPUT_TYPE_EXTERNAL", F.int64_t);
+    let none = F.constant("orxINPUT_TYPE_NONE", F.int64_t);
+
+    let map_to_constant = [
+      (Keyboard_key, keyboard_key),
+      (Mouse_button, mouse_button),
+      (Mouse_axis, mouse_axis),
+      (Joystick_button, joystick_button),
+      (Joystick_axis, joystick_axis),
+      (External, external_),
+      (None, none),
+    ];
+
+    let t =
+      F.enum("__orxINPUT_TYPE_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported input type enum: %Ld", i)
+      );
+  };
+
+  module Input_mode = {
+    type t =
+      | Full
+      | Positive
+      | Negative;
+
+    let full = F.constant("orxINPUT_MODE_FULL", F.int64_t);
+    let positive = F.constant("orxINPUT_MODE_POSITIVE", F.int64_t);
+    let negative = F.constant("orxINPUT_MODE_NEGATIVE", F.int64_t);
+
+    let map_to_constant = [
+      (Full, full),
+      (Positive, positive),
+      (Negative, negative),
+    ];
+
+    let t =
+      F.enum("__orxINPUT_MODE_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported input mode enum: %Ld", i)
+      );
+  };
+
   module Event_type = {
     type t =
       | Anim
