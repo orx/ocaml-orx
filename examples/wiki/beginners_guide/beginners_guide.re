@@ -113,7 +113,7 @@ let bootstrap = () => {
   // Tell Orx where to look for our configuration file(s)
   Orx.Resource.add_storage(
     Orx.Resource.Config,
-    "examples/data/config",
+    "examples/wiki/beginners_guide/data/config",
     false,
   );
 };
