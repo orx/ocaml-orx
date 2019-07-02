@@ -143,7 +143,7 @@ module Config = {
     get_list_vector(key, i, vector);
   };
 
-  let with_section = (f, section: string) => {
+  let with_section = (section: string, f) => {
     switch (push_section(section)) {
     | Error () as e => e
     | Ok () =>
@@ -157,10 +157,10 @@ module Config = {
 
   let get =
       (get: string => 'a, ~section: string, ~key: string): result('a, 'err) => {
-    with_section(() => get(key), section);
+    with_section(section, () => get(key));
   };
 
-  let get_list =
+  let get_list_item =
       (
         get: (string, option(int)) => 'a,
         i: option(int),
@@ -168,7 +168,17 @@ module Config = {
         ~key: string,
       )
       : result('a, 'error) => {
-    with_section(() => get(key, i), section);
+    with_section(section, () => get(key, i));
+  };
+
+  let get_list =
+      (get: (string, option(int)) => 'a, ~section: string, ~key: string)
+      : result(list('a), unit) => {
+    let get_all = () => {
+      let count = get_list_count(key);
+      List.init(count, i => get(key, Some(i)));
+    };
+    with_section(section, get_all);
   };
 };
 
