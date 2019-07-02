@@ -88,10 +88,105 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     };
   };
 
-  module Config_generated = {
+  module Config = {
     /* This module will be included in the Config module defined in orx.re */
     let set_basename =
       c("orxConfig_SetBaseName", string @-> returning(Status.t));
+
+    // Load config from a file
+    let load = c("orxConfig_Load", string @-> returning(Status.t));
+
+    // Load config from a string already in memory
+    let load_from_memory =
+      c("orxConfig_LoadFromMemory", string @-> int @-> returning(Status.t));
+
+    /* Select a config section to work within */
+    let push_section =
+      c("orxConfig_PushSection", string @-> returning(Status.t));
+    let pop_section =
+      c("orxConfig_PopSection", void @-> returning(Status.t));
+
+    // Check for section and value existence
+    let has_section = c("orxConfig_HasSection", string @-> returning(bool));
+    let has_value = c("orxConfig_HasValue", string @-> returning(bool));
+
+    // Get values from a config
+    let get_string = c("orxConfig_GetString", string @-> returning(string));
+    let get_bool = c("orxConfig_GetBool", string @-> returning(bool));
+    let get_float = c("orxConfig_GetFloat", string @-> returning(float));
+    // XXX: Pretend a signed 64bit integer is always enough and the values will
+    // always fit in an OCaml int
+    let get_int = c("orxConfig_GetS64", string @-> returning(int));
+    let get_vector =
+      c("orxConfig_GetVector", string @-> Vector.t @-> returning(Vector.t));
+
+    // Set config values
+    let set_string =
+      c("orxConfig_SetString", string @-> string @-> returning(Status.t));
+    let set_bool =
+      c("orxConfig_SetBool", string @-> bool @-> returning(Status.t));
+    let set_float =
+      c("orxConfig_SetFloat", string @-> float @-> returning(Status.t));
+    let set_int =
+      c("orxConfig_SetS64", string @-> int @-> returning(Status.t));
+    let set_vector =
+      c("orxConfig_SetVector", string @-> Vector.t @-> returning(Status.t));
+
+    // Get/Set values from a list
+    let is_list = c("orxConfig_IsList", string @-> returning(bool));
+    let get_list_count =
+      c("orxConfig_GetListCount", string @-> returning(int));
+
+    let int_or_random = {
+      let read = (i: int): option(int) => {
+        switch (i) {
+        | (-1) => None
+        | i => Some(i)
+        };
+      };
+      let write = (o: option(int)): int => {
+        switch (o) {
+        | None => (-1)
+        | Some(i) => i
+        };
+      };
+      view(~read, ~write, int);
+    };
+
+    let get_list_string =
+      c(
+        "orxConfig_GetListString",
+        string @-> int_or_random @-> returning(string),
+      );
+    let get_list_bool =
+      c(
+        "orxConfig_GetListBool",
+        string @-> int_or_random @-> returning(string),
+      );
+    let get_list_float =
+      c(
+        "orxConfig_GetListFloat",
+        string @-> int_or_random @-> returning(float),
+      );
+    let get_list_int =
+      c("orxConfig_GetListS64", string @-> int_or_random @-> returning(int));
+    let get_list_vector =
+      c(
+        "orxConfig_GetListVector",
+        string @-> int_or_random @-> Vector.t @-> returning(Vector.t),
+      );
+
+    // Modify a list of config values
+    let set_list_string =
+      c(
+        "orxConfig_SetListString",
+        string @-> ptr(string) @-> int @-> returning(Status.t),
+      );
+    let append_list_string =
+      c(
+        "orxConfig_AppendListString",
+        string @-> ptr(string) @-> int @-> returning(Status.t),
+      );
   };
 
   module Clock = {
@@ -350,5 +445,29 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let set_gravity =
       c("orxPhysics_SetGravity", Vector.t @-> returning(Status.t));
+  };
+
+  module Display = {
+    module Rgba = {
+      let make = (rgba: int32): structure(T.Rgba.t) => {
+        let rgba' = make(T.Rgba.t);
+        setf(rgba', T.Rgba.rgba, Unsigned.UInt32.of_int32(rgba));
+        rgba';
+      };
+    };
+
+    module Draw = {
+      let circle =
+        c(
+          "orxDisplay_DrawCircle",
+          Vector.t @-> float @-> T.Rgba.t @-> bool @-> returning(Status.t),
+        );
+
+      let line =
+        c(
+          "orxDisplay_DrawLine",
+          Vector.t @-> Vector.t @-> T.Rgba.t @-> returning(Status.t),
+        );
+    };
   };
 };

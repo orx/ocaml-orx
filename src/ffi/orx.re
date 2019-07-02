@@ -9,6 +9,7 @@ module Orx_gen = Orx_bindings.Bindings(Generated);
 module Input = Orx_gen.Input;
 module Resource = Orx_gen.Resource;
 module Viewport = Orx_gen.Viewport;
+module Display = Orx_gen.Display;
 
 module Vector = {
   include Orx_gen.Vector;
@@ -108,7 +109,8 @@ module Clock = {
 };
 
 module Config = {
-  include Orx_gen.Config_generated;
+  include Orx_gen.Config;
+
   let bootstrap_function = Ctypes.(void @-> returning(Orx_gen.Status.t));
 
   let set_bootstrap =
@@ -118,6 +120,56 @@ module Config = {
         Foreign.funptr(bootstrap_function) @-> returning(Orx_gen.Status.t),
       )
     );
+
+  let set_list_string = (key: string, values: list(string)) => {
+    let length = List.length(values);
+    let c_values = Ctypes.CArray.of_list(Ctypes.string, values);
+    set_list_string(key, Ctypes.CArray.start(c_values), length);
+  };
+
+  let append_list_string = (key: string, values: list(string)) => {
+    let length = List.length(values);
+    let c_values = Ctypes.CArray.of_list(Ctypes.string, values);
+    append_list_string(key, Ctypes.CArray.start(c_values), length);
+  };
+
+  let get_vector = (key: string): Vector.t => {
+    let vector: Vector.t = {x: 0.0, y: 0.0, z: 0.0};
+    get_vector(key, vector);
+  };
+
+  let get_list_vector = (key: string, i: option(int)): Vector.t => {
+    let vector: Vector.t = {x: 0.0, y: 0.0, z: 0.0};
+    get_list_vector(key, i, vector);
+  };
+
+  let with_section = (f, section: string) => {
+    switch (push_section(section)) {
+    | Error () as e => e
+    | Ok () =>
+      let result = f();
+      switch (pop_section()) {
+      | Error () as e => e
+      | Ok () => Ok(result)
+      };
+    };
+  };
+
+  let get =
+      (get: string => 'a, ~section: string, ~key: string): result('a, 'err) => {
+    with_section(() => get(key), section);
+  };
+
+  let get_list =
+      (
+        get: (string, option(int)) => 'a,
+        i: option(int),
+        ~section: string,
+        ~key: string,
+      )
+      : result('a, 'error) => {
+    with_section(() => get(key, i), section);
+  };
 };
 
 module Main = {

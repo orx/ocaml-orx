@@ -8,6 +8,14 @@ module Bindings = (F: Ctypes.TYPE) => {
     let failure = F.constant("orxSTATUS_FAILURE", F.int);
   };
 
+  module Rgba = {
+    type t;
+
+    let t: structure(t) = F.structure("__orxRGBA_t");
+    let rgba = F.field(t, "u32RGBA", F.uint32_t);
+    let () = F.seal(t);
+  };
+
   module Vector = {
     type t;
 
@@ -283,6 +291,18 @@ module Bindings = (F: Ctypes.TYPE) => {
     let recipient = F.field(t, "hRecipient", Handle.t);
     let payload = F.field(t, "pstPayload", F.ptr(F.void));
     let context = F.field(t, "pContext", F.ptr(F.void));
+    let () = F.seal(t);
+  };
+
+  module Object_bounding_box = {
+    type t;
+
+    let t: structure(t) = F.structure("__orxOBOX_t");
+    let position = F.field(t, "vPosition", Vector.t);
+    let pivot = F.field(t, "vPivot", Vector.t);
+    let x = F.field(t, "vX", Vector.t);
+    let y = F.field(t, "vY", Vector.t);
+    let z = F.field(t, "vZ", Vector.t);
     let () = F.seal(t);
   };
 };
