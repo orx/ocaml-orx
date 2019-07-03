@@ -6,10 +6,24 @@ let orx_error = (name: string) => {
 
 module Orx_gen = Orx_bindings.Bindings(Generated);
 
-module Input = Orx_gen.Input;
+module Camera = Orx_gen.Camera;
+module Display = Orx_gen.Display;
 module Resource = Orx_gen.Resource;
 module Viewport = Orx_gen.Viewport;
-module Display = Orx_gen.Display;
+
+module Input = {
+  include Orx_gen.Input;
+
+  let get_binding = (name: string, index: int) => {
+    let type_ = Ctypes.allocate_n(Orx_types.Input_type.t, ~count=1);
+    let id = Ctypes.allocate_n(Ctypes.int, ~count=1);
+    let mode = Ctypes.allocate_n(Orx_types.Input_mode.t, ~count=1);
+    switch (get_binding(name, index, type_, id, mode)) {
+    | Error () as e => e
+    | Ok () => Ok((!@type_, !@id, !@mode))
+    };
+  };
+};
 
 module Vector = {
   include Orx_gen.Vector;

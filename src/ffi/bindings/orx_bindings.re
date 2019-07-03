@@ -277,6 +277,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let create_from_config =
       c("orxCamera_CreateFromConfig", string @-> returning(t_opt));
 
+    let get_rotation = c("orxCamera_GetRotation", t @-> returning(float));
+
     let set_rotation =
       c("orxCamera_SetRotation", t @-> float @-> returning(Status.t));
   };
@@ -357,6 +359,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let create_from_config =
       c("orxViewport_CreateFromConfig", string @-> returning(t));
+
+    let get_camera = c("orxViewport_GetCamera", t @-> returning(Camera.t_opt));
   };
 
   module Input = {
