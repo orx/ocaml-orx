@@ -351,6 +351,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Viewport = {
+    type t = ptr(structure(T.Viewport.t));
+
     let t = ptr_opt(T.Viewport.t);
 
     let create_from_config =
