@@ -133,6 +133,13 @@ module Bindings = (F: Ctypes.TYPE) => {
       );
   };
 
+  module Clock = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxCLOCK_t");
+  };
+
   module Input_type = {
     type t =
       | Keyboard_key
@@ -292,6 +299,27 @@ module Bindings = (F: Ctypes.TYPE) => {
     let payload = F.field(t, "pstPayload", F.ptr(F.void));
     let context = F.field(t, "pContext", F.ptr(F.void));
     let () = F.seal(t);
+  };
+
+  module Camera = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxCAMERA_t");
+  };
+
+  module Object = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxOBJECT_t");
+  };
+
+  module Viewport = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxVIEWPORT_t");
   };
 
   module Object_bounding_box = {

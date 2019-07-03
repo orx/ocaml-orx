@@ -223,10 +223,10 @@ module Bindings = (F: Ctypes.FOREIGN) => {
         );
     };
 
-    type t = ptr(unit);
+    type t = ptr(structure(T.Clock.t));
 
-    let t: typ(t) = ptr(void);
-    let t_opt: typ(option(t)) = ptr_opt(void);
+    let t: typ(t) = ptr(T.Clock.t);
+    let t_opt: typ(option(t)) = ptr_opt(T.Clock.t);
 
     let find_first =
       c("orxClock_FindFirst", float @-> T.Clock_type.t @-> returning(t_opt));
@@ -269,10 +269,10 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Camera = {
-    type t = ptr(unit);
+    type t = ptr(structure(T.Camera.t));
 
-    let t: typ(t) = ptr(void);
-    let t_opt: typ(option(t)) = ptr_opt(void);
+    let t: typ(t) = ptr(T.Camera.t);
+    let t_opt: typ(option(t)) = ptr_opt(T.Camera.t);
 
     let create_from_config =
       c("orxCamera_CreateFromConfig", string @-> returning(t_opt));
@@ -282,13 +282,13 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Object = {
-    type t = ptr(unit);
+    type t = ptr(structure(T.Object.t));
 
-    let t: typ(t) = ptr(void);
-    let t_opt: typ(option(t)) = ptr_opt(void);
+    let t: typ(t) = ptr(T.Object.t);
+    let t_opt: typ(option(t)) = ptr_opt(T.Object.t);
 
-    let of_void_pointer = (p: ptr(unit)): t => {
-      p;
+    let of_void_pointer = (p: ptr(unit)): ptr(structure(T.Object.t)) => {
+      from_voidp(T.Object.t, p);
     };
 
     // Object creation and presence
@@ -351,15 +351,13 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Viewport = {
-    let t = ptr_opt(void);
+    let t = ptr_opt(T.Viewport.t);
 
     let create_from_config =
       c("orxViewport_CreateFromConfig", string @-> returning(t));
   };
 
   module Input = {
-    let t = ptr(void);
-
     let is_active = c("orxInput_IsActive", string @-> returning(bool));
 
     let has_new_status =
