@@ -52,8 +52,8 @@ module Object = {
 
   let get_world_position = (o: t): Vector.t => {
     let pos = Vector.allocate_raw();
-    let pos' = get_world_position(o, pos);
-    if (Ctypes.is_null(pos')) {
+    let ret : Vector.t = get_world_position(o, pos);
+    if (Ctypes.is_null(ret)) {
       orx_error("get_world_position");
     } else {
       pos;
