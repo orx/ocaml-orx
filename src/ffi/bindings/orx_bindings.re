@@ -162,36 +162,21 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
   module Clock = {
     module Info = {
-      type raw = ptr(structure(T.Clock_info.t));
+      type t = ptr(structure(T.Clock_info.t));
 
-      type t = {
-        clock_type: T.Clock_type.t,
-        tick_size: float,
-        modifier: T.Clock_modifier.t,
-        modifier_value: float,
-        dt: float,
-        time: float,
-      };
+      let t = ptr(T.Clock_info.t);
 
-      let of_raw = (raw: raw): t => {
-        let raw' = !@raw;
-        let get = field => Ctypes.getf(raw', field);
-        {
-          clock_type: get(T.Clock_info.clock_type),
-          tick_size: get(T.Clock_info.tick_size),
-          modifier: get(T.Clock_info.modifier),
-          modifier_value: get(T.Clock_info.modifier_value),
-          dt: get(T.Clock_info.dt),
-          time: get(T.Clock_info.time),
-        };
-      };
-
-      let t =
-        Ctypes.view(
-          ~read=of_raw,
-          ~write=_ => assert(false),
-          ptr(T.Clock_info.t),
-        );
+      let get = (info: t, field) => Ctypes.getf(!@info, field);
+      let get_type = (info: t): T.Clock_type.t =>
+        get(info, T.Clock_info.clock_type);
+      let get_tick_size = (info: t): float =>
+        get(info, T.Clock_info.tick_size);
+      let get_modifier = (info: t): T.Clock_modifier.t =>
+        get(info, T.Clock_info.modifier);
+      let get_modifier_value = (info: t): float =>
+        get(info, T.Clock_info.modifier_value);
+      let get_dt = (info: t): float => get(info, T.Clock_info.dt);
+      let get_time = (info: t): float => get(info, T.Clock_info.time);
     };
 
     type t = ptr(structure(T.Clock.t));
