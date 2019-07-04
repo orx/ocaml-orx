@@ -1,0 +1,3 @@
+(executable
+ (name tutorial_08_physics)
+ (libraries orx))
