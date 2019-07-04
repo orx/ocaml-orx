@@ -39,53 +39,24 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Vector = {
-    type t = {
-      x: float,
-      y: float,
-      z: float,
+    type t = ptr(structure(T.Vector.t));
+
+    let t = ptr(T.Vector.t);
+    let t_opt = ptr_opt(T.Vector.t);
+
+    let allocate_raw = (): t => allocate_n(T.Vector.t, ~count=1);
+
+    let make = (~x, ~y, ~z): t => {
+      let v_ptr = allocate_raw();
+      let v = !@v_ptr;
+      Ctypes.setf(v, T.Vector.x, x);
+      Ctypes.setf(v, T.Vector.y, y);
+      Ctypes.setf(v, T.Vector.z, z);
+      v_ptr;
     };
 
-    type t_ptr = ptr(structure(T.Vector.t));
-
-    let allocate_raw = (): t_ptr => allocate_n(T.Vector.t, ~count=1);
-
-    let of_raw = (v: t_ptr): t => {
-      let v = !@v;
-      {
-        x: Ctypes.getf(v, T.Vector.x),
-        y: Ctypes.getf(v, T.Vector.y),
-        z: Ctypes.getf(v, T.Vector.z),
-      };
-    };
-
-    let to_raw = (vector: t): t_ptr => {
-      let v = allocate_n(T.Vector.t, ~count=1);
-      setf(!@v, T.Vector.x, vector.x);
-      setf(!@v, T.Vector.y, vector.y);
-      setf(!@v, T.Vector.z, vector.z);
-      v;
-    };
-
-    let t = {
-      Ctypes.view(~read=of_raw, ~write=to_raw, ptr(T.Vector.t));
-    };
-
-    let of_raw_opt = (v: t_ptr): option(t) =>
-      if (Ctypes.is_null(v)) {
-        None;
-      } else {
-        Some(of_raw(v));
-      };
-
-    let to_raw_opt = (v_opt: option(t)): t_ptr =>
-      switch (v_opt) {
-      | None => Ctypes.from_voidp(T.Vector.t, Ctypes.null)
-      | Some(v) => to_raw(v)
-      };
-
-    let t_opt = {
-      Ctypes.view(~read=of_raw_opt, ~write=to_raw_opt, ptr(T.Vector.t));
-    };
+    let rotate_2d =
+      c("orxVector_2DRotate", t @-> t @-> float @-> returning(t));
   };
 
   module Config = {
@@ -360,7 +331,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let create_from_config =
       c("orxViewport_CreateFromConfig", string @-> returning(t));
 
-    let get_camera = c("orxViewport_GetCamera", t @-> returning(Camera.t_opt));
+    let get_camera =
+      c("orxViewport_GetCamera", t @-> returning(Camera.t_opt));
   };
 
   module Input = {

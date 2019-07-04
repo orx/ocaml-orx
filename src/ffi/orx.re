@@ -11,6 +11,18 @@ module Display = Orx_gen.Display;
 module Resource = Orx_gen.Resource;
 module Viewport = Orx_gen.Viewport;
 
+module Vector = {
+  include Orx_gen.Vector;
+
+  let rotate_2d = (v: t, angle: float): t => {
+    let rotated: t = allocate_raw();
+    // rotate_2d returns the rotated pointer, so there's no need to keep it
+    // around twice
+    let _: t = rotate_2d(rotated, v, angle);
+    rotated;
+  };
+};
+
 module Input = {
   include Orx_gen.Input;
 
@@ -25,27 +37,13 @@ module Input = {
   };
 };
 
-module Vector = {
-  include Orx_gen.Vector;
-
-  // Rotate about the z-axis
-  let rotate = (v: t, angle: float): t => {
-    let sin_angle = sin(angle);
-    let cos_angle = cos(angle);
-    {
-      ...v,
-      x: cos_angle *. v.x -. sin_angle *. v.y,
-      y: sin_angle *. v.x +. cos_angle *. v.y,
-    };
-  };
-};
-
 module Physics = {
   include Orx_gen.Physics;
 
   let get_gravity = () => {
-    let v: Vector.t = {x: 0.0, y: 0.0, z: 0.0};
-    get_gravity(v);
+    let v: Vector.t = Vector.allocate_raw();
+    let _: option(Vector.t) = get_gravity(v);
+    v;
   };
 };
 
@@ -58,7 +56,7 @@ module Object = {
     if (Ctypes.is_null(pos')) {
       orx_error("get_world_position");
     } else {
-      Vector.of_raw(pos);
+      pos;
     };
   };
 
@@ -111,14 +109,16 @@ module Clock = {
       )
     );
 
+  // Collect callbacks so they're not collected.  A user would normally be able
+  // to do this but we wrap a user's callback to "hide" the unused context
+  // argument.
+  let registered_callbacks: ref(list((Info.t, Ctypes.ptr(unit)) => unit)) =
+    ref([]);
+
   let register = (clock: t, callback, module_, priority) => {
-    c_register(
-      clock,
-      (info, _ctx) => callback(info),
-      Ctypes.null,
-      module_,
-      priority,
-    );
+    let callback_wrapper = (info, _ctx) => callback(info);
+    registered_callbacks := [callback_wrapper, ...registered_callbacks^];
+    c_register(clock, callback_wrapper, Ctypes.null, module_, priority);
   };
 };
 
@@ -148,13 +148,15 @@ module Config = {
   };
 
   let get_vector = (key: string): Vector.t => {
-    let vector: Vector.t = {x: 0.0, y: 0.0, z: 0.0};
-    get_vector(key, vector);
+    let vector: Vector.t = Vector.allocate_raw();
+    let _: Vector.t = get_vector(key, vector);
+    vector;
   };
 
   let get_list_vector = (key: string, i: option(int)): Vector.t => {
-    let vector: Vector.t = {x: 0.0, y: 0.0, z: 0.0};
-    get_list_vector(key, i, vector);
+    let vector: Vector.t = Vector.allocate_raw();
+    let _: Vector.t = get_list_vector(key, i, vector);
+    vector;
   };
 
   let with_section = (section: string, f) => {
