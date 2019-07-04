@@ -25,7 +25,7 @@ module Helpers = {
   // the object o
   let create_explosion_at_object = (o: Orx.Object.t, name: string) => {
     let position = Orx.Object.get_world_position(o);
-    let position: Orx.Vector.t = {...position, z: 0.0};
+    let position = Orx.Vector.copy(~z=0.0, position);
     let explosion = Orx.Object.create_from_config(name) |> get_some;
     Orx.Object.set_position(explosion, position);
   };
@@ -107,11 +107,12 @@ module Physics = {
   // Main Orx event handler
   let event_handler = (event: Orx.Event.t) => {
     let state = State.get();
-    let Physics(physics_event) = event;
-    switch (physics_event) {
-    | Contact_add({sender, recipient}) =>
-      on_add_contact(state, ~sender, ~recipient)
-    | Contact_remove(_) => Ok()
+    switch (Orx.Event.Physics.get_event(event)) {
+    | Contact_add =>
+      let sender = Orx.Event.Physics.get_sender(event);
+      let recipient = Orx.Event.Physics.get_recipient(event);
+      on_add_contact(state, ~sender, ~recipient);
+    | Contact_remove => Ok()
     };
   };
 };
@@ -152,12 +153,12 @@ let run = () => {
   let state = State.get();
 
   // Movement vectors
-  let left_speed: Orx.Vector.t = {x: (-1.0), y: 0.0, z: 0.0};
-  let right_speed: Orx.Vector.t = {x: 1.0, y: 0.0, z: 0.0};
-  let flip_left: Orx.Vector.t = {x: (-2.0), y: 2.0, z: 1.0};
-  let flip_right: Orx.Vector.t = {x: 2.0, y: 2.0, z: 1.0};
+  let left_speed = Orx.Vector.make(~x=-1.0, ~y=0.0, ~z=0.0);
+  let right_speed = Orx.Vector.make(~x=1.0, ~y=0.0, ~z=0.0);
+  let flip_left = Orx.Vector.make(~x=-2.0, ~y=2.0, ~z=1.0);
+  let flip_right = Orx.Vector.make(~x=2.0, ~y=2.0, ~z=1.0);
 
-  let jump_speed: Orx.Vector.t = {x: 0.0, y: (-600.0), z: 0.0};
+  let jump_speed = Orx.Vector.make(~x=0.0, ~y=(-600.0), ~z=0.0);
 
   if (Orx.Input.is_active("Quit")) {
     // Return an error to indicate that it's time to quit the engine

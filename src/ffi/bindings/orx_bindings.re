@@ -55,6 +55,24 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       v_ptr;
     };
 
+    let copy = (~x=?, ~y=?, ~z=?, src: t) => {
+      let dest = allocate_raw();
+      let dest' = !@dest;
+      let src' = !@src;
+      let set = (field, value) => {
+        let actual =
+          switch (value) {
+          | None => Ctypes.getf(src', field)
+          | Some(value') => value'
+          };
+        Ctypes.setf(dest', field, actual);
+      };
+      set(T.Vector.x, x);
+      set(T.Vector.y, y);
+      set(T.Vector.z, z);
+      dest;
+    };
+
     let rotate_2d =
       c("orxVector_2DRotate", t @-> t @-> float @-> returning(t));
   };
