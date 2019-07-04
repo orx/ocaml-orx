@@ -345,59 +345,33 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Event = {
-    module Raw = {
-      type t = ptr(structure(T.Event.t));
+    type t = ptr(structure(T.Event.t));
 
-      let to_event_id = (raw: t): int64 => {
-        Ctypes.getf(!@raw, T.Event.event_id) |> Unsigned.UInt.to_int64;
-      };
+    let t = ptr(T.Event.t);
+
+    let to_event_id = (event: t): int64 => {
+      Ctypes.getf(!@event, T.Event.event_id) |> Unsigned.UInt.to_int64;
     };
+
     module Physics = {
-      type objects = {
-        sender: Object.t,
-        recipient: Object.t,
-      };
+      let get_sender = (event: t): Object.t =>
+        Ctypes.getf(!@event, T.Event.sender) |> Object.of_void_pointer;
+      let get_recipient = (event: t): Object.t =>
+        Ctypes.getf(!@event, T.Event.recipient) |> Object.of_void_pointer;
 
-      type t =
-        | Contact_add(objects)
-        | Contact_remove(objects);
-
-      let objects_of_raw = (raw: Raw.t): objects => {
-        let sender =
-          Ctypes.getf(!@raw, T.Event.sender) |> Object.of_void_pointer;
-        let recipient =
-          Ctypes.getf(!@raw, T.Event.recipient) |> Object.of_void_pointer;
-        {sender, recipient};
-      };
-
-      let of_raw = (raw: Raw.t): t => {
-        let event_id = Raw.to_event_id(raw);
+      let get_event = (event: t): T.Physics_event.t => {
+        let event_id = to_event_id(event);
         let event =
           List.assoc_opt(event_id, T.Physics_event.map_from_constant);
         switch (event) {
         | None => Fmt.invalid_arg("Unhandled physics event id: %Ld", event_id)
-        | Some(event) =>
-          let objects = objects_of_raw(raw);
-          switch (event) {
-          | Contact_add => Contact_add(objects)
-          | Contact_remove => Contact_remove(objects)
-          };
+        | Some(event) => event
         };
       };
     };
 
-    type t =
-      | Physics(Physics.t);
-
-    let of_raw = (e: Raw.t): t => {
-      switch (Ctypes.getf(!@e, T.Event.event_type)) {
-      | Physics => Physics(Physics.of_raw(e))
-      | _ => Fmt.invalid_arg("Unsupported event")
-      };
-    };
-
-    let t =
-      Ctypes.view(~read=of_raw, ~write=_ => assert(false), ptr(T.Event.t));
+    let to_type = (event: t): T.Event_type.t =>
+      Ctypes.getf(!@event, T.Event.event_type);
   };
 
   module Physics = {
