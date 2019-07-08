@@ -8,6 +8,7 @@ module Orx_gen = Orx_bindings.Bindings(Generated);
 
 module Camera = Orx_gen.Camera;
 module Display = Orx_gen.Display;
+module Fx_event = Orx_gen.Fx_event;
 module Resource = Orx_gen.Resource;
 module Viewport = Orx_gen.Viewport;
 
@@ -77,6 +78,14 @@ module Object = {
 
 module Event = {
   include Orx_gen.Event;
+
+  let get_sender_object = (event: t): Object.t => {
+    Object.of_void_pointer(Ctypes.getf(!@event, Orx_types.Event.sender));
+  };
+
+  let get_recipient_object = (event: t): Object.t => {
+    Object.of_void_pointer(Ctypes.getf(!@event, Orx_types.Event.recipient));
+  };
 
   let event_handler = Ctypes.(t @-> returning(Orx_gen.Status.t));
 

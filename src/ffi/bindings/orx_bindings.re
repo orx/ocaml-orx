@@ -263,9 +263,7 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let t: typ(t) = ptr(T.Object.t);
     let t_opt: typ(option(t)) = ptr_opt(T.Object.t);
 
-    let of_void_pointer = (p: ptr(unit)): ptr(structure(T.Object.t)) => {
-      from_voidp(T.Object.t, p);
-    };
+    let of_void_pointer = c("orxOBJECT", ptr(void) @-> returning(t));
 
     // Object creation and presence
     let create_from_config =
@@ -367,29 +365,91 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let t = ptr(T.Event.t);
 
+    type payload('event) =
+      | Fx: payload(T.Fx_event.Payload.t)
+      | Input: payload(T.Input_event.Payload.t)
+      | Physics: payload(T.Physics_event.Payload.t);
+
+    type event('event) =
+      | Fx: event(T.Fx_event.t)
+      | Input: event(T.Input_event.t)
+      | Physics: event(T.Physics_event.t);
+
     let to_event_id = (event: t): int64 => {
       Ctypes.getf(!@event, T.Event.event_id) |> Unsigned.UInt.to_int64;
     };
 
-    module Physics = {
-      let get_sender = (event: t): Object.t =>
-        Ctypes.getf(!@event, T.Event.sender) |> Object.of_void_pointer;
-      let get_recipient = (event: t): Object.t =>
-        Ctypes.getf(!@event, T.Event.recipient) |> Object.of_void_pointer;
+    let to_type = (event: t): T.Event_type.t =>
+      Ctypes.getf(!@event, T.Event.event_type);
 
-      let get_event = (event: t): T.Physics_event.t => {
-        let event_id = to_event_id(event);
-        let event =
-          List.assoc_opt(event_id, T.Physics_event.map_from_constant);
-        switch (event) {
-        | None => Fmt.invalid_arg("Unhandled physics event id: %Ld", event_id)
-        | Some(event) => event
-        };
+    let assert_type = (event: t, typ_: T.Event_type.t): unit => {
+      to_type(event) == typ_
+        ? () : Fmt.invalid_arg("Unexpected or invalid event type");
+    };
+
+    let unsafe_get_payload = (event: t, payload_type) => {
+      let payload_field = Ctypes.getf(!@event, T.Event.payload);
+      Ctypes.from_voidp(payload_type, payload_field);
+    };
+
+    let to_payload =
+        (type a, event: t, payload_type: payload(a)): ptr(structure(a)) => {
+      // Some dynamic type checking...
+      switch (payload_type) {
+      | Fx =>
+        assert_type(event, T.Event_type.Fx);
+        unsafe_get_payload(event, T.Fx_event.Payload.t);
+      | Input =>
+        assert_type(event, T.Event_type.Input);
+        unsafe_get_payload(event, T.Input_event.Payload.t);
+      | Physics =>
+        assert_type(event, T.Event_type.Physics);
+        unsafe_get_payload(event, T.Physics_event.Payload.t);
       };
     };
 
-    let to_type = (event: t): T.Event_type.t =>
-      Ctypes.getf(!@event, T.Event.event_type);
+    let get_event_by_id = (event: t, map_from_constant) => {
+      let event_id = to_event_id(event);
+      switch (List.assoc_opt(event_id, map_from_constant)) {
+      | None => Fmt.invalid_arg("Unhandled event id: %Ld", event_id)
+      | Some(event) => event
+      };
+    };
+
+    let to_event = (type a, event: t, event_type: event(a)): a => {
+      switch (event_type) {
+      | Fx =>
+        assert_type(event, T.Event_type.Fx);
+        get_event_by_id(event, T.Fx_event.map_from_constant);
+      | Input =>
+        assert_type(event, T.Event_type.Input);
+        get_event_by_id(event, T.Input_event.map_from_constant);
+      | Physics =>
+        assert_type(event, T.Event_type.Physics);
+        get_event_by_id(event, T.Physics_event.map_from_constant);
+      };
+    };
+  };
+
+  module Fx_event = {
+    let get_name = (event: Event.t): string => {
+      let payload = Event.to_payload(event, Fx);
+      Ctypes.getf(!@payload, T.Fx_event.Payload.name);
+    };
+  };
+
+  module Input_event = {
+    let get_payload_field = (event: Event.t, field) => {
+      let payload = Event.to_payload(event, Input);
+      Ctypes.getf(!@payload, field);
+    };
+
+    let get_set_name = (event: Event.t): string => {
+      get_payload_field(event, T.Input_event.Payload.set_name);
+    };
+    let get_input_name = (event: Event.t): string => {
+      get_payload_field(event, T.Input_event.Payload.input_name);
+    };
   };
 
   module Physics = {

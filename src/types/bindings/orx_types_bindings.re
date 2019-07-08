@@ -140,6 +140,13 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t: structure(t) = F.structure("__orxCLOCK_t");
   };
 
+  module Fx = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxFX_t");
+  };
+
   module Input_type = {
     type t =
       | Keyboard_key
@@ -266,6 +273,74 @@ module Bindings = (F: Ctypes.TYPE) => {
       );
   };
 
+  module Fx_event = {
+    type t =
+      | Start
+      | Stop
+      | Add
+      | Remove
+      | Loop;
+
+    let start = F.constant("orxFX_EVENT_START", F.int64_t);
+    let stop = F.constant("orxFX_EVENT_STOP", F.int64_t);
+    let add = F.constant("orxFX_EVENT_ADD", F.int64_t);
+    let remove = F.constant("orxFX_EVENT_REMOVE", F.int64_t);
+    let loop = F.constant("orxFX_EVENT_LOOP", F.int64_t);
+
+    let map_to_constant = [
+      (Start, start),
+      (Stop, stop),
+      (Add, add),
+      (Remove, remove),
+      (Loop, loop),
+    ];
+
+    let map_from_constant = swap_tuple_list(map_to_constant);
+
+    let t =
+      F.enum("__orxFX_EVENT_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported fx event type enum: %Ld", i)
+      );
+
+    module Payload = {
+      type t;
+
+      let t: structure(t) = F.structure("__orxFX_EVENT_PAYLOAD_t");
+      let fx = F.field(t, "pstFX", F.ptr(Fx.t));
+      let name = F.field(t, "zFXName", F.string);
+      let () = F.seal(t);
+    };
+  };
+
+  module Input_event = {
+    type t =
+      | On
+      | Off
+      | Select_set;
+
+    let on = F.constant("orxINPUT_EVENT_ON", F.int64_t);
+    let off = F.constant("orxINPUT_EVENT_OFF", F.int64_t);
+    let select_set = F.constant("orxINPUT_EVENT_SELECT_SET", F.int64_t);
+
+    let map_to_constant = [(On, on), (Off, off), (Select_set, select_set)];
+
+    let map_from_constant = swap_tuple_list(map_to_constant);
+
+    let t =
+      F.enum("__orxINPUT_EVENT_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported input event type enum: %Ld", i)
+      );
+
+    module Payload = {
+      type t;
+
+      // Unsealed structure because the type definition isn't fully mapped here
+      let t: structure(t) = F.structure("__orxINPUT_EVENT_PAYLOAD_t");
+      let set_name = F.field(t, "zSetName", F.string);
+      let input_name = F.field(t, "zInputName", F.string);
+    };
+  };
+
   module Physics_event = {
     type t =
       | Contact_add
@@ -286,6 +361,17 @@ module Bindings = (F: Ctypes.TYPE) => {
       F.enum("__orxPHYSICS_EVENT_t", map_to_constant, ~unexpected=i =>
         Fmt.invalid_arg("unsupported physics event type enum: %Ld", i)
       );
+
+    module Payload = {
+      type t;
+
+      let t: structure(t) = F.structure("__orxPHYSICS_EVENT_PAYLOAD_t");
+      let position = F.field(t, "vPosition", Vector.t);
+      let normal = F.field(t, "vNormal", Vector.t);
+      let sender_part_name = F.field(t, "zSenderPartName", F.string);
+      let recipient_part_name = F.field(t, "zRecipientPartName", F.string);
+      let () = F.seal(t);
+    };
   };
 
   module Event = {
