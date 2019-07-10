@@ -3,6 +3,9 @@ let swap_tuple_list = l => List.map(((a, b)) => (b, a), l);
 module Bindings = (F: Ctypes.TYPE) => {
   type structure('a) = F.typ(Ctypes.structure('a));
 
+  // Type alias for orxENUM
+  let orx_enum = F.uint;
+
   module Status = {
     let success = F.constant("orxSTATUS_SUCCESS", F.int);
     let failure = F.constant("orxSTATUS_FAILURE", F.int);
@@ -334,10 +337,17 @@ module Bindings = (F: Ctypes.TYPE) => {
     module Payload = {
       type t;
 
-      // Unsealed structure because the type definition isn't fully mapped here
+      // orxINPUT_KU32_BINDING_NUMBER = 8 in orxInput.h
+      let binding_number = 8;
+
       let t: structure(t) = F.structure("__orxINPUT_EVENT_PAYLOAD_t");
       let set_name = F.field(t, "zSetName", F.string);
       let input_name = F.field(t, "zInputName", F.string);
+      let input_type = F.field(t, "aeType", F.array(binding_number, Input_type.t));
+      let id = F.field(t, "aeID", F.array(binding_number, orx_enum));
+      let mode = F.field(t, "aeMode", F.array(binding_number, Input_mode.t));
+      let value = F.field(t, "afValue", F.array(binding_number, F.float));
+      let () = F.seal(t);
     };
   };
 
@@ -379,7 +389,7 @@ module Bindings = (F: Ctypes.TYPE) => {
 
     let t: structure(t) = F.structure("__orxEVENT_t");
     let event_type = F.field(t, "eType", Event_type.t);
-    let event_id = F.field(t, "eID", F.uint);
+    let event_id = F.field(t, "eID", orx_enum);
     let sender = F.field(t, "hSender", Handle.t);
     let recipient = F.field(t, "hRecipient", Handle.t);
     let payload = F.field(t, "pstPayload", F.ptr(F.void));

@@ -24,11 +24,11 @@ module State = {
 };
 
 let event_handler = (event: Orx.Event.t) => {
-  switch (Orx.Event.Physics.get_event(event)) {
+  switch (Orx.Event.to_event(event, Physics)) {
   | Contact_remove => ()
   | Contact_add =>
-    let sender = Orx.Event.Physics.get_sender(event);
-    let recipient = Orx.Event.Physics.get_recipient(event);
+    let sender = Orx.Event.get_sender_object(event);
+    let recipient = Orx.Event.get_recipient_object(event);
     Orx.Object.add_fx(sender, "Bump") |> ignore;
     Orx.Object.add_fx(recipient, "Bump") |> ignore;
   };

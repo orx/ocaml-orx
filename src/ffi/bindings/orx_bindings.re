@@ -263,6 +263,10 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let t: typ(t) = ptr(T.Object.t);
     let t_opt: typ(option(t)) = ptr_opt(T.Object.t);
 
+    // Pointer/physical equality-based comparison
+    let compare = (a: t, b: t): int => Ctypes.ptr_compare(a, b);
+    let equal = (a, b) => compare(a, b) == 0;
+
     let of_void_pointer = c("orxOBJECT", ptr(void) @-> returning(t));
 
     // Object creation and presence

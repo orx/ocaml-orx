@@ -158,7 +158,7 @@ let run = () => {
   let flip_left = Orx.Vector.make(~x=-2.0, ~y=2.0, ~z=1.0);
   let flip_right = Orx.Vector.make(~x=2.0, ~y=2.0, ~z=1.0);
 
-  let jump_speed = Orx.Vector.make(~x=0.0, ~y=(-600.0), ~z=0.0);
+  let jump_speed = Orx.Vector.make(~x=0.0, ~y=-600.0, ~z=0.0);
 
   if (Orx.Input.is_active("Quit")) {
     // Return an error to indicate that it's time to quit the engine
