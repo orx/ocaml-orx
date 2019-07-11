@@ -53,16 +53,19 @@ module Bindings = (F: Ctypes.TYPE) => {
     type t =
       | Fixed
       | Multiply
-      | Maxed;
+      | Maxed
+      | None;
 
     let fixed = F.constant("orxCLOCK_MOD_TYPE_FIXED", F.int64_t);
     let multiply = F.constant("orxCLOCK_MOD_TYPE_MULTIPLY", F.int64_t);
     let maxed = F.constant("orxCLOCK_MOD_TYPE_MAXED", F.int64_t);
+    let none = F.constant("orxCLOCK_MOD_TYPE_NONE", F.int64_t);
 
     let map_to_constant = [
       (Fixed, fixed),
       (Multiply, multiply),
       (Maxed, maxed),
+      (None, none),
     ];
 
     let t =

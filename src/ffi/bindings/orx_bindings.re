@@ -179,7 +179,16 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   };
 
   module Clock = {
+    type t = ptr(structure(T.Clock.t));
+
+    let t: typ(t) = ptr(T.Clock.t);
+    let t_opt: typ(option(t)) = ptr_opt(T.Clock.t);
+
     module Info = {
+      type clock = t;
+      let clock = t;
+      let clock_opt = t_opt;
+
       type t = ptr(structure(T.Clock_info.t));
 
       let t = ptr(T.Clock_info.t);
@@ -195,15 +204,21 @@ module Bindings = (F: Ctypes.FOREIGN) => {
         get(info, T.Clock_info.modifier_value);
       let get_dt = (info: t): float => get(info, T.Clock_info.dt);
       let get_time = (info: t): float => get(info, T.Clock_info.time);
+
+      let get_clock = c("orxClock_GetFromInfo", t @-> returning(clock_opt));
     };
 
-    type t = ptr(structure(T.Clock.t));
+    // Pointer/physical equality-based comparison
+    let compare = (a: t, b: t): int => Ctypes.ptr_compare(a, b);
+    let equal = (a, b) => compare(a, b) == 0;
 
-    let t: typ(t) = ptr(T.Clock.t);
-    let t_opt: typ(option(t)) = ptr_opt(T.Clock.t);
+    let create_from_config =
+      c("orxClock_CreateFromConfig", string @-> returning(t_opt));
 
     let find_first =
       c("orxClock_FindFirst", float @-> T.Clock_type.t @-> returning(t_opt));
+
+    let get_name = c("orxClock_GetName", t @-> returning(string));
 
     let get_info = c("orxClock_GetInfo", t @-> returning(Info.t));
 
@@ -285,6 +300,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     // Position and orientation
     let get_rotation = c("orxObject_GetRotation", t @-> returning(float));
+    let set_rotation =
+      c("orxObject_SetRotation", t @-> float @-> returning(Status.t));
 
     let get_world_position =
       c(
