@@ -55,23 +55,11 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       v_ptr;
     };
 
-    let copy = (~x=?, ~y=?, ~z=?, src: t) => {
-      let dest = allocate_raw();
-      let dest' = !@dest;
-      let src' = !@src;
-      let set = (field, value) => {
-        let actual =
-          switch (value) {
-          | None => Ctypes.getf(src', field)
-          | Some(value') => value'
-          };
-        Ctypes.setf(dest', field, actual);
-      };
-      set(T.Vector.x, x);
-      set(T.Vector.y, y);
-      set(T.Vector.z, z);
-      dest;
-    };
+    let copy = c("orxVector_Copy", t @-> t @-> returning(t));
+
+    let scale = c("orxVector_Mulf", t @-> t @-> float @-> returning(t));
+
+    let add = c("orxVector_Add", t @-> t @-> t @-> returning(t));
 
     let rotate_2d =
       c("orxVector_2DRotate", t @-> t @-> float @-> returning(t));
@@ -266,8 +254,12 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let create_from_config =
       c("orxCamera_CreateFromConfig", string @-> returning(t_opt));
 
-    let get_rotation = c("orxCamera_GetRotation", t @-> returning(float));
+    let get_position =
+      c("orxCamera_GetPosition", t @-> Vector.t @-> returning(Vector.t));
+    let set_position =
+      c("orxCamera_SetPosition", t @-> Vector.t @-> returning(Status.t));
 
+    let get_rotation = c("orxCamera_GetRotation", t @-> returning(float));
     let set_rotation =
       c("orxCamera_SetRotation", t @-> float @-> returning(Status.t));
   };
@@ -348,10 +340,11 @@ module Bindings = (F: Ctypes.FOREIGN) => {
   module Viewport = {
     type t = ptr(structure(T.Viewport.t));
 
-    let t = ptr_opt(T.Viewport.t);
+    let t = ptr(T.Viewport.t);
+    let t_opt = ptr_opt(T.Viewport.t);
 
     let create_from_config =
-      c("orxViewport_CreateFromConfig", string @-> returning(t));
+      c("orxViewport_CreateFromConfig", string @-> returning(t_opt));
 
     let get_camera =
       c("orxViewport_GetCamera", t @-> returning(Camera.t_opt));

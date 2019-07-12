@@ -6,7 +6,6 @@ let orx_error = (name: string) => {
 
 module Orx_gen = Orx_bindings.Bindings(Generated);
 
-module Camera = Orx_gen.Camera;
 module Display = Orx_gen.Display;
 module Fx_event = Orx_gen.Fx_event;
 module Resource = Orx_gen.Resource;
@@ -15,12 +14,64 @@ module Viewport = Orx_gen.Viewport;
 module Vector = {
   include Orx_gen.Vector;
 
+  let get_x = (v: t): float => {
+    Ctypes.getf(!@v, Orx_types.Vector.x);
+  };
+
+  let get_y = (v: t): float => {
+    Ctypes.getf(!@v, Orx_types.Vector.y);
+  };
+
+  let get_z = (v: t): float => {
+    Ctypes.getf(!@v, Orx_types.Vector.z);
+  };
+
+  let set_x = (v: t, x: float): unit => {
+    Ctypes.setf(!@v, Orx_types.Vector.x, x);
+  };
+
+  let set_y = (v: t, y: float): unit => {
+    Ctypes.setf(!@v, Orx_types.Vector.y, y);
+  };
+
+  let set_z = (v: t, z: float): unit => {
+    Ctypes.setf(!@v, Orx_types.Vector.z, z);
+  };
+
+  let copy = (v: t): t => {
+    let copied: t = allocate_raw();
+    let _: t = copy(copied, v);
+    copied;
+  };
+
+  let scale = (v: t, factor: float): t => {
+    let scaled: t = allocate_raw();
+    let _: t = scale(scaled, v, factor);
+    scaled;
+  };
+
+  let add = (v1: t, v2: t): t => {
+    let added: t = allocate_raw();
+    let _: t = add(added, v1, v2);
+    added;
+  };
+
   let rotate_2d = (v: t, angle: float): t => {
     let rotated: t = allocate_raw();
     // rotate_2d returns the rotated pointer, so there's no need to keep it
     // around twice
     let _: t = rotate_2d(rotated, v, angle);
     rotated;
+  };
+};
+
+module Camera = {
+  include Orx_gen.Camera;
+
+  let get_position = (c: t): Vector.t => {
+    let position: Vector.t = Vector.allocate_raw();
+    let _: Vector.t = get_position(c, position);
+    position;
   };
 };
 

@@ -25,7 +25,7 @@ module Helpers = {
   // the object o
   let create_explosion_at_object = (o: Orx.Object.t, name: string) => {
     let position = Orx.Object.get_world_position(o);
-    let position = Orx.Vector.copy(~z=0.0, position);
+    Orx.Vector.set_z(position, 0.0);
     let explosion = Orx.Object.create_from_config(name) |> get_some;
     Orx.Object.set_position(explosion, position);
   };
@@ -107,10 +107,10 @@ module Physics = {
   // Main Orx event handler
   let event_handler = (event: Orx.Event.t) => {
     let state = State.get();
-    switch (Orx.Event.Physics.get_event(event)) {
+    switch (Orx.Event.to_event(event, Physics)) {
     | Contact_add =>
-      let sender = Orx.Event.Physics.get_sender(event);
-      let recipient = Orx.Event.Physics.get_recipient(event);
+      let sender = Orx.Event.get_sender_object(event);
+      let recipient = Orx.Event.get_recipient_object(event);
       on_add_contact(state, ~sender, ~recipient);
     | Contact_remove => Ok()
     };
