@@ -29,6 +29,15 @@ module Bindings = (F: Ctypes.TYPE) => {
     let () = F.seal(t);
   };
 
+  module Color = {
+    type t;
+
+    let t: structure(t) = F.structure("__orxCOLOR_t");
+    let rgb = F.field(t, "vRGB", Vector.t);
+    let alpha = F.field(t, "fAlpha", F.float);
+    let () = F.seal(t);
+  };
+
   module Handle = {
     let t = F.ptr(F.void);
   };
@@ -346,7 +355,8 @@ module Bindings = (F: Ctypes.TYPE) => {
       let t: structure(t) = F.structure("__orxINPUT_EVENT_PAYLOAD_t");
       let set_name = F.field(t, "zSetName", F.string);
       let input_name = F.field(t, "zInputName", F.string);
-      let input_type = F.field(t, "aeType", F.array(binding_number, Input_type.t));
+      let input_type =
+        F.field(t, "aeType", F.array(binding_number, Input_type.t));
       let id = F.field(t, "aeID", F.array(binding_number, orx_enum));
       let mode = F.field(t, "aeMode", F.array(binding_number, Input_mode.t));
       let value = F.field(t, "afValue", F.array(binding_number, F.float));
@@ -387,6 +397,30 @@ module Bindings = (F: Ctypes.TYPE) => {
     };
   };
 
+  module Texture_event = {
+    type t =
+      | Create
+      | Delete
+      | Load;
+
+    let create = F.constant("orxTEXTURE_EVENT_CREATE", F.int64_t);
+    let delete = F.constant("orxTEXTURE_EVENT_DELETE", F.int64_t);
+    let load = F.constant("orxTEXTURE_EVENT_LOAD", F.int64_t);
+
+    let map_to_constant = [
+      (Create, create),
+      (Delete, delete),
+      (Load, load),
+    ];
+
+    let map_from_constant = swap_tuple_list(map_to_constant);
+
+    let t =
+      F.enum("__orxTEXTURE_EVENT_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported texture event type enum: %Ld", i)
+      );
+  };
+
   module Event = {
     type t;
 
@@ -412,6 +446,13 @@ module Bindings = (F: Ctypes.TYPE) => {
 
     // Unsealed structure because the type is anonymous
     let t: structure(t) = F.structure("__orxOBJECT_t");
+  };
+
+  module Texture = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxTEXTURE_t");
   };
 
   module Viewport = {

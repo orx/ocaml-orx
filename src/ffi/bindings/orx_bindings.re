@@ -46,14 +46,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let allocate_raw = (): t => allocate_n(T.Vector.t, ~count=1);
 
-    let make = (~x, ~y, ~z): t => {
-      let v_ptr = allocate_raw();
-      let v = !@v_ptr;
-      Ctypes.setf(v, T.Vector.x, x);
-      Ctypes.setf(v, T.Vector.y, y);
-      Ctypes.setf(v, T.Vector.z, z);
-      v_ptr;
-    };
+    let set =
+      c("orxVector_Set", t @-> float @-> float @-> float @-> returning(t));
 
     let copy = c("orxVector_Copy", t @-> t @-> returning(t));
 
@@ -63,6 +57,15 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let rotate_2d =
       c("orxVector_2DRotate", t @-> t @-> float @-> returning(t));
+  };
+
+  module Color = {
+    type t = ptr(structure(T.Color.t));
+
+    let t = ptr(T.Color.t);
+    let t_opt = ptr_opt(T.Color.t);
+
+    let allocate_raw = (): t => allocate_n(T.Color.t, ~count=1);
   };
 
   module Config = {
@@ -472,6 +475,12 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let set_gravity =
       c("orxPhysics_SetGravity", Vector.t @-> returning(Status.t));
+  };
+
+  module Texture = {
+    type t = ptr(structure(T.Texture.t));
+
+    let t = ptr(T.Texture.t);
   };
 
   module Display = {

@@ -6,9 +6,11 @@ let orx_error = (name: string) => {
 
 module Orx_gen = Orx_bindings.Bindings(Generated);
 
+module Color = Orx_gen.Color;
 module Display = Orx_gen.Display;
 module Fx_event = Orx_gen.Fx_event;
 module Resource = Orx_gen.Resource;
+module Texture = Orx_gen.Texture;
 module Viewport = Orx_gen.Viewport;
 
 module Vector = {
@@ -24,6 +26,12 @@ module Vector = {
 
   let get_z = (v: t): float => {
     Ctypes.getf(!@v, Orx_types.Vector.z);
+  };
+
+  let make = (~x, ~y, ~z): t => {
+    let v = allocate_raw();
+    let _: t = set(v, x, y, z);
+    v;
   };
 
   let set_x = (v: t, x: float): unit => {
