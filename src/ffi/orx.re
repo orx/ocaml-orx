@@ -9,6 +9,7 @@ module Orx_gen = Orx_bindings.Bindings(Generated);
 module Color = Orx_gen.Color;
 module Display = Orx_gen.Display;
 module Fx_event = Orx_gen.Fx_event;
+module Input_event = Orx_gen.Input_event;
 module Resource = Orx_gen.Resource;
 module Texture = Orx_gen.Texture;
 module Viewport = Orx_gen.Viewport;
