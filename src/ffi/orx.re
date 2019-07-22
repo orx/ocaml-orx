@@ -133,6 +133,23 @@ module Object = {
     | Error () => orx_error("set_text_string")
     };
   };
+
+  let add_fx = (~delay: option(float)=?, o: t, fx: string, ~unique: bool) => {
+    switch (delay) {
+    | None =>
+      if (unique) {
+        add_unique_fx(o, fx);
+      } else {
+        add_fx(o, fx);
+      }
+    | Some(time) =>
+      if (unique) {
+        add_unique_delayed_fx(o, fx, time);
+      } else {
+        add_delayed_fx(o, fx, time);
+      }
+    };
+  };
 };
 
 module Event = {

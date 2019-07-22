@@ -292,6 +292,22 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     // FX
     let add_fx = c("orxObject_AddFX", t @-> string @-> returning(Status.t));
+    let add_unique_fx =
+      c("orxObject_AddUniqueFX", t @-> string @-> returning(Status.t));
+
+    let add_delayed_fx =
+      c(
+        "orxObject_AddDelayedFX",
+        t @-> string @-> float @-> returning(Status.t),
+      );
+    let add_unique_delayed_fx =
+      c(
+        "orxObject_AddUniqueDelayedFX",
+        t @-> string @-> float @-> returning(Status.t),
+      );
+
+    let remove_fx =
+      c("orxObject_RemoveFX", t @-> string @-> returning(Status.t));
 
     // Position and orientation
     let get_rotation = c("orxObject_GetRotation", t @-> returning(float));

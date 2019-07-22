@@ -74,7 +74,7 @@ let init = () => {
   Fmt.pr("* Gravity will follow the camera@.");
   Fmt.pr("* a bump visual FX is played on objects that collide@.");
 
-  let viewport = Orx.Viewport.create_from_config("Viewport");
+  let viewport = Orx.Viewport.create_from_config("Viewport") |> get_some;
   let camera = Orx.Viewport.get_camera(viewport) |> get_some;
 
   let clock = Orx.Clock.find_first(-1.0, Core) |> get_some;
@@ -87,11 +87,11 @@ let init = () => {
   Orx.Object.create_from_config("Sky") |> get_some |> ignore;
   Orx.Object.create_from_config("Walls") |> get_some |> ignore;
 
-  Orx.Config.with_section("Tutorial", () => {
+  Orx.Config.with_section("Tutorial", () =>
     for (_ in 1 to Orx.Config.get_int("BoxNumber")) {
       Orx.Object.create_from_config("Box") |> get_some |> ignore;
     }
-  })
+  )
   |> get_ok;
 
   Ok();
