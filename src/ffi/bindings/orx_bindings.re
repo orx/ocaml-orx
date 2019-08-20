@@ -68,6 +68,65 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let allocate_raw = (): t => allocate_n(T.Color.t, ~count=1);
   };
 
+  module Structure = {
+    type t = ptr(structure(T.Structure.t));
+
+    let t = ptr(T.Structure.t);
+    let t_opt = ptr_opt(T.Structure.t);
+  };
+
+  module Texture = {
+    type t = ptr(structure(T.Texture.t));
+
+    let t = ptr(T.Texture.t);
+    let t_opt = ptr_opt(T.Texture.t);
+
+    let create =
+      c("orxTexture_CreateFromFile", string @-> bool @-> returning(t_opt));
+
+    let delete = c("orxTexture_Delete", t @-> returning(Status.t));
+
+    let clear_cache =
+      c("orxTexture_ClearCache", void @-> returning(Status.t));
+
+    let to_structure = c("orxSTRUCTURE", t @-> returning(Structure.t));
+  };
+
+  module Graphic = {
+    type t = ptr(structure(T.Graphic.t));
+
+    let t = ptr(T.Graphic.t);
+    let t_opt = ptr_opt(T.Graphic.t);
+
+    let create = c("orxGraphic_Create", void @-> returning(t_opt));
+
+    let create_from_config =
+      c("orxGraphic_CreateFromConfig", string @-> returning(t_opt));
+
+    let delete = c("orxGraphic_Delete", t @-> returning(Status.t));
+
+    // Graphic dimensions on the source texture
+    let set_size =
+      c("orxGraphic_SetSize", t @-> Vector.t @-> returning(Status.t));
+
+    let get_size =
+      c("orxGraphic_GetSize", t @-> Vector.t @-> returning(Vector.t));
+
+    // Graphic origin on the source texture
+    let set_origin =
+      c("orxGraphic_SetOrigin", t @-> Vector.t @-> returning(Status.t));
+
+    let get_origin =
+      c("orxGraphic_GetOrigin", t @-> Vector.t @-> returning(Vector.t));
+
+    // Set texture data associated with this graphic
+    let set_data =
+      c("orxGraphic_SetData", t @-> Structure.t @-> returning(Status.t));
+
+    // Cast to a orx structure
+    let to_structure = c("orxSTRUCTURE", t @-> returning(Structure.t));
+  };
+
   module Config = {
     /* This module will be included in the Config module defined in orx.re */
     let set_basename =
@@ -351,9 +410,27 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let apply_torque =
       c("orxObject_ApplyTorque", t @-> float @-> returning(Status.t));
 
+    // Color
+    let set_rgb =
+      c("orxObject_SetRGB", t @-> Vector.t @-> returning(Status.t));
+    let set_rgb_recursive =
+      c("orxObject_SetRGBRecursive", t @-> Vector.t @-> returning(void));
+
+    let set_alpha =
+      c("orxObject_SetAlpha", t @-> float @-> returning(Status.t));
+    let set_alpha_recursive =
+      c("orxObject_SetAlphaRecursive", t @-> float @-> returning(void));
+
     // Animation
     let set_target_anim =
       c("orxObject_SetTargetAnim", t @-> string @-> returning(Status.t));
+
+    // Linking structures
+    let link_structure =
+      c(
+        "orxObject_LinkStructure",
+        t @-> Structure.t @-> returning(Status.t),
+      );
   };
 
   module Viewport = {

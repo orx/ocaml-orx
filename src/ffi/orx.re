@@ -11,6 +11,7 @@ module Display = Orx_gen.Display;
 module Fx_event = Orx_gen.Fx_event;
 module Input_event = Orx_gen.Input_event;
 module Resource = Orx_gen.Resource;
+module Structure = Orx_gen.Structure;
 module Texture = Orx_gen.Texture;
 module Viewport = Orx_gen.Viewport;
 
@@ -71,6 +72,22 @@ module Vector = {
     // around twice
     let _: t = rotate_2d(rotated, v, angle);
     rotated;
+  };
+};
+
+module Graphic = {
+  include Orx_gen.Graphic;
+
+  let get_size = (g: t): Vector.t => {
+    let size: Vector.t = Vector.allocate_raw();
+    let _: Vector.t = get_size(g, size);
+    size;
+  };
+
+  let get_origin = (g: t): Vector.t => {
+    let origin: Vector.t = Vector.allocate_raw();
+    let _: Vector.t = get_origin(g, origin);
+    origin;
   };
 };
 

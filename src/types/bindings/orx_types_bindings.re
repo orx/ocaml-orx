@@ -162,6 +162,20 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t: structure(t) = F.structure("__orxFX_t");
   };
 
+  module Graphic = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxGRAPHIC_t");
+  };
+
+  module Structure = {
+    type t;
+
+    // Unsealed structure until we expose its form in these bindings
+    let t: structure(t) = F.structure("__orxSTRUCTURE_t");
+  };
+
   module Input_type = {
     type t =
       | Keyboard_key
