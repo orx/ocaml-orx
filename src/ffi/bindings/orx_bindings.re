@@ -73,6 +73,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let t = ptr(T.Structure.t);
     let t_opt = ptr_opt(T.Structure.t);
+
+    let of_any = c("orxSTRUCTURE", ptr(void) @-> returning(t));
   };
 
   module Texture = {
@@ -88,8 +90,6 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let clear_cache =
       c("orxTexture_ClearCache", void @-> returning(Status.t));
-
-    let to_structure = c("orxSTRUCTURE", t @-> returning(Structure.t));
   };
 
   module Graphic = {
@@ -122,9 +122,6 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     // Set texture data associated with this graphic
     let set_data =
       c("orxGraphic_SetData", t @-> Structure.t @-> returning(Status.t));
-
-    // Cast to a orx structure
-    let to_structure = c("orxSTRUCTURE", t @-> returning(Structure.t));
   };
 
   module Config = {
@@ -568,12 +565,6 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let set_gravity =
       c("orxPhysics_SetGravity", Vector.t @-> returning(Status.t));
-  };
-
-  module Texture = {
-    type t = ptr(structure(T.Texture.t));
-
-    let t = ptr(T.Texture.t);
   };
 
   module Display = {

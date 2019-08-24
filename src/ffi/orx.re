@@ -89,6 +89,11 @@ module Graphic = {
     let _: Vector.t = get_origin(g, origin);
     origin;
   };
+
+  let to_structure = (g: t): Structure.t => {
+    let g' = Ctypes.to_voidp(g);
+    Structure.of_any(g');
+  };
 };
 
 module Camera = {
