@@ -3,11 +3,33 @@ let prefix = "orx_stub";
 let prologue = {|
 #include <orx.h>
 
+orxSTATUS ml_orx_thread_pre() {
+  printf("Setting up for OCaml\n");
+  fflush(stdout);
+  caml_c_thread_register();
+  printf("Setup for OCaml\n");
+  fflush(stdout);
+  return orxSTATUS_SUCCESS;
+}
+
+void ml_orx_thread_post() {
+  printf("Cleaning up for OCaml\n");
+  fflush(stdout);
+  caml_c_thread_unregister();
+  printf("Cleaned up for OCaml\n");
+  fflush(stdout);
+  return orxSTATUS_SUCCESS;
+}
+
+void ml_orx_thread_set_prepost() {
+  orxThread_SetPrePost(&ml_orx_thread_pre, &ml_orx_thread_post, NULL);
+  return;
+}
+
 void ml_orx_execute(int argc, char **argv,
                     orxMODULE_INIT_FUNCTION init,
                     orxMODULE_RUN_FUNCTION run,
-                    orxMODULE_EXIT_FUNCTION exit)
-{
+                    orxMODULE_EXIT_FUNCTION exit) {
     orx_Execute(argc,
                 argv,
                 init,

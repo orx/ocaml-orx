@@ -10,7 +10,9 @@ module Color = Orx_gen.Color;
 module Display = Orx_gen.Display;
 module Fx_event = Orx_gen.Fx_event;
 module Input_event = Orx_gen.Input_event;
+module Sound_event = Orx_gen.Sound_event;
 module Resource = Orx_gen.Resource;
+module Sound = Orx_gen.Sound;
 module Structure = Orx_gen.Structure;
 module Texture = Orx_gen.Texture;
 module Viewport = Orx_gen.Viewport;
@@ -150,6 +152,12 @@ module Object = {
     };
   };
 
+  let get_scale = (o: t): Vector.t => {
+    let scale = Vector.allocate_raw();
+    let _: Vector.t = get_scale(o, scale);
+    scale;
+  };
+
   let set_text_string = (o: t, s: string): unit => {
     switch (set_text_string(o, s)) {
     | Ok () => ()
@@ -173,6 +181,15 @@ module Object = {
       }
     };
   };
+
+  let add_sound =
+    Ctypes.(
+      Foreign.foreign(
+        ~release_runtime_lock=true,
+        "orxObject_AddSound",
+        t @-> string @-> returning(Orx_gen.Status.t),
+      )
+    );
 };
 
 module Event = {
@@ -188,15 +205,30 @@ module Event = {
 
   let event_handler = Ctypes.(t @-> returning(Orx_gen.Status.t));
 
-  let add_handler =
+  let c_add_handler = (~runtime_lock) =>
     Ctypes.(
       Foreign.foreign(
+        ~release_runtime_lock=false,
         "orxEvent_AddHandler",
         Orx_types.Event_type.t
-        @-> Foreign.funptr(event_handler)
+        @-> Foreign.funptr(~runtime_lock, event_handler)
         @-> returning(Orx_gen.Status.t),
       )
     );
+  let c_add_handler_with_lock = c_add_handler(~runtime_lock=true);
+  let c_add_handler_without_lock = c_add_handler(~runtime_lock=false);
+
+  // Hold onto callbacks so they're not collected
+  let registered_callbacks: ref(list(t => Orx_gen.Status.t)) = ref([]);
+
+  let add_handler = (event_type: Orx_types.Event_type.t, callback) => {
+    Fmt.epr("Callbacks need to have their exceptions caught! %s@.", __LOC__);
+    registered_callbacks := [callback, ...registered_callbacks^];
+    switch (event_type) {
+    | Sound => c_add_handler_with_lock(event_type, callback)
+    | _ => c_add_handler_without_lock(event_type, callback)
+    };
+  };
 };
 
 module Clock = {
@@ -207,9 +239,10 @@ module Clock = {
   let c_register =
     Ctypes.(
       Foreign.foreign(
+        ~release_runtime_lock=false,
         "orxClock_Register",
         t
-        @-> Foreign.funptr(callback)
+        @-> Foreign.funptr(~runtime_lock=true, callback)
         @-> ptr(void)
         @-> Orx_types.Module_id.t
         @-> Orx_types.Clock_priority.t
@@ -217,9 +250,7 @@ module Clock = {
       )
     );
 
-  // Collect callbacks so they're not collected.  A user would normally be able
-  // to do this but we wrap a user's callback to "hide" the unused context
-  // argument.
+  // Hold onto callbacks so they're not collected
   let registered_callbacks: ref(list((Info.t, Ctypes.ptr(unit)) => unit)) =
     ref([]);
 
@@ -306,28 +337,47 @@ module Config = {
   };
 };
 
+module Orx_thread = {
+  let set_ocaml_prepost =
+    Ctypes.(
+      Foreign.foreign("ml_orx_thread_set_prepost", void @-> returning(void))
+    );
+};
+
 module Main = {
   let init_function = Ctypes.(void @-> returning(Orx_gen.Status.t));
   let run_function = Ctypes.(void @-> returning(Orx_gen.Status.t));
   let exit_function = Ctypes.(void @-> returning(void));
 
-  // This is wrapped differently because it's inlined in orx.h
+  // This is wrapped differently because the underlying orx function is
+  // inlined in orx.h
   let execute_c = {
     Ctypes.(
       Foreign.foreign(
+        ~release_runtime_lock=true,
         "ml_orx_execute",
         int
         @-> ptr(string)
-        @-> Foreign.funptr(init_function)
-        @-> Foreign.funptr(run_function)
-        @-> Foreign.funptr(exit_function)
+        @-> Foreign.funptr(~runtime_lock=true, init_function)
+        @-> Foreign.funptr(~runtime_lock=true, run_function)
+        @-> Foreign.funptr(~runtime_lock=true, exit_function)
         @-> returning(void),
       )
     );
   };
 
   let execute = (~init, ~run, ~exit, ()) => {
+    // Initialize orx's per-thread callbacks to work with the OCaml runtime
+    Orx_thread.set_ocaml_prepost();
+
+    // Start the orx main loop
     let empty_argv = Ctypes.from_voidp(Ctypes.string, Ctypes.null);
-    execute_c(0, empty_argv, init, run, exit);
+    execute_c(
+      0,
+      empty_argv,
+      Sys.opaque_identity(init),
+      Sys.opaque_identity(run),
+      Sys.opaque_identity(exit),
+    );
   };
 };

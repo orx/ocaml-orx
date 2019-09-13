@@ -33,4 +33,4 @@
   (:include ../orx-c-include-flags.sexp))
  (c_library_flags
   (:include ../orx-c-link-flags.sexp))
- (libraries orx_bindings))
+ (libraries ctypes.foreign.threaded orx_bindings threads))

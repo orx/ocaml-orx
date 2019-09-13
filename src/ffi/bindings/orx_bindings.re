@@ -124,6 +124,40 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxGraphic_SetData", t @-> Structure.t @-> returning(Status.t));
   };
 
+  module Sound = {
+    type t = ptr(structure(T.Sound.t));
+
+    let t = ptr(T.Sound.t);
+    let t_opt = ptr_opt(T.Sound.t);
+
+    let create_from_config =
+      c("orxSound_CreateFromConfig", string @-> returning(t_opt));
+
+    let get_name = c("orxSound_GetName", t @-> returning(string));
+
+    let get_status =
+      c("orxSound_GetStatus", t @-> returning(T.Sound_status.t));
+
+    let play = c("orxSound_Play", t @-> returning(Status.t));
+    let pause = c("orxSound_Pause", t @-> returning(Status.t));
+    let stop = c("orxSound_Stop", t @-> returning(Status.t));
+
+    let get_duration = c("orxSound_GetDuration", t @-> returning(float));
+
+    let get_pitch = c("orxSound_GetPitch", t @-> returning(float));
+    let set_pitch =
+      c("orxSound_SetPitch", t @-> float @-> returning(Status.t));
+
+    let get_volume = c("orxSound_GetVolume", t @-> returning(float));
+    let set_volume =
+      c("orxSound_SetVolume", t @-> float @-> returning(Status.t));
+
+    let get_attenuation =
+      c("orxSound_GetAttenuation", t @-> returning(float));
+    let set_attenuation =
+      c("orxSound_SetAttenuation", t @-> float @-> returning(Status.t));
+  };
+
   module Config = {
     /* This module will be included in the Config module defined in orx.re */
     let set_basename =
@@ -373,12 +407,14 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let get_world_position =
       c(
         "orxObject_GetWorldPosition",
-        t @-> ptr(T.Vector.t) @-> returning(ptr(T.Vector.t)),
+        t @-> Vector.t @-> returning(Vector.t),
       );
 
     let set_position =
       c("orxObject_SetPosition", t @-> Vector.t @-> returning(Status.t));
 
+    let get_scale =
+      c("orxObject_GetScale", t @-> Vector.t @-> returning(Vector.t));
     let set_scale =
       c("orxObject_SetScale", t @-> Vector.t @-> returning(Status.t));
 
@@ -421,6 +457,10 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     // Animation
     let set_target_anim =
       c("orxObject_SetTargetAnim", t @-> string @-> returning(Status.t));
+
+    // Sound
+    let add_sound =
+      c("orxObject_AddSound", t @-> string @-> returning(Status.t));
 
     // Linking structures
     let link_structure =
@@ -475,12 +515,14 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     type payload('event) =
       | Fx: payload(T.Fx_event.Payload.t)
       | Input: payload(T.Input_event.Payload.t)
-      | Physics: payload(T.Physics_event.Payload.t);
+      | Physics: payload(T.Physics_event.Payload.t)
+      | Sound: payload(T.Sound_event.Payload.t);
 
     type event('event) =
       | Fx: event(T.Fx_event.t)
       | Input: event(T.Input_event.t)
-      | Physics: event(T.Physics_event.t);
+      | Physics: event(T.Physics_event.t)
+      | Sound: event(T.Sound_event.t);
 
     let to_event_id = (event: t): int64 => {
       Ctypes.getf(!@event, T.Event.event_id) |> Unsigned.UInt.to_int64;
@@ -512,6 +554,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       | Physics =>
         assert_type(event, T.Event_type.Physics);
         unsafe_get_payload(event, T.Physics_event.Payload.t);
+      | Sound =>
+        assert_type(event, T.Event_type.Sound);
+        unsafe_get_payload(event, T.Sound_event.Payload.t);
       };
     };
 
@@ -534,6 +579,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       | Physics =>
         assert_type(event, T.Event_type.Physics);
         get_event_by_id(event, T.Physics_event.map_from_constant);
+      | Sound =>
+        assert_type(event, T.Event_type.Sound);
+        get_event_by_id(event, T.Sound_event.map_from_constant);
       };
     };
   };
@@ -556,6 +604,13 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     };
     let get_input_name = (event: Event.t): string => {
       get_payload_field(event, T.Input_event.Payload.input_name);
+    };
+  };
+
+  module Sound_event = {
+    let get_sound = (event: Event.t): Sound.t => {
+      let payload = Event.to_payload(event, Sound);
+      Ctypes.getf(!@payload, T.Sound_event.Payload.sound);
     };
   };
 

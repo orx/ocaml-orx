@@ -169,6 +169,38 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t: structure(t) = F.structure("__orxGRAPHIC_t");
   };
 
+  module Sound = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxSOUND_t");
+  };
+
+  module Sound_status = {
+    type t =
+      | Play
+      | Pause
+      | Stop
+      | None;
+
+    let play = F.constant("orxSOUND_STATUS_PLAY", F.int64_t);
+    let pause = F.constant("orxSOUND_STATUS_PAUSE", F.int64_t);
+    let stop = F.constant("orxSOUND_STATUS_STOP", F.int64_t);
+    let none = F.constant("orxSOUND_STATUS_NONE", F.int64_t);
+
+    let map_to_constant = [
+      (Play, play),
+      (Pause, pause),
+      (Stop, stop),
+      (None, none),
+    ];
+
+    let t =
+      F.enum("__orxSOUND_STATUS_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported sound status enum: %Ld", i)
+      );
+  };
+
   module Structure = {
     type t;
 
@@ -407,6 +439,57 @@ module Bindings = (F: Ctypes.TYPE) => {
       let normal = F.field(t, "vNormal", Vector.t);
       let sender_part_name = F.field(t, "zSenderPartName", F.string);
       let recipient_part_name = F.field(t, "zRecipientPartName", F.string);
+      let () = F.seal(t);
+    };
+  };
+
+  module Sound_event = {
+    type t =
+      | Start
+      | Stop
+      | Add
+      | Remove
+      | Packet
+      | Recording_start
+      | Recording_stop
+      | Recording_packet
+      | None;
+
+    let make = tag => F.constant("orxSOUND_EVENT_" ++ tag, F.int64_t);
+    let start = make("START");
+    let stop = make("STOP");
+    let add = make("ADD");
+    let remove = make("REMOVE");
+    let packet = make("PACKET");
+    let recording_start = make("RECORDING_START");
+    let recording_stop = make("RECORDING_STOP");
+    let recording_packet = make("RECORDING_PACKET");
+    let none = make("NONE");
+
+    let map_to_constant = [
+      (Start, start),
+      (Stop, stop),
+      (Add, add),
+      (Remove, remove),
+      (Packet, packet),
+      (Recording_start, recording_start),
+      (Recording_stop, recording_stop),
+      (Recording_packet, recording_packet),
+      (None, none),
+    ];
+
+    let map_from_constant = swap_tuple_list(map_to_constant);
+
+    let t =
+      F.enum("__orxSOUND_EVENT_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported sound event type enum: %Ld", i)
+      );
+
+    module Payload = {
+      type t;
+
+      let t: structure(t) = F.structure("__orxSOUND_EVENT_PAYLOAD_t");
+      let sound = F.field(t, "pstSound", F.ptr(Sound.t));
       let () = F.seal(t);
     };
   };
