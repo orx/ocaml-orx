@@ -458,9 +458,12 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let set_target_anim =
       c("orxObject_SetTargetAnim", t @-> string @-> returning(Status.t));
 
-    // Sound
-    let add_sound =
-      c("orxObject_AddSound", t @-> string @-> returning(Status.t));
+    // NOTE: This is commented out and bound with Foreign/libffi
+    // The libffi binding is used because this function needs to
+    // release the OCaml runtime lock while running.
+    // // Sound
+    // let add_sound =
+    //   c("orxObject_AddSound", t @-> string @-> returning(Status.t));
 
     // Linking structures
     let link_structure =

@@ -39,14 +39,11 @@ let event_message = (event: Orx.Event.t, kind) => {
   );
 };
 
-let counter = ref(0);
 let event_handler = (event: Orx.Event.t) => {
-  incr(counter);
-  //Fmt.pr("I'm here %d@.", counter^);
   switch (Orx.Event.to_event(event, Sound)) {
   | Start => event_message(event, "started")
   | Stop => event_message(event, "stopped")
-  | _ => Fmt.pr("Some other sound event@.")
+  | _ => ()
   };
   Ok();
 };

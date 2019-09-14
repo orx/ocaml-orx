@@ -70,8 +70,6 @@ module Vector = {
 
   let rotate_2d = (v: t, angle: float): t => {
     let rotated: t = allocate_raw();
-    // rotate_2d returns the rotated pointer, so there's no need to keep it
-    // around twice
     let _: t = rotate_2d(rotated, v, angle);
     rotated;
   };
@@ -222,7 +220,17 @@ module Event = {
   let registered_callbacks: ref(list(t => Orx_gen.Status.t)) = ref([]);
 
   let add_handler = (event_type: Orx_types.Event_type.t, callback) => {
-    Fmt.epr("Callbacks need to have their exceptions caught! %s@.", __LOC__);
+    let callback = event =>
+      switch (callback(event)) {
+      | result => result
+      | exception exn =>
+        Fmt.epr(
+          "Unhandled exception in event callback: %a@.",
+          Fmt.exn_backtrace,
+          (exn, Printexc.get_raw_backtrace()),
+        );
+        raise(exn);
+      };
     registered_callbacks := [callback, ...registered_callbacks^];
     switch (event_type) {
     | Sound => c_add_handler_with_lock(event_type, callback)
@@ -255,7 +263,17 @@ module Clock = {
     ref([]);
 
   let register = (clock: t, callback, module_, priority) => {
-    let callback_wrapper = (info, _ctx) => callback(info);
+    let callback_wrapper = (info, _ctx) =>
+      switch (callback(info)) {
+      | () => ()
+      | exception exn =>
+        Fmt.epr(
+          "Unhandled exception in clock callback: %a@.",
+          Fmt.exn_backtrace,
+          (exn, Printexc.get_raw_backtrace()),
+        );
+        raise(exn);
+      };
     registered_callbacks := [callback_wrapper, ...registered_callbacks^];
     c_register(clock, callback_wrapper, Ctypes.null, module_, priority);
   };

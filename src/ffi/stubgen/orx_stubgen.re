@@ -4,20 +4,12 @@ let prologue = {|
 #include <orx.h>
 
 orxSTATUS ml_orx_thread_pre() {
-  printf("Setting up for OCaml\n");
-  fflush(stdout);
   caml_c_thread_register();
-  printf("Setup for OCaml\n");
-  fflush(stdout);
   return orxSTATUS_SUCCESS;
 }
 
 void ml_orx_thread_post() {
-  printf("Cleaning up for OCaml\n");
-  fflush(stdout);
   caml_c_thread_unregister();
-  printf("Cleaned up for OCaml\n");
-  fflush(stdout);
   return orxSTATUS_SUCCESS;
 }
 
