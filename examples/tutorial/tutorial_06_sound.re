@@ -140,6 +140,27 @@ let update = (clock_info: Orx.Clock.Info.t) => {
 };
 
 let init = () => {
+  // Print out a hint to the user about what's to come
+  let get_name = (binding: string): string => {
+    let (type_, id, mode) = Orx.Input.get_binding(binding, 0) |> get_ok;
+    Orx.Input.get_binding_name(type_, id, mode);
+  };
+  Fmt.pr(
+    "@.- '%s' & '%s' will change the music volume (+ soldier size)@."
+    ^^ "- '%s' & '%s' will change the music pitch (+ soldier rotation)@."
+    ^^ "- '%s' will toggle music (+ soldier display)@."
+    ^^ "- '%s' will play a random SFX on the soldier (+ change its color)@."
+    ^^ "- '%s' will the default SFX on the soldier (+ restore its color)@."
+    ^^ "! The sound effect will be played only if the soldier is active@.",
+    get_name("VolumeUp"),
+    get_name("VolumeDown"),
+    get_name("PitchUp"),
+    get_name("PitchDown"),
+    get_name("ToggleMusic"),
+    get_name("RandomSFX"),
+    get_name("DefaultSFX"),
+  );
+
   Orx.Viewport.create_from_config("Viewport") |> get_some |> ignore;
   let soldier = Orx.Object.create_from_config("Soldier") |> get_some;
   let clock = Orx.Clock.find_first(-1.0, Core) |> get_some;
