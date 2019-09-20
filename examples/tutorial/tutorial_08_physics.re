@@ -29,8 +29,8 @@ let event_handler = (event: Orx.Event.t) => {
   | Contact_add =>
     let sender = Orx.Event.get_sender_object(event);
     let recipient = Orx.Event.get_recipient_object(event);
-    Orx.Object.add_fx(sender, "Bump") |> ignore;
-    Orx.Object.add_fx(recipient, "Bump") |> ignore;
+    Orx.Object.add_fx(sender, "Bump", ~unique=false) |> ignore;
+    Orx.Object.add_fx(recipient, "Bump", ~unique=false) |> ignore;
   };
 
   Ok();
@@ -84,15 +84,7 @@ let init = () => {
 
   Orx.Event.add_handler(Physics, event_handler) |> get_ok;
 
-  Orx.Object.create_from_config("Sky") |> get_some |> ignore;
-  Orx.Object.create_from_config("Walls") |> get_some |> ignore;
-
-  Orx.Config.with_section("Tutorial", () =>
-    for (_ in 1 to Orx.Config.get_int("BoxNumber")) {
-      Orx.Object.create_from_config("Box") |> get_some |> ignore;
-    }
-  )
-  |> get_ok;
+  Orx.Object.create_from_config("Scene") |> get_some |> ignore;
 
   Ok();
 };
