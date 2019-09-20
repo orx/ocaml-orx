@@ -458,12 +458,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let set_target_anim =
       c("orxObject_SetTargetAnim", t @-> string @-> returning(Status.t));
 
-    // NOTE: This is commented out and bound with Foreign/libffi
-    // The libffi binding is used because this function needs to
-    // release the OCaml runtime lock while running.
-    // // Sound
-    // let add_sound =
-    //   c("orxObject_AddSound", t @-> string @-> returning(Status.t));
+    // Sound
+    let add_sound =
+      c("orxObject_AddSound", t @-> string @-> returning(Status.t));
 
     // Linking structures
     let link_structure =
@@ -526,6 +523,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       | Input: event(T.Input_event.t)
       | Physics: event(T.Physics_event.t)
       | Sound: event(T.Sound_event.t);
+
+    let get_flag = c("orxEVENT_GET_FLAG", uint32_t @-> returning(uint32_t));
 
     let to_event_id = (event: t): int64 => {
       Ctypes.getf(!@event, T.Event.event_id) |> Unsigned.UInt.to_int64;
