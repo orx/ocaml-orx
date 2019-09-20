@@ -91,15 +91,7 @@ let init = () => {
   let clock = Orx.Clock.find_first(-1.0, Core) |> get_some;
   Orx.Clock.register(clock, update, Main, Normal) |> get_ok;
 
-  Orx.Object.create_from_config("Sky") |> get_some |> ignore;
-
-  Orx.Config.push_section("Tutorial") |> get_ok;
-
-  for (_i in 1 to Orx.Config.get_int("CloudNumber")) {
-    Orx.Object.create_from_config("Cloud") |> get_some |> ignore;
-  };
-
-  Orx.Config.pop_section() |> get_ok;
+  Orx.Object.create_from_config("Scene") |> get_some |> ignore;
 
   Ok();
 };
