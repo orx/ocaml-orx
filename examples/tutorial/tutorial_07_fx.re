@@ -94,7 +94,7 @@ let update = (_clock_info: Orx.Clock.Info.t) => {
   };
 
   if (!state.soldier_fx_lock) {
-    if (Orx.Input.is_active("ApplyFX") && Orx.Input.has_new_status("ApplyFX")) {
+    if (Orx.Input.has_been_activated("ApplyFX")) {
       Orx.Object.add_fx(state.soldier, state.selected_fx, ~unique=true)
       |> get_ok;
     };
