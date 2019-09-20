@@ -730,4 +730,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
         );
     };
   };
+
+  module Screenshot = {
+    let capture = c("orxScreenshot_Capture", void @-> returning(Status.t));
+  };
 };
