@@ -448,34 +448,36 @@ module Bindings = (F: Ctypes.TYPE) => {
       | Start
       | Stop
       | Add
-      | Remove
-      | Packet
-      | Recording_start
-      | Recording_stop
-      | Recording_packet
-      | None;
+      | Remove;
+    /* TODO: If someone finds a way to safely handle these from OCaml, add
+       support back in.
+       | Packet
+       | Recording_start
+       | Recording_stop
+       | Recording_packet
+       | None; */
 
     let make = tag => F.constant("orxSOUND_EVENT_" ++ tag, F.int64_t);
     let start = make("START");
     let stop = make("STOP");
     let add = make("ADD");
     let remove = make("REMOVE");
-    let packet = make("PACKET");
-    let recording_start = make("RECORDING_START");
-    let recording_stop = make("RECORDING_STOP");
-    let recording_packet = make("RECORDING_PACKET");
-    let none = make("NONE");
+    /* let packet = make("PACKET");
+       let recording_start = make("RECORDING_START");
+       let recording_stop = make("RECORDING_STOP");
+       let recording_packet = make("RECORDING_PACKET");
+       let none = make("NONE"); */
 
     let map_to_constant = [
       (Start, start),
       (Stop, stop),
       (Add, add),
       (Remove, remove),
-      (Packet, packet),
-      (Recording_start, recording_start),
-      (Recording_stop, recording_stop),
-      (Recording_packet, recording_packet),
-      (None, none),
+      /* (Packet, packet),
+         (Recording_start, recording_start),
+         (Recording_stop, recording_stop),
+         (Recording_packet, recording_packet),
+         (None, none), */
     ];
 
     let map_from_constant = swap_tuple_list(map_to_constant);
