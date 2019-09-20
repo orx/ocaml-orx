@@ -293,23 +293,40 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let compare = (a: t, b: t): int => Ctypes.ptr_compare(a, b);
     let equal = (a, b) => compare(a, b) == 0;
 
+    // Create a new clock
     let create_from_config =
       c("orxClock_CreateFromConfig", string @-> returning(t_opt));
 
+    let create =
+      c("orxClock_Create", float @-> T.Clock_type.t @-> returning(t_opt));
+
+    // Get a clock in various ways
     let get = c("orxClock_Get", string @-> returning(t_opt));
 
     let find_first =
       c("orxClock_FindFirst", float @-> T.Clock_type.t @-> returning(t_opt));
 
+    // Get clock properties
     let get_name = c("orxClock_GetName", t @-> returning(string));
 
     let get_info = c("orxClock_GetInfo", t @-> returning(Info.t));
 
+    // Change a clock
     let set_modifier =
       c(
         "orxClock_SetModifier",
         t @-> T.Clock_modifier.t @-> float @-> returning(Status.t),
       );
+
+    let set_tick_size =
+      c("orxClock_SetTickSize", t @-> float @-> returning(Status.t));
+
+    // Adjust clock's progress
+    let restart = c("orxClock_Restart", t @-> returning(Status.t));
+
+    let pause = c("orxClock_Pause", t @-> returning(Status.t));
+    let unpause = c("orxClock_Unpause", t @-> returning(Status.t));
+    let is_paused = c("orxClock_IsPaused", t @-> returning(bool));
   };
 
   module Resource = {
