@@ -375,6 +375,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let enable = c("orxObject_Enable", t @-> bool @-> returning(void));
 
+    let is_enabled = c("orxObject_IsEnabled", t @-> returning(bool));
+
     // Basic attributes
     let get_name = c("orxObject_GetName", t @-> returning(string));
 
@@ -462,6 +464,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let add_sound =
       c("orxObject_AddSound", t @-> string @-> returning(Status.t));
 
+    let get_last_added_sound =
+      c("orxObject_GetLastAddedSound", t @-> returning(Sound.t_opt));
+
     // Linking structures
     let link_structure =
       c(
@@ -488,6 +493,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let has_new_status =
       c("orxInput_HasNewStatus", string @-> returning(bool));
+
+    let has_been_activated =
+      c("orxInput_HasBeenActivated", string @-> returning(bool));
 
     let get_binding =
       c(

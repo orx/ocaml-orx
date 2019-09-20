@@ -40,19 +40,19 @@ let event_message = (event: Orx.Event.t, kind) => {
 };
 
 let event_handler = (event: Orx.Event.t) => {
-  switch (Orx.Event.to_event(event, Sound)) {
-  | Start => event_message(event, "started")
-  | Stop => event_message(event, "stopped")
-  | _ => ()
+  let state = State.get();
+  if (Orx.Object.equal(state.soldier, Orx.Event.get_recipient_object(event))) {
+    switch (Orx.Event.to_event(event, Sound)) {
+    | Start => event_message(event, "started")
+    | Stop => event_message(event, "stopped")
+    | _ => ()
+    };
   };
   Ok();
 };
 
-let update = (clock_info: Orx.Clock.Info.t) => {
-  let state = State.get();
-
-  if (Orx.Input.is_active("RandomSFX")
-      && Orx.Input.has_new_status("RandomSFX")) {
+let update_state = (state: State.t, clock_info: Orx.Clock.Info.t) => {
+  if (Orx.Input.has_been_activated("RandomSFX")) {
     Orx.Object.add_sound(state.soldier, "RandomBip") |> get_ok;
 
     Orx.Config.push_section("Tutorial") |> get_ok;
@@ -62,26 +62,13 @@ let update = (clock_info: Orx.Clock.Info.t) => {
     Orx.Config.pop_section() |> get_ok;
   };
 
-  if (Orx.Input.is_active("DefaultSFX")
-      && Orx.Input.has_new_status("DefaultSFX")) {
+  if (Orx.Input.has_been_activated("DefaultSFX")) {
     Orx.Object.add_sound(state.soldier, "DefaultBip") |> get_ok;
     Orx.Object.set_rgb(
       state.soldier,
       Orx.Vector.make(~x=1.0, ~y=1.0, ~z=1.0),
     )
     |> get_ok;
-  };
-
-  if (Orx.Input.is_active("ToggleMusic")
-      && Orx.Input.has_new_status("ToggleMusic")) {
-    switch (Orx.Sound.get_status(state.music)) {
-    | Play =>
-      Orx.Sound.pause(state.music) |> get_ok;
-      Orx.Object.enable(state.soldier, false);
-    | _ =>
-      Orx.Sound.play(state.music) |> get_ok;
-      Orx.Object.enable(state.soldier, true);
-    };
   };
 
   if (Orx.Input.is_active("PitchUp")) {
@@ -139,6 +126,17 @@ let update = (clock_info: Orx.Clock.Info.t) => {
   };
 };
 
+let update = (clock_info: Orx.Clock.Info.t) => {
+  let state = State.get();
+
+  if (Orx.Input.has_been_activated("ToggleMusic")) {
+    Orx.Object.enable(state.soldier, !Orx.Object.is_enabled(state.soldier));
+  };
+  if (Orx.Object.is_enabled(state.soldier)) {
+    update_state(state, clock_info);
+  };
+};
+
 let init = () => {
   // Print out a hint to the user about what's to come
   let get_name = (binding: string): string => {
@@ -164,7 +162,8 @@ let init = () => {
   Orx.Viewport.create_from_config("Viewport") |> get_some |> ignore;
   let soldier = Orx.Object.create_from_config("Soldier") |> get_some;
   let clock = Orx.Clock.find_first(-1.0, Core) |> get_some;
-  let music = Orx.Sound.create_from_config("Music") |> get_some;
+  Orx.Object.add_sound(soldier, "Music") |> get_ok;
+  let music = Orx.Object.get_last_added_sound(soldier) |> get_some;
   Orx.Sound.play(music) |> get_ok;
   Orx.Clock.register(clock, update, Main, Normal) |> get_ok;
   Orx.Event.add_handler(Sound, event_handler) |> get_ok;
