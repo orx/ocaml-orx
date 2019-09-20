@@ -54,19 +54,22 @@ let update = (clock_info: Orx.Clock.Info.t) => {
 
 let input_update = (_clock_info: Orx.Clock.Info.t) => {
   Orx.Config.push_section("Main") |> get_ok;
-  if (Orx.Input.is_active("Log") && Orx.Input.has_new_status("Log")) {
+  if (Orx.Input.has_been_activated("Log")) {
     Orx.Config.set_bool("DisplayLog", !Orx.Config.get_bool("DisplayLog"))
     |> get_ok;
   };
   Orx.Config.pop_section() |> get_ok;
 
-  let clock = Orx.Clock.find_first(-1.0, User) |> get_some;
-  if (Orx.Input.is_active("Faster")) {
-    Orx.Clock.set_modifier(clock, Multiply, 4.0) |> get_ok;
-  } else if (Orx.Input.is_active("Slower")) {
-    Orx.Clock.set_modifier(clock, Multiply, 0.25) |> get_ok;
-  } else if (Orx.Input.is_active("Normal")) {
-    Orx.Clock.set_modifier(clock, None, 0.0) |> get_ok;
+  switch (Orx.Clock.get("Clock1")) {
+  | None => ()
+  | Some(clock) =>
+    if (Orx.Input.is_active("Faster")) {
+      Orx.Clock.set_modifier(clock, Multiply, 4.0) |> get_ok;
+    } else if (Orx.Input.is_active("Slower")) {
+      Orx.Clock.set_modifier(clock, Multiply, 0.25) |> get_ok;
+    } else if (Orx.Input.is_active("Normal")) {
+      Orx.Clock.set_modifier(clock, None, 0.0) |> get_ok;
+    }
   };
 };
 

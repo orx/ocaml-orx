@@ -296,6 +296,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let create_from_config =
       c("orxClock_CreateFromConfig", string @-> returning(t_opt));
 
+    let get = c("orxClock_Get", string @-> returning(t_opt));
+
     let find_first =
       c("orxClock_FindFirst", float @-> T.Clock_type.t @-> returning(t_opt));
 
