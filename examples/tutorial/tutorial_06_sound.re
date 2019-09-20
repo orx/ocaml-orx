@@ -108,7 +108,10 @@ let update_state = (state: State.t, clock_info: Orx.Clock.Info.t) => {
     |> get_ok;
     Orx.Object.set_scale(
       state.soldier,
-      Orx.Vector.scale(Orx.Object.get_scale(state.soldier), 0.98),
+      Orx.Vector.scale(
+        Orx.Object.get_scale(state.soldier) |> get_some,
+        0.98,
+      ),
     )
     |> get_ok;
   };
@@ -120,7 +123,10 @@ let update_state = (state: State.t, clock_info: Orx.Clock.Info.t) => {
     |> get_ok;
     Orx.Object.set_scale(
       state.soldier,
-      Orx.Vector.scale(Orx.Object.get_scale(state.soldier), 1.02),
+      Orx.Vector.scale(
+        Orx.Object.get_scale(state.soldier) |> get_some,
+        1.02,
+      ),
     )
     |> get_ok;
   };

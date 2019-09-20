@@ -411,23 +411,26 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let get_world_position =
       c(
         "orxObject_GetWorldPosition",
-        t @-> Vector.t @-> returning(Vector.t),
+        t @-> Vector.t @-> returning(Vector.t_opt),
       );
 
     let set_position =
       c("orxObject_SetPosition", t @-> Vector.t @-> returning(Status.t));
 
     let get_scale =
-      c("orxObject_GetScale", t @-> Vector.t @-> returning(Vector.t));
+      c("orxObject_GetScale", t @-> Vector.t @-> returning(Vector.t_opt));
     let set_scale =
       c("orxObject_SetScale", t @-> Vector.t @-> returning(Status.t));
 
+    // Text
     let set_text_string =
       c("orxObject_SetTextString", t @-> string @-> returning(Status.t));
 
+    // Life time
     let set_life_time =
       c("orxObject_SetLifeTime", t @-> double @-> returning(Status.t));
 
+    // Time line
     let add_time_line_track =
       c("orxObject_AddTimeLineTrack", t @-> string @-> returning(Status.t));
 
@@ -446,6 +449,46 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let apply_torque =
       c("orxObject_ApplyTorque", t @-> float @-> returning(Status.t));
+
+    let set_speed =
+      c("orxObject_SetSpeed", t @-> Vector.t @-> returning(Status.t));
+    let get_speed =
+      c("orxObject_GetSpeed", t @-> Vector.t @-> returning(Vector.t_opt));
+
+    let set_relative_speed =
+      c(
+        "orxObject_SetRelativeSpeed",
+        t @-> Vector.t @-> returning(Status.t),
+      );
+    let get_relative_speed =
+      c(
+        "orxObject_GetRelativeSpeed",
+        t @-> Vector.t @-> returning(Vector.t_opt),
+      );
+
+    let set_angular_velocity =
+      c("orxObject_SetAngularVelocity", t @-> float @-> returning(Status.t));
+    let get_angular_velocity =
+      c("orxObject_GetAngularVelocity", t @-> returning(float));
+
+    let set_custom_gravity =
+      c(
+        "orxObject_SetCustomGravity",
+        t @-> Vector.t @-> returning(Status.t),
+      );
+    let get_custom_gravity =
+      c(
+        "orxObject_GetCustomGravity",
+        t @-> Vector.t @-> returning(Vector.t_opt),
+      );
+
+    let get_mass = c("orxObject_GetMass", t @-> returning(float));
+
+    let get_mass_center =
+      c(
+        "orxObject_GetMassCenter",
+        t @-> Vector.t @-> returning(Vector.t_opt),
+      );
 
     // Color
     let set_rgb =
@@ -466,8 +509,21 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let add_sound =
       c("orxObject_AddSound", t @-> string @-> returning(Status.t));
 
+    let remove_sound =
+      c("orxObject_RemoveSound", t @-> string @-> returning(Status.t));
+
     let get_last_added_sound =
       c("orxObject_GetLastAddedSound", t @-> returning(Sound.t_opt));
+
+    let set_volume =
+      c("orxObject_SetVolume", t @-> float @-> returning(Status.t));
+
+    let set_pitch =
+      c("orxObject_SetPitch", t @-> float @-> returning(Status.t));
+
+    let play = c("orxObject_Play", t @-> returning(Status.t));
+
+    let stop = c("orxObject_Stop", t @-> returning(Status.t));
 
     // Linking structures
     let link_structure =

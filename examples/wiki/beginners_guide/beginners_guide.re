@@ -24,10 +24,10 @@ module Helpers = {
   // Create an explosion named name (defined in the game's configuration) at
   // the object o
   let create_explosion_at_object = (o: Orx.Object.t, name: string) => {
-    let position = Orx.Object.get_world_position(o);
+    let position = Orx.Object.get_world_position(o) |> get_some;
     Orx.Vector.set_z(position, 0.0);
     let explosion = Orx.Object.create_from_config(name) |> get_some;
-    Orx.Object.set_position(explosion, position);
+    Orx.Object.set_position(explosion, position) |> get_ok;
   };
 };
 
@@ -50,7 +50,7 @@ module State = {
   let increase_score = (state: t, earned: int): unit => {
     state.score = state.score + earned;
     let formatted_score = Fmt.strf("%06d", state.score);
-    Orx.Object.set_text_string(state.score_object, formatted_score);
+    Orx.Object.set_text_string(state.score_object, formatted_score) |> get_ok;
   };
 };
 

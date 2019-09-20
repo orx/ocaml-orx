@@ -1,9 +1,5 @@
 let (!@) = Ctypes.(!@);
 
-let orx_error = (name: string) => {
-  Fmt.invalid_arg("Fatal orx error in %s", name);
-};
-
 module Orx_gen = Orx_bindings.Bindings(Generated);
 
 module Color = Orx_gen.Color;
@@ -75,20 +71,27 @@ module Vector = {
   };
 };
 
+// Wrapper for functions which return a vector property.
+// Orx uses the return value to indicate if the get was a success or not.
+let get_optional_vector = (get, o) => {
+  let v = Vector.allocate_raw();
+  switch (get(o, v)) {
+  | None => None
+  | Some(_v) => Some(v)
+  };
+};
+
+let get_vector = (get, o) => {
+  let v = Vector.allocate_raw();
+  let _: Vector.t = get(o, v);
+  v;
+};
+
 module Graphic = {
   include Orx_gen.Graphic;
 
-  let get_size = (g: t): Vector.t => {
-    let size: Vector.t = Vector.allocate_raw();
-    let _: Vector.t = get_size(g, size);
-    size;
-  };
-
-  let get_origin = (g: t): Vector.t => {
-    let origin: Vector.t = Vector.allocate_raw();
-    let _: Vector.t = get_origin(g, origin);
-    origin;
-  };
+  let get_size = get_vector(get_size);
+  let get_origin = get_vector(get_origin);
 
   let to_structure = (g: t): Structure.t => {
     let g' = Ctypes.to_voidp(g);
@@ -99,11 +102,7 @@ module Graphic = {
 module Camera = {
   include Orx_gen.Camera;
 
-  let get_position = (c: t): Vector.t => {
-    let position: Vector.t = Vector.allocate_raw();
-    let _: Vector.t = get_position(c, position);
-    position;
-  };
+  let get_position = get_vector(get_position);
 };
 
 module Input = {
@@ -123,45 +122,18 @@ module Input = {
 module Physics = {
   include Orx_gen.Physics;
 
-  let get_gravity = () => {
-    let v: Vector.t = Vector.allocate_raw();
-    let _: option(Vector.t) = get_gravity(v);
-    v;
-  };
+  let get_gravity = get_optional_vector(((), v) => get_gravity(v));
 };
 
 module Object = {
   include Orx_gen.Object;
 
-  let get_world_position = (o: t): Vector.t => {
-    let pos = Vector.allocate_raw();
-    let ret: Vector.t = get_world_position(o, pos);
-    if (Ctypes.is_null(ret)) {
-      orx_error("get_world_position");
-    } else {
-      pos;
-    };
-  };
-
-  let set_position = (o: t, v: Vector.t): unit => {
-    switch (set_position(o, v)) {
-    | Ok () => ()
-    | Error () => orx_error("set_position")
-    };
-  };
-
-  let get_scale = (o: t): Vector.t => {
-    let scale = Vector.allocate_raw();
-    let _: Vector.t = get_scale(o, scale);
-    scale;
-  };
-
-  let set_text_string = (o: t, s: string): unit => {
-    switch (set_text_string(o, s)) {
-    | Ok () => ()
-    | Error () => orx_error("set_text_string")
-    };
-  };
+  let get_world_position = get_optional_vector(get_world_position);
+  let get_scale = get_optional_vector(get_scale);
+  let get_speed = get_optional_vector(get_speed);
+  let get_relative_speed = get_optional_vector(get_relative_speed);
+  let get_custom_gravity = get_optional_vector(get_custom_gravity);
+  let get_mass_center = get_optional_vector(get_mass_center);
 
   let add_fx = (~delay: option(float)=?, o: t, fx: string, ~unique: bool) => {
     switch (delay) {

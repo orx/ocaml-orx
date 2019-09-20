@@ -55,7 +55,8 @@ let update = (clock_info: Orx.Clock.Info.t) => {
     Orx.Camera.set_rotation(camera, current_rotation +. delta) |> get_ok;
 
     // Rotate gravity
-    let gravity = Orx.Vector.rotate_2d(Orx.Physics.get_gravity(), delta);
+    let gravity =
+      Orx.Vector.rotate_2d(Orx.Physics.get_gravity() |> get_some, delta);
     Orx.Physics.set_gravity(gravity) |> get_ok;
   };
 };
