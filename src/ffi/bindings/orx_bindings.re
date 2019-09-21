@@ -363,17 +363,38 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let t: typ(t) = ptr(T.Camera.t);
     let t_opt: typ(option(t)) = ptr_opt(T.Camera.t);
 
+    // Creating cameras
     let create_from_config =
       c("orxCamera_CreateFromConfig", string @-> returning(t_opt));
 
+    // Get camera by name
+    let get = c("orxCamera_Get", string @-> returning(t_opt));
+
+    // Get misc camera properties
+    let get_name = c("orxCamera_GetName", t @-> returning(string));
+
+    // Camera positioning
     let get_position =
       c("orxCamera_GetPosition", t @-> Vector.t @-> returning(Vector.t));
     let set_position =
       c("orxCamera_SetPosition", t @-> Vector.t @-> returning(Status.t));
 
+    // Camera rotation
     let get_rotation = c("orxCamera_GetRotation", t @-> returning(float));
     let set_rotation =
       c("orxCamera_SetRotation", t @-> float @-> returning(Status.t));
+
+    // Camera zoom
+    let get_zoom = c("orxCamera_GetZoom", t @-> returning(float));
+    let set_zoom =
+      c("orxCamera_SetZoom", t @-> float @-> returning(Status.t));
+
+    // Camera frustum
+    let set_frustum =
+      c(
+        "orxCamera_SetFrustum",
+        t @-> float @-> float @-> float @-> float @-> returning(Status.t),
+      );
   };
 
   module Object = {
@@ -733,5 +754,34 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
   module Screenshot = {
     let capture = c("orxScreenshot_Capture", void @-> returning(Status.t));
+  };
+
+  module Locale = {
+    let select_language =
+      c("orxLocale_SelectLanguage", string @-> returning(Status.t));
+
+    let get_current_language =
+      c("orxLocale_GetCurrentLanguage", void @-> returning(string));
+
+    let has_language =
+      c("orxLocale_HasLanguage", string @-> returning(bool));
+
+    let get_language_count =
+      c("orxLocale_GetLanguageCount", void @-> returning(uint32_t));
+
+    let get_language =
+      c("orxLocale_GetLanguage", uint32_t @-> returning(string));
+
+    let has_string = c("orxLocale_HasString", string @-> returning(bool));
+
+    let get_string = c("orxLocale_GetString", string @-> returning(string));
+
+    let set_string =
+      c("orxLocale_SetString", string @-> string @-> returning(Status.t));
+
+    let get_key_count =
+      c("orxLocale_GetKeyCount", void @-> returning(uint32_t));
+
+    let get_key = c("orxLocale_GetKey", uint32_t @-> returning(string));
   };
 };
