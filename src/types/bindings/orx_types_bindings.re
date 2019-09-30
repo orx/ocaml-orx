@@ -201,6 +201,69 @@ module Bindings = (F: Ctypes.TYPE) => {
       );
   };
 
+  module Mouse_button = {
+    type t =
+      | Left
+      | Right
+      | Middle
+      | Extra_1
+      | Extra_2
+      | Extra_3
+      | Extra_4
+      | Extra_5
+      | Wheel_up
+      | Wheel_down;
+
+    let make = name => F.constant("orxMOUSE_BUTTON_" ++ name, F.int64_t);
+
+    let left = make("LEFT");
+    let right = make("RIGHT");
+    let middle = make("MIDDLE");
+    let extra_1 = make("EXTRA_1");
+    let extra_2 = make("EXTRA_2");
+    let extra_3 = make("EXTRA_3");
+    let extra_4 = make("EXTRA_4");
+    let extra_5 = make("EXTRA_5");
+    let wheel_up = make("WHEEL_UP");
+    let wheel_down = make("WHEEL_DOWN");
+
+    let map_to_constant = [
+      (Left, left),
+      (Right, right),
+      (Middle, middle),
+      (Extra_1, extra_1),
+      (Extra_2, extra_2),
+      (Extra_3, extra_3),
+      (Extra_4, extra_4),
+      (Extra_5, extra_5),
+      (Wheel_up, wheel_up),
+      (Wheel_down, wheel_down),
+    ];
+
+    let t =
+      F.enum("__orxMOUSE_BUTTON_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported mouse button enum: %Ld", i)
+      );
+  };
+
+  module Mouse_axis = {
+    type t =
+      | X
+      | Y;
+
+    let make = name => F.constant("orxMOUSE_AXIS_" ++ name, F.int64_t);
+
+    let x = make("X");
+    let y = make("Y");
+
+    let map_to_constant = [(X, x), (Y, y)];
+
+    let t =
+      F.enum("__orxMOUSE_AXIS_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported mouse axis enum: %Ld", i)
+      );
+  };
+
   module Structure = {
     type t;
 

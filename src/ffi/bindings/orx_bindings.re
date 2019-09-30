@@ -158,6 +158,37 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxSound_SetAttenuation", t @-> float @-> returning(Status.t));
   };
 
+  module Mouse = {
+    let set_position =
+      c("orxMouse_SetPosition", Vector.t @-> returning(Status.t));
+
+    let get_position =
+      c("orxMouse_GetPosition", Vector.t @-> returning(Vector.t_opt));
+
+    let is_button_pressed =
+      c("orxMouse_IsButtonPressed", T.Mouse_button.t @-> returning(bool));
+
+    let get_move_delta =
+      c("orxMouse_GetMoveDelta", Vector.t @-> returning(Vector.t_opt));
+
+    let get_wheel_delta =
+      c("orxMouse_GetWheelDelta", void @-> returning(float));
+
+    let show_cursor = c("orxMouse_ShowCursor", bool @-> returning(Status.t));
+
+    let set_cursor =
+      c(
+        "orxMouse_SetCursor",
+        string @-> Vector.t_opt @-> returning(Status.t),
+      );
+
+    let get_button_name =
+      c("orxMouse_GetButtonName", T.Mouse_button.t @-> returning(string));
+
+    let get_axis_name =
+      c("orxMouse_GetAxisName", T.Mouse_axis.t @-> returning(string));
+  };
+
   module Config = {
     /* This module will be included in the Config module defined in orx.re */
     let set_basename =
