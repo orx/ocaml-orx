@@ -87,6 +87,13 @@ let get_vector = (get, o) => {
   v;
 };
 
+module Mouse = {
+  include Orx_gen.Mouse;
+
+  let get_position = get_optional_vector(((), v) => get_position(v));
+  let get_move_delta = get_optional_vector(((), v) => get_move_delta(v));
+};
+
 module Graphic = {
   include Orx_gen.Graphic;
 
