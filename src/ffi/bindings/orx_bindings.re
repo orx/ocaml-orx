@@ -445,8 +445,12 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxObject_CreateFromConfig", string @-> returning(t_opt));
 
     let enable = c("orxObject_Enable", t @-> bool @-> returning(void));
-
+    let enable_recursive =
+      c("orxObject_EnableRecursive", t @-> bool @-> returning(void));
     let is_enabled = c("orxObject_IsEnabled", t @-> returning(bool));
+
+    let pause = c("orxObject_Pause", t @-> bool @-> returning(void));
+    let is_paused = c("orxObject_IsPaused", t @-> returning(bool));
 
     // Basic attributes
     let get_name = c("orxObject_GetName", t @-> returning(string));
@@ -483,6 +487,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
         t @-> Vector.t @-> returning(Vector.t_opt),
       );
 
+    let get_position =
+      c("orxObject_GetPosition", t @-> Vector.t @-> returning(Vector.t_opt));
     let set_position =
       c("orxObject_SetPosition", t @-> Vector.t @-> returning(Status.t));
 
@@ -495,13 +501,33 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let set_text_string =
       c("orxObject_SetTextString", t @-> string @-> returning(Status.t));
 
+    let get_text_string =
+      c("orxObject_GetTextString", t @-> returning(string));
+
     // Life time
     let set_life_time =
-      c("orxObject_SetLifeTime", t @-> double @-> returning(Status.t));
+      c("orxObject_SetLifeTime", t @-> float @-> returning(Status.t));
+
+    let get_life_time = c("orxObject_GetLifeTime", t @-> returning(float));
+
+    let get_active_time =
+      c("orxObject_GetActiveTime", t @-> returning(float));
 
     // Time line
     let add_time_line_track =
       c("orxObject_AddTimeLineTrack", t @-> string @-> returning(Status.t));
+
+    let remove_time_line_track =
+      c(
+        "orxObject_RemoveTimeLineTrack",
+        t @-> string @-> returning(Status.t),
+      );
+
+    let enable_time_line =
+      c("orxObject_EnableTimeLine", t @-> bool @-> returning(void));
+
+    let is_time_line_enabled =
+      c("orxObject_IsTimeLineEnabled", t @-> returning(bool));
 
     // Physics
     let apply_force =
@@ -557,6 +583,19 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c(
         "orxObject_GetMassCenter",
         t @-> Vector.t @-> returning(Vector.t_opt),
+      );
+
+    let raycast =
+      c(
+        "orxObject_Raycast",
+        Vector.t
+        @-> Vector.t
+        @-> uint16_t
+        @-> uint16_t
+        @-> bool
+        @-> Vector.t_opt
+        @-> Vector.t_opt
+        @-> returning(t_opt),
       );
 
     // Color

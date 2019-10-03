@@ -135,6 +135,12 @@ module Physics = {
 module Object = {
   include Orx_gen.Object;
 
+  type collision = {
+    colliding_object: t,
+    contact: Vector.t,
+    normal: Vector.t,
+  };
+
   let get_world_position = get_optional_vector(get_world_position);
   let get_scale = get_optional_vector(get_scale);
   let get_speed = get_optional_vector(get_speed);
@@ -142,7 +148,34 @@ module Object = {
   let get_custom_gravity = get_optional_vector(get_custom_gravity);
   let get_mass_center = get_optional_vector(get_mass_center);
 
-  let add_fx = (~delay: option(float)=?, o: t, fx: string, ~unique: bool) => {
+  let raycast =
+      (
+        ~self_flags=0xffff,
+        ~check_mask=0xffff,
+        ~early_exit=false,
+        ~v0: Vector.t,
+        ~v1: Vector.t,
+      )
+      : option(collision) => {
+    let contact = Vector.allocate_raw();
+    let normal = Vector.allocate_raw();
+    let collision =
+      raycast(
+        v0,
+        v1,
+        Unsigned.UInt16.of_int(self_flags),
+        Unsigned.UInt16.of_int(check_mask),
+        early_exit,
+        Some(contact),
+        Some(normal),
+      );
+    switch (collision) {
+    | None => None
+    | Some(o) => Some({colliding_object: o, contact, normal})
+    };
+  };
+
+  let add_fx = (~delay: option(float)=?, ~unique: bool, o: t, fx: string) => {
     switch (delay) {
     | None =>
       if (unique) {
