@@ -11,6 +11,19 @@ module Bindings = (F: Ctypes.TYPE) => {
     let failure = F.constant("orxSTATUS_FAILURE", F.int);
   };
 
+  module Bank = {
+    type t;
+
+    // Unsealed structure because the type is anonymous
+    let t: structure(t) = F.structure("__orxBANK_t");
+  };
+
+  module String_id = {
+    type t = Unsigned.UInt32.t;
+
+    let undefined = F.constant("orxSTRINGID_UNDEFINED", F.uint32_t);
+  };
+
   module Rgba = {
     type t;
 
@@ -610,6 +623,19 @@ module Bindings = (F: Ctypes.TYPE) => {
     let t: structure(t) = F.structure("__orxOBJECT_t");
   };
 
+  module Obox = {
+    type t;
+
+    let t: structure(t) = F.structure("__orxOBOX_t");
+    let field = F.field(t);
+    let position = field("vPosition", Vector.t);
+    let pivot = field("vPivot", Vector.t);
+    let x = field("vX", Vector.t);
+    let y = field("vY", Vector.t);
+    let z = field("vZ", Vector.t);
+    let () = F.seal(t);
+  };
+
   module Texture = {
     type t;
 
@@ -622,17 +648,5 @@ module Bindings = (F: Ctypes.TYPE) => {
 
     // Unsealed structure because the type is anonymous
     let t: structure(t) = F.structure("__orxVIEWPORT_t");
-  };
-
-  module Object_bounding_box = {
-    type t;
-
-    let t: structure(t) = F.structure("__orxOBOX_t");
-    let position = F.field(t, "vPosition", Vector.t);
-    let pivot = F.field(t, "vPivot", Vector.t);
-    let x = F.field(t, "vX", Vector.t);
-    let y = F.field(t, "vY", Vector.t);
-    let z = F.field(t, "vZ", Vector.t);
-    let () = F.seal(t);
   };
 };

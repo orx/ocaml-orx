@@ -38,6 +38,30 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let t = view(~format=pp, ~read=of_int, ~write=to_int, int);
   };
 
+  module Bank = {
+    type t = ptr(structure(T.Bank.t));
+
+    let t = ptr(T.Bank.t);
+    let t_opt = ptr_opt(T.Bank.t);
+
+    let get_next =
+      c(
+        "orxBank_GetNext",
+        t @-> ptr_opt(void) @-> returning(ptr_opt(void)),
+      );
+  };
+
+  module String_id = {
+    type t = T.String_id.t;
+
+    let t = uint32_t;
+
+    let undefined = T.String_id.undefined;
+
+    let get_id = c("orxString_GetID", string @-> returning(t));
+    let get_from_id = c("orxString_GetFromID", t @-> returning(string));
+  };
+
   module Vector = {
     type t = ptr(structure(T.Vector.t));
 
@@ -57,6 +81,37 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let rotate_2d =
       c("orxVector_2DRotate", t @-> t @-> float @-> returning(t));
+  };
+
+  module Obox = {
+    type t = ptr(structure(T.Obox.t));
+
+    let t = ptr(T.Obox.t);
+    let t_opt = ptr_opt(T.Obox.t);
+
+    let allocate_raw = (): t => allocate_n(T.Obox.t, ~count=1);
+
+    let set_2d =
+      c(
+        "orxOBox_2DSet",
+        t @-> Vector.t @-> Vector.t @-> Vector.t @-> float @-> returning(t),
+      );
+
+    let copy = c("orxOBox_Copy", t @-> t @-> returning(t));
+
+    let get_center =
+      c("orxOBox_GetCenter", t @-> Vector.t @-> returning(Vector.t));
+
+    let move = c("orxOBox_Move", t @-> t @-> Vector.t @-> returning(t));
+
+    let rotate_2d =
+      c("orxOBox_2DRotate", t @-> t @-> float @-> returning(t));
+
+    let is_inside =
+      c("orxOBox_IsInside", t @-> Vector.t @-> returning(bool));
+
+    let is_inside_2d =
+      c("orxOBox_2DIsInside", t @-> Vector.t @-> returning(bool));
   };
 
   module Color = {
@@ -439,6 +494,7 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let equal = (a, b) => compare(a, b) == 0;
 
     let of_void_pointer = c("orxOBJECT", ptr(void) @-> returning(t));
+    let to_void_pointer = (o: t) => to_voidp(o);
 
     // Object creation and presence
     let create_from_config =
@@ -456,6 +512,10 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let get_name = c("orxObject_GetName", t @-> returning(string));
 
     let get_child_object = c("orxObject_GetChild", t @-> returning(t_opt));
+
+    // Bounding box
+    let get_bounding_box =
+      c("orxObject_GetBoundingBox", t @-> Obox.t @-> returning(Obox.t_opt));
 
     // FX
     let add_fx = c("orxObject_AddFX", t @-> string @-> returning(Status.t));
@@ -639,6 +699,41 @@ module Bindings = (F: Ctypes.FOREIGN) => {
         "orxObject_LinkStructure",
         t @-> Structure.t @-> returning(Status.t),
       );
+
+    // Object selection
+    // Neighbor = Object(s) within a bounding box
+    let create_neighbor_list =
+      c(
+        "orxObject_CreateNeighborList",
+        Obox.t @-> String_id.t @-> returning(Bank.t_opt),
+      );
+
+    let delete_neighbor_list =
+      c("orxObject_DeleteNeighborList", Bank.t @-> returning(void));
+
+    let pick =
+      c("orxObject_Pick", Vector.t @-> String_id.t @-> returning(t_opt));
+
+    let box_pick =
+      c("orxObject_BoxPick", Obox.t @-> String_id.t @-> returning(t_opt));
+
+    // Group ID and object selection
+    let get_default_group_id =
+      c("orxObject_GetDefaultGroupID", void @-> returning(String_id.t));
+
+    let get_group_id =
+      c("orxObject_GetGroupID", t @-> returning(String_id.t));
+    let set_group_id =
+      c("orxObject_SetGroupID", t @-> String_id.t @-> returning(Status.t));
+
+    let set_group_id_recursive =
+      c(
+        "orxObject_SetGroupIDRecursive",
+        t @-> String_id.t @-> returning(void),
+      );
+
+    let get_next =
+      c("orxObject_GetNext", t_opt @-> String_id.t @-> returning(t_opt));
   };
 
   module Viewport = {

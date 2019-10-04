@@ -1,7 +1,6 @@
 let (!@) = Ctypes.(!@);
 
 module Orx_gen = Orx_bindings.Bindings(Generated);
-
 module Color = Orx_gen.Color;
 module Display = Orx_gen.Display;
 module Fx_event = Orx_gen.Fx_event;
@@ -9,9 +8,30 @@ module Input_event = Orx_gen.Input_event;
 module Sound_event = Orx_gen.Sound_event;
 module Resource = Orx_gen.Resource;
 module Sound = Orx_gen.Sound;
+module String_id = Orx_gen.String_id;
 module Structure = Orx_gen.Structure;
 module Texture = Orx_gen.Texture;
 module Viewport = Orx_gen.Viewport;
+
+module Bank = {
+  include Orx_gen.Bank;
+
+  let rec to_list =
+          (
+            b: t,
+            cell: option(Ctypes.ptr(unit)),
+            ptrs: list(Ctypes.ptr(unit)),
+          ) => {
+    switch (get_next(b, cell)) {
+    | None => List.rev(ptrs)
+    | Some(ptr) as next_cell => to_list(b, next_cell, [ptr, ...ptrs])
+    };
+  };
+
+  let to_list = (b: t): list(Ctypes.ptr(unit)) => {
+    to_list(b, None, []);
+  };
+};
 
 module Vector = {
   include Orx_gen.Vector;
@@ -71,6 +91,40 @@ module Vector = {
   };
 };
 
+module Obox = {
+  include Orx_gen.Obox;
+
+  let make = (~pos, ~pivot, ~size, angle): t => {
+    let ob = allocate_raw();
+    let _: t = set_2d(ob, pos, pivot, size, angle);
+    ob;
+  };
+
+  let copy = (ob: t) => {
+    let copied: t = allocate_raw();
+    let _: t = copy(copied, ob);
+    copied;
+  };
+
+  let get_center = (ob: t): Vector.t => {
+    let center = Vector.allocate_raw();
+    let _: Vector.t = get_center(ob, center);
+    center;
+  };
+
+  let move = (ob: t, v: Vector.t): t => {
+    let moved: t = allocate_raw();
+    let _: t = move(moved, ob, v);
+    moved;
+  };
+
+  let rotate_2d = (ob: t, angle): t => {
+    let rotated: t = allocate_raw();
+    let _: t = rotate_2d(rotated, ob, angle);
+    rotated;
+  };
+};
+
 // Wrapper for functions which return a vector property.
 // Orx uses the return value to indicate if the get was a success or not.
 let get_optional_vector = (get, o) => {
@@ -85,6 +139,16 @@ let get_vector = (get, o) => {
   let v = Vector.allocate_raw();
   let _: Vector.t = get(o, v);
   v;
+};
+
+// Wrapper for functions which return a obox property.
+// Orx uses the return value to indicate if the get was a success or not.
+let get_optional_obox = (get, o) => {
+  let v = Obox.allocate_raw();
+  switch (get(o, v)) {
+  | None => None
+  | Some(_v) => Some(v)
+  };
 };
 
 module Mouse = {
@@ -141,6 +205,8 @@ module Object = {
     normal: Vector.t,
   };
 
+  let get_bounding_box = get_optional_obox(get_bounding_box);
+
   let get_world_position = get_optional_vector(get_world_position);
   let get_scale = get_optional_vector(get_scale);
   let get_speed = get_optional_vector(get_speed);
@@ -190,6 +256,27 @@ module Object = {
         add_delayed_fx(o, fx, time);
       }
     };
+  };
+
+  let get_neighbor_list = (box: Obox.t, group_id: String_id.t) => {
+    switch (create_neighbor_list(box, group_id)) {
+    | None => None
+    | Some(bank) =>
+      let ptrs = Bank.to_list(bank);
+      let objects = List.map(of_void_pointer, ptrs);
+      delete_neighbor_list(bank);
+      Some(objects);
+    };
+  };
+
+  let get_list = (group_id: String_id.t) => {
+    let rec loop = (o: option(t), accu: list(t)) => {
+      switch (get_next(o, group_id)) {
+      | None => List.rev(accu)
+      | Some(next) as o_next => loop(o_next, [next, ...accu])
+      };
+    };
+    loop(None, []);
   };
 };
 
