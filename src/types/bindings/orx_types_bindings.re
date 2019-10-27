@@ -410,6 +410,28 @@ module Bindings = (F: Ctypes.TYPE) => {
       );
   };
 
+  module Config_event = {
+    type t =
+      | Reload_start
+      | Reload_stop;
+
+    let make = tag => F.constant("orxCONFIG_EVENT_" ++ tag, F.int64_t);
+    let reload_start = make("RELOAD_START");
+    let reload_stop = make("RELOAD_STOP");
+
+    let map_to_constant = [
+      (Reload_start, reload_start),
+      (Reload_stop, reload_stop),
+    ];
+
+    let map_from_constant = swap_tuple_list(map_to_constant);
+
+    let t =
+      F.enum("__orxCONFIG_EVENT_t", map_to_constant, ~unexpected=i =>
+        Fmt.invalid_arg("unsupported config event type enum: %Ld", i)
+      );
+  };
+
   module Fx_event = {
     type t =
       | Start

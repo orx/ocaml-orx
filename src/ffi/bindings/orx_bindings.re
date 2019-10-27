@@ -256,11 +256,17 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let load_from_memory =
       c("orxConfig_LoadFromMemory", string @-> int @-> returning(Status.t));
 
-    /* Select a config section to work within */
+    /* Select a config section to work within (stack-based) */
     let push_section =
       c("orxConfig_PushSection", string @-> returning(Status.t));
     let pop_section =
       c("orxConfig_PopSection", void @-> returning(Status.t));
+
+    // Select a config section to work with (manually manage state)
+    let get_current_section =
+      c("orxConfig_GetCurrentSection", void @-> returning(string));
+    let select_section =
+      c("orxConfig_SelectSection", string @-> returning(Status.t));
 
     // Check for section and value existence
     let has_section = c("orxConfig_HasSection", string @-> returning(bool));
@@ -788,6 +794,7 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       | Sound: payload(T.Sound_event.Payload.t);
 
     type event('event) =
+      | Config: event(T.Config_event.t)
       | Fx: event(T.Fx_event.t)
       | Input: event(T.Input_event.t)
       | Physics: event(T.Physics_event.t)
@@ -841,6 +848,9 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let to_event = (type a, event: t, event_type: event(a)): a => {
       switch (event_type) {
+      | Config =>
+        assert_type(event, T.Event_type.Config);
+        get_event_by_id(event, T.Config_event.map_from_constant);
       | Fx =>
         assert_type(event, T.Event_type.Fx);
         get_event_by_id(event, T.Fx_event.map_from_constant);

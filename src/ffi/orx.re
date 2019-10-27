@@ -304,6 +304,7 @@ module Event = {
   let make_flags =
       (type a, event_type: event(a), event_ids: list(a)): event_flag => {
     switch (event_type) {
+    | Config => to_flags(event_ids, Orx_types.Config_event.map_to_constant)
     | Fx => to_flags(event_ids, Orx_types.Fx_event.map_to_constant)
     | Input => to_flags(event_ids, Orx_types.Input_event.map_to_constant)
     | Physics => to_flags(event_ids, Orx_types.Physics_event.map_to_constant)
