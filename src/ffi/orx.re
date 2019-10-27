@@ -488,7 +488,7 @@ module Config = {
     List.init(count, i => get_key(i));
   };
 
-  let get_keys = (section: string) => {
+  let get_section_keys = (section: string) => {
     with_section(section, get_current_section_keys);
   };
 };

@@ -281,6 +281,12 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let has_section = c("orxConfig_HasSection", string @-> returning(bool));
     let has_value = c("orxConfig_HasValue", string @-> returning(bool));
 
+    // Clearing sections/values
+    let clear_section =
+      c("orxConfig_ClearSection", string @-> returning(Status.t));
+    let clear_value =
+      c("orxConfig_ClearValue", string @-> returning(Status.t));
+
     // Get values from a config
     let get_string = c("orxConfig_GetString", string @-> returning(string));
     let get_bool = c("orxConfig_GetBool", string @-> returning(bool));
