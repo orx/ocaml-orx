@@ -476,6 +476,21 @@ module Config = {
     };
     with_section(section, get_all);
   };
+
+  // Helpers to get all the sections, or all the keys in a section
+  let get_sections = (): list(string) => {
+    let count = get_section_count();
+    List.init(count, i => get_section(i));
+  };
+
+  let get_current_section_keys = (): list(string) => {
+    let count = get_key_count();
+    List.init(count, i => get_key(i));
+  };
+
+  let get_keys = (section: string) => {
+    with_section(section, get_current_section_keys);
+  };
 };
 
 module Orx_thread = {

@@ -268,6 +268,15 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let select_section =
       c("orxConfig_SelectSection", string @-> returning(Status.t));
 
+    // Enumerate sections
+    let get_section_count =
+      c("orxConfig_GetSectionCount", void @-> returning(int));
+    let get_section = c("orxConfig_GetSection", int @-> returning(string));
+
+    // Enumerate keys in the current section
+    let get_key_count = c("orxConfig_GetKeyCount", void @-> returning(int));
+    let get_key = c("orxConfig_GetKey", int @-> returning(string));
+
     // Check for section and value existence
     let has_section = c("orxConfig_HasSection", string @-> returning(bool));
     let has_value = c("orxConfig_HasValue", string @-> returning(bool));
