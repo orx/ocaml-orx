@@ -174,6 +174,14 @@ module Bindings = (F: Ctypes.FOREIGN) => {
     let get_origin =
       c("orxGraphic_GetOrigin", t @-> Vector.t @-> returning(Vector.t));
 
+    // Flip a graphic on the X or Y axis
+    let set_flip =
+      c("orxGraphic_SetFlip", t @-> bool @-> bool @-> returning(Status.t));
+
+    // Set the pivot point for a graphic
+    let set_pivot =
+      c("orxGraphic_SetPivot", t @-> Vector.t @-> returning(Status.t));
+
     // Set texture data associated with this graphic
     let set_data =
       c("orxGraphic_SetData", t @-> Structure.t @-> returning(Status.t));
@@ -244,8 +252,8 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxMouse_GetAxisName", T.Mouse_axis.t @-> returning(string));
   };
 
-  module Config = {
     /* This module will be included in the Config module defined in orx.re */
+  module Config = {
     let set_basename =
       c("orxConfig_SetBaseName", string @-> returning(Status.t));
 
