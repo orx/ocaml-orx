@@ -208,6 +208,7 @@ module Object = {
   let get_bounding_box = get_optional_obox(get_bounding_box);
 
   let get_world_position = get_optional_vector(get_world_position);
+  let get_position = get_optional_vector(get_position);
   let get_scale = get_optional_vector(get_scale);
   let get_speed = get_optional_vector(get_speed);
   let get_relative_speed = get_optional_vector(get_relative_speed);
