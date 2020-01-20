@@ -1,3 +1,4 @@
 (executables
- (names tutorial_02_clock tutorial_06_sound tutorial_07_fx tutorial_08_physics tutorial_09_scrolling)
+ (names tutorial_02_clock tutorial_06_sound tutorial_07_fx
+   tutorial_08_physics tutorial_09_scrolling)
  (libraries orx))

@@ -275,7 +275,7 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c("orxMouse_GetAxisName", T.Mouse_axis.t @-> returning(string));
   };
 
-    /* This module will be included in the Config module defined in orx.re */
+  /* This module will be included in the Config module defined in orx.re */
   module Config = {
     let set_basename =
       c("orxConfig_SetBaseName", string @-> returning(Status.t));
