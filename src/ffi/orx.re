@@ -66,28 +66,89 @@ module Vector = {
     Ctypes.setf(!@v, Orx_types.Vector.z, z);
   };
 
-  let copy = (v: t): t => {
-    let copied: t = allocate_raw();
-    let _: t = copy(copied, v);
-    copied;
+  let make_one_vec_op = op => {
+    let f' = (~target: t, v: t): unit => {
+      let _: t = op(target, v);
+      ();
+    };
+    let f = (v: t): t => {
+      let target: t = allocate_raw();
+      f'(~target, v);
+      target;
+    };
+    (f', f);
   };
 
-  let scale = (v: t, factor: float): t => {
-    let scaled: t = allocate_raw();
-    let _: t = scale(scaled, v, factor);
-    scaled;
+  let (copy', copy) = make_one_vec_op(copy);
+  let (normalize', normalize) = make_one_vec_op(normalize);
+  let (reciprocal', reciprocal) = make_one_vec_op(reciprocal);
+  let (round', round) = make_one_vec_op(round);
+  let (floor', floor) = make_one_vec_op(floor);
+  let (neg', neg) = make_one_vec_op(neg);
+
+  let make_two_vec_op = op => {
+    let f' = (~target: t, v1: t, v2: t): unit => {
+      let _: t = op(target, v1, v2);
+      ();
+    };
+    let f = (v1: t, v2: t): t => {
+      let target: t = allocate_raw();
+      f'(~target, v1, v2);
+      target;
+    };
+    (f', f);
   };
 
-  let add = (v1: t, v2: t): t => {
-    let added: t = allocate_raw();
-    let _: t = add(added, v1, v2);
-    added;
+  let (add', add) = make_two_vec_op(add);
+  let (sub', sub) = make_two_vec_op(sub);
+  let (mul', mul) = make_two_vec_op(mul);
+  let (div', div) = make_two_vec_op(div);
+  let (cross', cross) = make_two_vec_op(cross);
+
+  let make_one_vec_one_float_op = op => {
+    let f' = (~target: t, v: t, x: float): unit => {
+      let _: t = op(target, v, x);
+      ();
+    };
+
+    let f = (v: t, x: float): t => {
+      let target: t = allocate_raw();
+      f'(~target, v, x);
+      target;
+    };
+    (f', f);
   };
 
-  let rotate_2d = (v: t, angle: float): t => {
-    let rotated: t = allocate_raw();
-    let _: t = rotate_2d(rotated, v, angle);
-    rotated;
+  let (mulf', mulf) = make_one_vec_one_float_op(mulf);
+  let (divf', divf) = make_one_vec_one_float_op(divf);
+  let (rotate_2d', rotate_2d) = make_one_vec_one_float_op(rotate_2d);
+
+  let make_two_vec_one_float_op = op => {
+    let f' = (~target: t, v1: t, v2: t, x: float): unit => {
+      let _: t = op(target, v1, v2, x);
+      ();
+    };
+
+    let f = (v1: t, v2: t, x: float): t => {
+      let target: t = allocate_raw();
+      f'(~target, v1, v2, x);
+      target;
+    };
+    (f', f);
+  };
+
+  let (lerp', lerp) = make_two_vec_one_float_op(lerp);
+
+  let move_x = (v: t, delta: float): unit => {
+    set_x(v, get_x(v) +. delta);
+  };
+
+  let move_y = (v: t, delta: float): unit => {
+    set_y(v, get_y(v) +. delta);
+  };
+
+  let move_z = (v: t, delta: float): unit => {
+    set_z(v, get_z(v) +. delta);
   };
 };
 

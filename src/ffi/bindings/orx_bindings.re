@@ -70,14 +70,37 @@ module Bindings = (F: Ctypes.FOREIGN) => {
 
     let allocate_raw = (): t => allocate_n(T.Vector.t, ~count=1);
 
+    let equal = c("orxVector_AreEqual", t @-> t @-> returning(bool));
+
     let set =
       c("orxVector_Set", t @-> float @-> float @-> float @-> returning(t));
 
     let copy = c("orxVector_Copy", t @-> t @-> returning(t));
 
-    let scale = c("orxVector_Mulf", t @-> t @-> float @-> returning(t));
+    let mulf = c("orxVector_Mulf", t @-> t @-> float @-> returning(t));
+    let divf = c("orxVector_Divf", t @-> t @-> float @-> returning(t));
 
     let add = c("orxVector_Add", t @-> t @-> t @-> returning(t));
+    let sub = c("orxVector_Sub", t @-> t @-> t @-> returning(t));
+    let mul = c("orxVector_Mul", t @-> t @-> t @-> returning(t));
+    let div = c("orxVector_Div", t @-> t @-> t @-> returning(t));
+    let cross = c("orxVector_Cross", t @-> t @-> t @-> returning(t));
+
+    let neg = c("orxVector_Neg", t @-> t @-> returning(t));
+
+    let min = c("orxVector_Min", t @-> t @-> t @-> returning(t));
+    let max = c("orxVector_Max", t @-> t @-> t @-> returning(t));
+
+    let normalize = c("orxVector_Normalize", t @-> t @-> returning(t));
+    let reciprocal = c("orxVector_Rec", t @-> t @-> returning(t));
+    let round = c("orxVector_Round", t @-> t @-> returning(t));
+    let floor = c("orxVector_Floor", t @-> t @-> returning(t));
+
+    let get_distance =
+      c("orxVector_GetDistance", t @-> t @-> returning(float));
+    let get_size = c("orxVector_GetSize", t @-> returning(float));
+
+    let lerp = c("orxVector_Lerp", t @-> t @-> t @-> float @-> returning(t));
 
     let rotate_2d =
       c("orxVector_2DRotate", t @-> t @-> float @-> returning(t));
@@ -574,6 +597,11 @@ module Bindings = (F: Ctypes.FOREIGN) => {
       c(
         "orxObject_GetWorldPosition",
         t @-> Vector.t @-> returning(Vector.t_opt),
+      );
+    let set_world_position =
+      c(
+        "orxObject_SetWorldPosition",
+        t @-> Vector.t @-> returning(Status.t),
       );
 
     let get_position =
