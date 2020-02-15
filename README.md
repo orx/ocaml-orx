@@ -33,7 +33,10 @@ installed, or `dune exec examples/tutorial.exe` to try a (slightly modified)
 port of the Orx beginner's guide tutorial.
 
 ## Examples
-The [beginner's guide][guide] project has been ported to Reason in [this example](examples/tutorial.re).
+The [beginner's guide][guide] project has been ported to Reason in
+[this example](examples/wiki/beginners_guide/beginners_guide.re).
+
+Some of the [tutorials][tutorials] have been ported [as well](examples/tutorial/).
 
 You run run [run.sh](run.sh) to compile and execute the beginner's guide port
 (only tested on Linux so far).
@@ -46,5 +49,6 @@ based on the structure used in [ocaml-yaml].
 [ctypes]: https://github.com/ocamllabs/ocaml-ctypes
 [ocaml-yaml]: https://github.com/avsm/ocaml-yaml
 [guide]: https://orx-project.org/wiki/en/guides/beginners/main
+[tutorials]: https://github.com/orx/orx/tree/master/tutorial/src
 [opam]: https://opam.ocaml.org
 [utop]: https://opam.ocaml.org/packages/utop/
