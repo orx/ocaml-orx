@@ -6,6 +6,7 @@ let get_ok (r : ('a, _) result) : 'a =
   match r with
   | Ok x -> x
   | Error _ -> invalid_arg "get_ok: argument must be Ok(_)"
+
 let get_some (o : 'a option) : 'a =
   match o with
   | Some x -> x
@@ -25,7 +26,7 @@ end
 let event_message (event : Orx.Event.t) kind =
   assert (Orx.Event.to_type event = Sound);
 
-  let sound = Orx.Sound_event.get_sound event in
+  let sound = Orx.Sound_event_details.get_sound event in
   let recipient = Orx.Event.get_recipient_object event in
   Fmt.pr "Sound [%s]@@[%s] has %s@." (Orx.Sound.get_name sound)
     (Orx.Object.get_name recipient)
@@ -84,7 +85,7 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
       (max (Orx.Sound.get_volume state.music -. 0.05) 0.0)
     |> get_ok;
     Orx.Object.set_scale state.soldier
-      (Orx.Vector.scale (Orx.Object.get_scale state.soldier |> get_some) 0.98)
+      (Orx.Vector.mulf (Orx.Object.get_scale state.soldier |> get_some) 0.98)
     |> get_ok
   );
   if Orx.Input.is_active "VolumeUp" then (
@@ -92,7 +93,7 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
       (min (Orx.Sound.get_volume state.music +. 0.05) 1.0)
     |> get_ok;
     Orx.Object.set_scale state.soldier
-      (Orx.Vector.scale (Orx.Object.get_scale state.soldier |> get_some) 1.02)
+      (Orx.Vector.mulf (Orx.Object.get_scale state.soldier |> get_some) 1.02)
     |> get_ok
   )
 

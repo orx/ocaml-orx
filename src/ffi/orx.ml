@@ -3,15 +3,32 @@ let ( !@ ) = Ctypes.( !@ )
 module Orx_gen = Orx_bindings.Bindings (Generated)
 module Color = Orx_gen.Color
 module Display = Orx_gen.Display
-module Fx_event = Orx_gen.Fx_event
-module Input_event = Orx_gen.Input_event
-module Sound_event = Orx_gen.Sound_event
+module Fx_event_details = Orx_gen.Fx_event_details
+module Input_event_details = Orx_gen.Input_event_details
+module Sound_event_details = Orx_gen.Sound_event_details
 module Resource = Orx_gen.Resource
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
 module Texture = Orx_gen.Texture
 module Viewport = Orx_gen.Viewport
+module Status = Orx_gen.Status
+module Clock_modifier = Orx_types.Clock_modifier
+module Clock_priority = Orx_types.Clock_priority
+module Clock_info = Orx_types.Clock_info
+module Clock_type = Orx_types.Clock_type
+module Module_id = Orx_types.Module_id
+module Event_type = Orx_types.Event_type
+module Config_event = Orx_types.Config_event
+module Fx_event = Orx_types.Fx_event
+module Input_event = Orx_types.Input_event
+module Physics_event = Orx_types.Physics_event
+module Sound_event = Orx_types.Sound_event
+module Input_mode = Orx_types.Input_mode
+module Input_type = Orx_types.Input_type
+module Mouse_axis = Orx_types.Mouse_axis
+module Mouse_button = Orx_types.Mouse_button
+module Sound_status = Orx_types.Sound_status
 
 module Bank = struct
   include Orx_gen.Bank
@@ -60,10 +77,15 @@ module Vector = struct
     (f', f)
 
   let (copy', copy) = make_one_vec_op copy
+
   let (normalize', normalize) = make_one_vec_op normalize
+
   let (reciprocal', reciprocal) = make_one_vec_op reciprocal
+
   let (round', round) = make_one_vec_op round
+
   let (floor', floor) = make_one_vec_op floor
+
   let (neg', neg) = make_one_vec_op neg
 
   let make_two_vec_op op =
@@ -79,9 +101,13 @@ module Vector = struct
     (f', f)
 
   let (add', add) = make_two_vec_op add
+
   let (sub', sub) = make_two_vec_op sub
+
   let (mul', mul) = make_two_vec_op mul
+
   let (div', div) = make_two_vec_op div
+
   let (cross', cross) = make_two_vec_op cross
 
   let make_one_vec_one_float_op op =
@@ -98,7 +124,9 @@ module Vector = struct
     (f', f)
 
   let (mulf', mulf) = make_one_vec_one_float_op mulf
+
   let (divf', divf) = make_one_vec_one_float_op divf
+
   let (rotate_2d', rotate_2d) = make_one_vec_one_float_op rotate_2d
 
   let make_two_vec_one_float_op op =
@@ -177,6 +205,7 @@ module Mouse = struct
   include Orx_gen.Mouse
 
   let get_position = get_optional_vector (fun () v -> get_position v)
+
   let get_move_delta = get_optional_vector (fun () v -> get_move_delta v)
 end
 
@@ -184,6 +213,7 @@ module Graphic = struct
   include Orx_gen.Graphic
 
   let get_size = get_vector get_size
+
   let get_origin = get_vector get_origin
 
   let to_structure (g : t) : Structure.t =
@@ -227,11 +257,17 @@ module Object = struct
   let get_bounding_box = get_optional_obox get_bounding_box
 
   let get_world_position = get_optional_vector get_world_position
+
   let get_position = get_optional_vector get_position
+
   let get_scale = get_optional_vector get_scale
+
   let get_speed = get_optional_vector get_speed
+
   let get_relative_speed = get_optional_vector get_relative_speed
+
   let get_custom_gravity = get_optional_vector get_custom_gravity
+
   let get_mass_center = get_optional_vector get_mass_center
 
   let raycast
@@ -292,6 +328,7 @@ module Event = struct
     match List.assoc_opt event_id map_to_constant with
     | None -> Fmt.invalid_arg "Unhandled event id when looking up flag"
     | Some event -> get_flag (Unsigned.UInt32.of_int64 event)
+
   let to_flags (event_ids : 'a list) (map_to_constant : ('a * int64) list) =
     let flags =
       List.map (fun event_id -> to_flag event_id map_to_constant) event_ids
@@ -465,7 +502,9 @@ end
 
 module Main = struct
   let init_function = Ctypes.(void @-> returning Orx_gen.Status.t)
+
   let run_function = Ctypes.(void @-> returning Orx_gen.Status.t)
+
   let exit_function = Ctypes.(void @-> returning void)
 
   (* This is wrapped differently because the underlying orx function is *)
