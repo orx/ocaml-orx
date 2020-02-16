@@ -869,24 +869,25 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         get_event_by_id event T.Sound_event.map_from_constant
   end
 
-  module Fx_event = struct
+  module Fx_event_details = struct
     let get_name (event : Event.t) : string =
       let payload = Event.to_payload event Fx in
       Ctypes.getf !@payload T.Fx_event.Payload.name
   end
 
-  module Input_event = struct
+  module Input_event_details = struct
     let get_payload_field (event : Event.t) field =
       let payload = Event.to_payload event Input in
       Ctypes.getf !@payload field
 
     let get_set_name (event : Event.t) : string =
       get_payload_field event T.Input_event.Payload.set_name
+
     let get_input_name (event : Event.t) : string =
       get_payload_field event T.Input_event.Payload.input_name
   end
 
-  module Sound_event = struct
+  module Sound_event_details = struct
     let get_sound (event : Event.t) : Sound.t =
       let payload = Event.to_payload event Sound in
       Ctypes.getf !@payload T.Sound_event.Payload.sound
