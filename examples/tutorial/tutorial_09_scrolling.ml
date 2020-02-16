@@ -6,6 +6,7 @@ let get_ok (r : ('a, _) result) : 'a =
   match r with
   | Ok x -> x
   | Error _ -> invalid_arg "get_ok: argument must be Ok(_)"
+
 let get_some (o : 'a option) : 'a =
   match o with
   | Some x -> x
@@ -27,7 +28,7 @@ let update (clock_info : Orx.Clock.Info.t) =
   Orx.Config.pop_section () |> get_ok;
 
   let scroll_speed =
-    Orx.Vector.scale scroll_speed (Orx.Clock.Info.get_dt clock_info)
+    Orx.Vector.mulf scroll_speed (Orx.Clock.Info.get_dt clock_info)
   in
 
   let move_x =
