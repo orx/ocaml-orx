@@ -9,6 +9,9 @@ doc:
 repl:
 	dune utop src
 
+fmt:
+	dune build @fmt --auto-promote
+
 clean:
 	dune clean
 
