@@ -7,8 +7,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     include Ctypes
 
     let ( @-> ) = F.( @-> )
+
     let returning = F.returning
   end
+
   open Ctypes_for_stubs
 
   module Status = struct
@@ -35,6 +37,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Bank.t structure ptr
 
     let t = ptr T.Bank.t
+
     let t_opt = ptr_opt T.Bank.t
 
     let get_next =
@@ -49,6 +52,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let undefined = T.String_id.undefined
 
     let get_id = c "orxString_GetID" (string @-> returning t)
+
     let get_from_id = c "orxString_GetFromID" (t @-> returning string)
   end
 
@@ -56,6 +60,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Vector.t structure ptr
 
     let t = ptr T.Vector.t
+
     let t_opt = ptr_opt T.Vector.t
 
     let allocate_raw () : t = allocate_n T.Vector.t ~count:1
@@ -67,25 +72,35 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let copy = c "orxVector_Copy" (t @-> t @-> returning t)
 
     let mulf = c "orxVector_Mulf" (t @-> t @-> float @-> returning t)
+
     let divf = c "orxVector_Divf" (t @-> t @-> float @-> returning t)
 
     let add = c "orxVector_Add" (t @-> t @-> t @-> returning t)
+
     let sub = c "orxVector_Sub" (t @-> t @-> t @-> returning t)
+
     let mul = c "orxVector_Mul" (t @-> t @-> t @-> returning t)
+
     let div = c "orxVector_Div" (t @-> t @-> t @-> returning t)
+
     let cross = c "orxVector_Cross" (t @-> t @-> t @-> returning t)
 
     let neg = c "orxVector_Neg" (t @-> t @-> returning t)
 
     let min = c "orxVector_Min" (t @-> t @-> t @-> returning t)
+
     let max = c "orxVector_Max" (t @-> t @-> t @-> returning t)
 
     let normalize = c "orxVector_Normalize" (t @-> t @-> returning t)
+
     let reciprocal = c "orxVector_Rec" (t @-> t @-> returning t)
+
     let round = c "orxVector_Round" (t @-> t @-> returning t)
+
     let floor = c "orxVector_Floor" (t @-> t @-> returning t)
 
     let get_distance = c "orxVector_GetDistance" (t @-> t @-> returning float)
+
     let get_size = c "orxVector_GetSize" (t @-> returning float)
 
     let lerp = c "orxVector_Lerp" (t @-> t @-> t @-> float @-> returning t)
@@ -97,6 +112,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Obox.t structure ptr
 
     let t = ptr T.Obox.t
+
     let t_opt = ptr_opt T.Obox.t
 
     let allocate_raw () : t = allocate_n T.Obox.t ~count:1
@@ -123,6 +139,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Color.t structure ptr
 
     let t = ptr T.Color.t
+
     let t_opt = ptr_opt T.Color.t
 
     let allocate_raw () : t = allocate_n T.Color.t ~count:1
@@ -132,6 +149,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Structure.t structure ptr
 
     let t = ptr T.Structure.t
+
     let t_opt = ptr_opt T.Structure.t
 
     let of_any = c "orxSTRUCTURE" (ptr void @-> returning t)
@@ -141,6 +159,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Texture.t structure ptr
 
     let t = ptr T.Texture.t
+
     let t_opt = ptr_opt T.Texture.t
 
     let create =
@@ -155,6 +174,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Graphic.t structure ptr
 
     let t = ptr T.Graphic.t
+
     let t_opt = ptr_opt T.Graphic.t
 
     let create = c "orxGraphic_Create" (void @-> returning t_opt)
@@ -193,6 +213,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Sound.t structure ptr
 
     let t = ptr T.Sound.t
+
     let t_opt = ptr_opt T.Sound.t
 
     let create_from_config =
@@ -203,18 +224,23 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_status = c "orxSound_GetStatus" (t @-> returning T.Sound_status.t)
 
     let play = c "orxSound_Play" (t @-> returning Status.t)
+
     let pause = c "orxSound_Pause" (t @-> returning Status.t)
+
     let stop = c "orxSound_Stop" (t @-> returning Status.t)
 
     let get_duration = c "orxSound_GetDuration" (t @-> returning float)
 
     let get_pitch = c "orxSound_GetPitch" (t @-> returning float)
+
     let set_pitch = c "orxSound_SetPitch" (t @-> float @-> returning Status.t)
 
     let get_volume = c "orxSound_GetVolume" (t @-> returning float)
+
     let set_volume = c "orxSound_SetVolume" (t @-> float @-> returning Status.t)
 
     let get_attenuation = c "orxSound_GetAttenuation" (t @-> returning float)
+
     let set_attenuation =
       c "orxSound_SetAttenuation" (t @-> float @-> returning Status.t)
   end
@@ -258,55 +284,69 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Select a config section to work within (stack-based) *)
     let push_section = c "orxConfig_PushSection" (string @-> returning Status.t)
+
     let pop_section = c "orxConfig_PopSection" (void @-> returning Status.t)
 
     (* Select a config section to work with (manually manage state) *)
     let get_current_section =
       c "orxConfig_GetCurrentSection" (void @-> returning string)
+
     let select_section =
       c "orxConfig_SelectSection" (string @-> returning Status.t)
 
     (* Enumerate sections *)
     let get_section_count =
       c "orxConfig_GetSectionCount" (void @-> returning int)
+
     let get_section = c "orxConfig_GetSection" (int @-> returning string)
 
     (* Enumerate keys in the current section *)
     let get_key_count = c "orxConfig_GetKeyCount" (void @-> returning int)
+
     let get_key = c "orxConfig_GetKey" (int @-> returning string)
 
     (* Check for section and value existence *)
     let has_section = c "orxConfig_HasSection" (string @-> returning bool)
+
     let has_value = c "orxConfig_HasValue" (string @-> returning bool)
 
     (* Clearing sections/values *)
     let clear_section =
       c "orxConfig_ClearSection" (string @-> returning Status.t)
+
     let clear_value = c "orxConfig_ClearValue" (string @-> returning Status.t)
 
     (* Get values from a config *)
     let get_string = c "orxConfig_GetString" (string @-> returning string)
+
     let get_bool = c "orxConfig_GetBool" (string @-> returning bool)
+
     let get_float = c "orxConfig_GetFloat" (string @-> returning float)
 
     (* XXX: Pretend a signed 64bit integer is always enough and the values will *)
     (* always fit in an OCaml int *)
     let get_int = c "orxConfig_GetS64" (string @-> returning int)
+
     let get_vector =
       c "orxConfig_GetVector" (string @-> Vector.t @-> returning Vector.t)
 
     (* Set config values *)
     let set_string =
       c "orxConfig_SetString" (string @-> string @-> returning Status.t)
+
     let set_bool = c "orxConfig_SetBool" (string @-> bool @-> returning Status.t)
+
     let set_float =
       c "orxConfig_SetFloat" (string @-> float @-> returning Status.t)
+
     let set_int = c "orxConfig_SetS64" (string @-> int @-> returning Status.t)
+
     let set_vector =
       c "orxConfig_SetVector" (string @-> Vector.t @-> returning Status.t)
 
     (* Get/Set values from a list *)
     let is_list = c "orxConfig_IsList" (string @-> returning bool)
+
     let get_list_count = c "orxConfig_GetListCount" (string @-> returning int)
 
     let int_or_random =
@@ -324,12 +364,16 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_list_string =
       c "orxConfig_GetListString" (string @-> int_or_random @-> returning string)
+
     let get_list_bool =
       c "orxConfig_GetListBool" (string @-> int_or_random @-> returning string)
+
     let get_list_float =
       c "orxConfig_GetListFloat" (string @-> int_or_random @-> returning float)
+
     let get_list_int =
       c "orxConfig_GetListS64" (string @-> int_or_random @-> returning int)
+
     let get_list_vector =
       c "orxConfig_GetListVector"
         (string @-> int_or_random @-> Vector.t @-> returning Vector.t)
@@ -338,6 +382,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let set_list_string =
       c "orxConfig_SetListString"
         (string @-> ptr string @-> int @-> returning Status.t)
+
     let append_list_string =
       c "orxConfig_AppendListString"
         (string @-> ptr string @-> int @-> returning Status.t)
@@ -347,11 +392,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Clock.t structure ptr
 
     let t : t typ = ptr T.Clock.t
+
     let t_opt : t option typ = ptr_opt T.Clock.t
 
     module Info = struct
       type clock = t
+
       let clock = t
+
       let clock_opt = t_opt
 
       type t = T.Clock_info.t structure ptr
@@ -359,14 +407,20 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       let t = ptr T.Clock_info.t
 
       let get (info : t) field = Ctypes.getf !@info field
+
       let get_type (info : t) : T.Clock_type.t =
         get info T.Clock_info.clock_type
+
       let get_tick_size (info : t) : float = get info T.Clock_info.tick_size
+
       let get_modifier (info : t) : T.Clock_modifier.t =
         get info T.Clock_info.modifier
+
       let get_modifier_value (info : t) : float =
         get info T.Clock_info.modifier_value
+
       let get_dt (info : t) : float = get info T.Clock_info.dt
+
       let get_time (info : t) : float = get info T.Clock_info.time
 
       let get_clock = c "orxClock_GetFromInfo" (t @-> returning clock_opt)
@@ -374,6 +428,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Pointer/physical equality-based comparison *)
     let compare (a : t) (b : t) : int = Ctypes.ptr_compare a b
+
     let equal a b = compare a b = 0
 
     (* Create a new clock *)
@@ -406,7 +461,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let restart = c "orxClock_Restart" (t @-> returning Status.t)
 
     let pause = c "orxClock_Pause" (t @-> returning Status.t)
+
     let unpause = c "orxClock_Unpause" (t @-> returning Status.t)
+
     let is_paused = c "orxClock_IsPaused" (t @-> returning bool)
   end
 
@@ -437,6 +494,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Camera.t structure ptr
 
     let t : t typ = ptr T.Camera.t
+
     let t_opt : t option typ = ptr_opt T.Camera.t
 
     (* Creating cameras *)
@@ -452,16 +510,19 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Camera positioning *)
     let get_position =
       c "orxCamera_GetPosition" (t @-> Vector.t @-> returning Vector.t)
+
     let set_position =
       c "orxCamera_SetPosition" (t @-> Vector.t @-> returning Status.t)
 
     (* Camera rotation *)
     let get_rotation = c "orxCamera_GetRotation" (t @-> returning float)
+
     let set_rotation =
       c "orxCamera_SetRotation" (t @-> float @-> returning Status.t)
 
     (* Camera zoom *)
     let get_zoom = c "orxCamera_GetZoom" (t @-> returning float)
+
     let set_zoom = c "orxCamera_SetZoom" (t @-> float @-> returning Status.t)
 
     (* Camera frustum *)
@@ -474,13 +535,16 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Object.t structure ptr
 
     let t : t typ = ptr T.Object.t
+
     let t_opt : t option typ = ptr_opt T.Object.t
 
     (* Pointer/physical equality-based comparison *)
     let compare (a : t) (b : t) : int = Ctypes.ptr_compare a b
+
     let equal a b = compare a b = 0
 
     let of_void_pointer = c "orxOBJECT" (ptr void @-> returning t)
+
     let to_void_pointer (o : t) = to_voidp o
 
     (* Object creation and presence *)
@@ -488,11 +552,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_CreateFromConfig" (string @-> returning t_opt)
 
     let enable = c "orxObject_Enable" (t @-> bool @-> returning void)
+
     let enable_recursive =
       c "orxObject_EnableRecursive" (t @-> bool @-> returning void)
+
     let is_enabled = c "orxObject_IsEnabled" (t @-> returning bool)
 
     let pause = c "orxObject_Pause" (t @-> bool @-> returning void)
+
     let is_paused = c "orxObject_IsPaused" (t @-> returning bool)
 
     (* Basic attributes *)
@@ -506,11 +573,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* FX *)
     let add_fx = c "orxObject_AddFX" (t @-> string @-> returning Status.t)
+
     let add_unique_fx =
       c "orxObject_AddUniqueFX" (t @-> string @-> returning Status.t)
 
     let add_delayed_fx =
       c "orxObject_AddDelayedFX" (t @-> string @-> float @-> returning Status.t)
+
     let add_unique_delayed_fx =
       c "orxObject_AddUniqueDelayedFX"
         (t @-> string @-> float @-> returning Status.t)
@@ -519,21 +588,25 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Position and orientation *)
     let get_rotation = c "orxObject_GetRotation" (t @-> returning float)
+
     let set_rotation =
       c "orxObject_SetRotation" (t @-> float @-> returning Status.t)
 
     let get_world_position =
       c "orxObject_GetWorldPosition" (t @-> Vector.t @-> returning Vector.t_opt)
+
     let set_world_position =
       c "orxObject_SetWorldPosition" (t @-> Vector.t @-> returning Status.t)
 
     let get_position =
       c "orxObject_GetPosition" (t @-> Vector.t @-> returning Vector.t_opt)
+
     let set_position =
       c "orxObject_SetPosition" (t @-> Vector.t @-> returning Status.t)
 
     let get_scale =
       c "orxObject_GetScale" (t @-> Vector.t @-> returning Vector.t_opt)
+
     let set_scale =
       c "orxObject_SetScale" (t @-> Vector.t @-> returning Status.t)
 
@@ -578,21 +651,25 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let set_speed =
       c "orxObject_SetSpeed" (t @-> Vector.t @-> returning Status.t)
+
     let get_speed =
       c "orxObject_GetSpeed" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_relative_speed =
       c "orxObject_SetRelativeSpeed" (t @-> Vector.t @-> returning Status.t)
+
     let get_relative_speed =
       c "orxObject_GetRelativeSpeed" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_angular_velocity =
       c "orxObject_SetAngularVelocity" (t @-> float @-> returning Status.t)
+
     let get_angular_velocity =
       c "orxObject_GetAngularVelocity" (t @-> returning float)
 
     let set_custom_gravity =
       c "orxObject_SetCustomGravity" (t @-> Vector.t @-> returning Status.t)
+
     let get_custom_gravity =
       c "orxObject_GetCustomGravity" (t @-> Vector.t @-> returning Vector.t_opt)
 
@@ -615,10 +692,12 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Color *)
     let set_rgb = c "orxObject_SetRGB" (t @-> Vector.t @-> returning Status.t)
+
     let set_rgb_recursive =
       c "orxObject_SetRGBRecursive" (t @-> Vector.t @-> returning void)
 
     let set_alpha = c "orxObject_SetAlpha" (t @-> float @-> returning Status.t)
+
     let set_alpha_recursive =
       c "orxObject_SetAlphaRecursive" (t @-> float @-> returning void)
 
@@ -666,6 +745,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_GetDefaultGroupID" (void @-> returning String_id.t)
 
     let get_group_id = c "orxObject_GetGroupID" (t @-> returning String_id.t)
+
     let set_group_id =
       c "orxObject_SetGroupID" (t @-> String_id.t @-> returning Status.t)
 
@@ -680,6 +760,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type t = T.Viewport.t structure ptr
 
     let t = ptr T.Viewport.t
+
     let t_opt = ptr_opt T.Viewport.t
 
     let create_from_config =

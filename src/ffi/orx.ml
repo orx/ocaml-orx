@@ -60,10 +60,15 @@ module Vector = struct
     (f', f)
 
   let (copy', copy) = make_one_vec_op copy
+
   let (normalize', normalize) = make_one_vec_op normalize
+
   let (reciprocal', reciprocal) = make_one_vec_op reciprocal
+
   let (round', round) = make_one_vec_op round
+
   let (floor', floor) = make_one_vec_op floor
+
   let (neg', neg) = make_one_vec_op neg
 
   let make_two_vec_op op =
@@ -79,9 +84,13 @@ module Vector = struct
     (f', f)
 
   let (add', add) = make_two_vec_op add
+
   let (sub', sub) = make_two_vec_op sub
+
   let (mul', mul) = make_two_vec_op mul
+
   let (div', div) = make_two_vec_op div
+
   let (cross', cross) = make_two_vec_op cross
 
   let make_one_vec_one_float_op op =
@@ -98,7 +107,9 @@ module Vector = struct
     (f', f)
 
   let (mulf', mulf) = make_one_vec_one_float_op mulf
+
   let (divf', divf) = make_one_vec_one_float_op divf
+
   let (rotate_2d', rotate_2d) = make_one_vec_one_float_op rotate_2d
 
   let make_two_vec_one_float_op op =
@@ -177,6 +188,7 @@ module Mouse = struct
   include Orx_gen.Mouse
 
   let get_position = get_optional_vector (fun () v -> get_position v)
+
   let get_move_delta = get_optional_vector (fun () v -> get_move_delta v)
 end
 
@@ -184,6 +196,7 @@ module Graphic = struct
   include Orx_gen.Graphic
 
   let get_size = get_vector get_size
+
   let get_origin = get_vector get_origin
 
   let to_structure (g : t) : Structure.t =
@@ -227,11 +240,17 @@ module Object = struct
   let get_bounding_box = get_optional_obox get_bounding_box
 
   let get_world_position = get_optional_vector get_world_position
+
   let get_position = get_optional_vector get_position
+
   let get_scale = get_optional_vector get_scale
+
   let get_speed = get_optional_vector get_speed
+
   let get_relative_speed = get_optional_vector get_relative_speed
+
   let get_custom_gravity = get_optional_vector get_custom_gravity
+
   let get_mass_center = get_optional_vector get_mass_center
 
   let raycast
@@ -292,6 +311,7 @@ module Event = struct
     match List.assoc_opt event_id map_to_constant with
     | None -> Fmt.invalid_arg "Unhandled event id when looking up flag"
     | Some event -> get_flag (Unsigned.UInt32.of_int64 event)
+
   let to_flags (event_ids : 'a list) (map_to_constant : ('a * int64) list) =
     let flags =
       List.map (fun event_id -> to_flag event_id map_to_constant) event_ids
@@ -465,7 +485,9 @@ end
 
 module Main = struct
   let init_function = Ctypes.(void @-> returning Orx_gen.Status.t)
+
   let run_function = Ctypes.(void @-> returning Orx_gen.Status.t)
+
   let exit_function = Ctypes.(void @-> returning void)
 
   (* This is wrapped differently because the underlying orx function is *)
