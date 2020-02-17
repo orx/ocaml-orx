@@ -1,3 +1,4 @@
 (library
- (public_name orx_types_bindings)
+ (public_name orx.types_bindings)
+ (name orx_types_bindings)
  (libraries ctypes fmt))
