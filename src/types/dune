@@ -7,7 +7,8 @@
    (run %{deps}))))
 
 (library
- (public_name orx_types)
+ (public_name orx.types)
+ (name orx_types)
  (flags
   :standard
   -w
