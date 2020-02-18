@@ -129,7 +129,7 @@ end
 module Texture : sig
   type t
 
-  val create : string -> bool -> t option
+  val create_from_file : string -> bool -> t option
 
   val delete : t -> Status.t
 

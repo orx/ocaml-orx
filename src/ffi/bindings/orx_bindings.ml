@@ -162,7 +162,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t_opt = ptr_opt T.Texture.t
 
-    let create =
+    let create_from_file =
       c "orxTexture_CreateFromFile" (string @-> bool @-> returning t_opt)
 
     let delete = c "orxTexture_Delete" (t @-> returning Status.t)
