@@ -134,6 +134,8 @@ module Texture : sig
   val delete : t -> Status.t
 
   val clear_cache : unit -> Status.t
+
+  val get_size : t -> (float * float) option
 end
 
 module Graphic : sig
@@ -652,6 +654,8 @@ module Config : sig
 
   val get_key : int -> string
 
+  val get_parent : string -> string option
+
   val has_section : string -> bool
 
   val has_value : string -> bool
@@ -676,11 +680,11 @@ module Config : sig
 
   val set_int : string -> int -> Status.t
 
-  val get_vector : string -> Vector.t
+  val get_vector : string -> Vector.t option
 
   val set_vector : string -> Vector.t -> Status.t
 
-  val get_list_vector : string -> int option -> Vector.t
+  val get_list_vector : string -> int option -> Vector.t option
 
   val set_list_string : string -> string list -> Status.t
 

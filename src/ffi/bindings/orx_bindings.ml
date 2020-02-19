@@ -168,6 +168,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let delete = c "orxTexture_Delete" (t @-> returning Status.t)
 
     let clear_cache = c "orxTexture_ClearCache" (void @-> returning Status.t)
+
+    let get_size =
+      c "orxTexture_GetSize"
+        (t @-> ptr float @-> ptr float @-> returning Status.t)
   end
 
   module Graphic = struct
@@ -305,6 +309,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_key = c "orxConfig_GetKey" (int @-> returning string)
 
+    let get_parent = c "orxConfig_GetParent" (string @-> returning string_opt)
+
     (* Check for section and value existence *)
     let has_section = c "orxConfig_HasSection" (string @-> returning bool)
 
@@ -328,7 +334,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_int = c "orxConfig_GetS64" (string @-> returning int)
 
     let get_vector =
-      c "orxConfig_GetVector" (string @-> Vector.t @-> returning Vector.t)
+      c "orxConfig_GetVector" (string @-> Vector.t @-> returning Vector.t_opt)
 
     (* Set config values *)
     let set_string =
@@ -376,7 +382,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_list_vector =
       c "orxConfig_GetListVector"
-        (string @-> int_or_random @-> Vector.t @-> returning Vector.t)
+        (string @-> int_or_random @-> Vector.t @-> returning Vector.t_opt)
 
     (* Modify a list of config values *)
     let set_list_string =

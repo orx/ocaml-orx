@@ -10,7 +10,6 @@ module Resource = Orx_gen.Resource
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
-module Texture = Orx_gen.Texture
 module Viewport = Orx_gen.Viewport
 module Status = Orx_gen.Status
 module Clock_modifier = Orx_types.Clock_modifier
@@ -29,6 +28,17 @@ module Input_type = Orx_types.Input_type
 module Mouse_axis = Orx_types.Mouse_axis
 module Mouse_button = Orx_types.Mouse_button
 module Sound_status = Orx_types.Sound_status
+
+module Texture = struct
+  include Orx_gen.Texture
+
+  let get_size texture =
+    let width = Ctypes.allocate_n Ctypes.float ~count:1 in
+    let height = Ctypes.allocate_n Ctypes.float ~count:1 in
+    match get_size texture width height with
+    | Error () -> None
+    | Ok () -> Some (!@width, !@height)
+end
 
 module Bank = struct
   include Orx_gen.Bank
@@ -439,15 +449,11 @@ module Config = struct
     let c_values = Ctypes.CArray.of_list Ctypes.string values in
     append_list_string key (Ctypes.CArray.start c_values) length
 
-  let get_vector (key : string) : Vector.t =
-    let vector : Vector.t = Vector.allocate_raw () in
-    let (_ : Vector.t) = get_vector key vector in
-    vector
+  let get_vector (key : string) : Vector.t option =
+    get_optional_vector get_vector key
 
-  let get_list_vector (key : string) (i : int option) : Vector.t =
-    let vector : Vector.t = Vector.allocate_raw () in
-    let (_ : Vector.t) = get_list_vector key i vector in
-    vector
+  let get_list_vector (key : string) (i : int option) : Vector.t option =
+    get_optional_vector (fun k v -> get_list_vector k i v) key
 
   let with_section (section : string) f =
     match push_section section with
