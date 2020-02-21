@@ -167,11 +167,15 @@ end
 module Camera : sig
   type t
 
+  type parent
+
   val create_from_config : string -> t option
 
   val get : string -> t option
 
   val get_name : t -> string
+
+  val set_parent : t -> parent -> Status.t
 
   val get_position : t -> Vector.t
 
@@ -445,6 +449,8 @@ module Object : sig
   val set_group_id : t -> String_id.t -> Status.t
 
   val set_group_id_recursive : t -> String_id.t -> unit
+
+  val to_camera_parent : t -> Camera.parent
 end
 
 module Event_type : sig

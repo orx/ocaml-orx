@@ -234,6 +234,8 @@ end
 module Camera = struct
   include Orx_gen.Camera
 
+  type parent = unit Ctypes.ptr
+
   let get_position = get_vector get_position
 end
 
@@ -327,6 +329,8 @@ module Object = struct
       | Some next as o_next -> loop o_next (next :: accu)
     in
     loop None []
+
+  let to_camera_parent = to_void_pointer
 end
 
 module Event = struct

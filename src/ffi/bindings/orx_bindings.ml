@@ -510,8 +510,11 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Get camera by name *)
     let get = c "orxCamera_Get" (string @-> returning t_opt)
 
-    (* Get misc camera properties *)
+    (* Get/set misc camera properties *)
     let get_name = c "orxCamera_GetName" (t @-> returning string)
+
+    let set_parent =
+      c "orxCamera_SetParent" (t @-> ptr void @-> returning Status.t)
 
     (* Camera positioning *)
     let get_position =
