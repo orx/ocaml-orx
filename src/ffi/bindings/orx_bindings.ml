@@ -778,6 +778,12 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_camera = c "orxViewport_GetCamera" (t @-> returning Camera.t_opt)
   end
 
+  module Render = struct
+    let get_world_position =
+      c "orxRender_GetWorldPosition"
+        (Vector.t @-> Viewport.t @-> Vector.t @-> returning Vector.t_opt)
+  end
+
   module Input = struct
     let is_active = c "orxInput_IsActive" (string @-> returning bool)
 

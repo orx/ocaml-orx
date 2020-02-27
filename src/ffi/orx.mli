@@ -200,6 +200,10 @@ module Viewport : sig
   val get_camera : t -> Camera.t option
 end
 
+module Render : sig
+  val get_world_position : Vector.t -> Viewport.t -> Vector.t option
+end
+
 module Display : sig
   module Rgba : sig end
 
