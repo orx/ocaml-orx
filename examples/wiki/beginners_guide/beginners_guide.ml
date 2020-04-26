@@ -143,8 +143,8 @@ let run () =
   let state = State.get () in
 
   (* Movement vectors *)
-  let left_speed = Orx.Vector.make ~x:(-1.0) ~y:0.0 ~z:0.0 in
-  let right_speed = Orx.Vector.make ~x:1.0 ~y:0.0 ~z:0.0 in
+  let left_speed = Orx.Vector.make ~x:(-10.0) ~y:0.0 ~z:0.0 in
+  let right_speed = Orx.Vector.make ~x:10.0 ~y:0.0 ~z:0.0 in
   let flip_left = Orx.Vector.make ~x:(-2.0) ~y:2.0 ~z:1.0 in
   let flip_right = Orx.Vector.make ~x:2.0 ~y:2.0 ~z:1.0 in
 
