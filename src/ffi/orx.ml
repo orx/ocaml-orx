@@ -37,7 +37,7 @@ module Texture = struct
     let width = Ctypes.allocate_n Ctypes.float ~count:1 in
     let height = Ctypes.allocate_n Ctypes.float ~count:1 in
     match get_size texture width height with
-    | Error () -> None
+    | Error `Orx -> None
     | Ok () -> Some (!@width, !@height)
 end
 
@@ -255,7 +255,7 @@ module Input = struct
     let id = Ctypes.allocate_n Ctypes.int ~count:1 in
     let mode = Ctypes.allocate_n Orx_types.Input_mode.t ~count:1 in
     match get_binding name index type_ id mode with
-    | Error () as e -> e
+    | Error _ as e -> Status.open_error e
     | Ok () -> Ok (!@type_, !@id, !@mode)
 end
 
@@ -470,11 +470,11 @@ module Config = struct
 
   let with_section (section : string) f =
     match push_section section with
-    | Error () as e -> e
+    | Error _ as e -> Status.open_error e
     | Ok () ->
       let result = f () in
       ( match pop_section () with
-      | Error () as e -> e
+      | Error _ as e -> Status.open_error e
       | Ok () -> Ok result
       )
 
@@ -492,7 +492,7 @@ module Config = struct
   let get_list
       (get : string -> int option -> 'a)
       ~(section : string)
-      ~(key : string) : ('a list, unit) result =
+      ~(key : string) : ('a list, [> `Orx ]) result =
     let get_all () =
       let count = get_list_count key in
       List.init count (fun i -> get key (Some i))

@@ -14,18 +14,27 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   open Ctypes_for_stubs
 
   module Status = struct
-    type t = (unit, unit) result
+    type 'ok result = ('ok, [ `Orx ]) Stdlib.result
+    type t = unit result
+
+    let ok = Ok ()
+    let error = Error `Orx
+
+    let open_error (r : 'ok result) : ('ok, [> `Orx ]) Stdlib.result =
+      match r with
+      | Ok _ as o -> o
+      | Error `Orx -> Error `Orx
 
     let of_int i : t =
       match i with
       | 1 -> Ok ()
-      | 0 -> Error ()
+      | 0 -> Error `Orx
       | _ -> Fmt.invalid_arg "Unsupported ORX status %d" i
 
     let to_int (s : t) : int =
       match s with
       | Ok () -> 1
-      | Error () -> 0
+      | Error `Orx -> 0
 
     let pp =
       Fmt.(result ~ok:(const string "success") ~error:(const string "failure"))

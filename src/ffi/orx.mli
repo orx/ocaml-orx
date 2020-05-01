@@ -1,5 +1,11 @@
 module Status : sig
-  type t = (unit, unit) result
+  type 'ok result = ('ok, [ `Orx ]) Stdlib.result
+  type t = unit result
+
+  val ok : t
+  val error : t
+
+  val open_error : 'ok result -> ('ok, [> `Orx ]) Stdlib.result
 end
 
 module Color : sig
@@ -298,7 +304,7 @@ module Input : sig
   val has_been_activated : string -> bool
 
   val get_binding :
-    string -> int -> (Input_type.t * int * Input_mode.t, unit) result
+    string -> int -> (Input_type.t * int * Input_mode.t) Status.result
 
   val get_binding_name : Input_type.t -> int -> Input_mode.t -> string
 end
@@ -712,20 +718,20 @@ module Config : sig
 
   val append_list_string : string -> string list -> Status.t
 
-  val get : (string -> 'a) -> section:string -> key:string -> ('a, unit) result
+  val get : (string -> 'a) -> section:string -> key:string -> 'a Status.result
 
   val get_list_item :
     (string -> int option -> 'a) ->
     int option ->
     section:string ->
     key:string ->
-    ('a, unit) result
+    'a Status.result
 
   val get_list :
     (string -> int option -> 'a) ->
     section:string ->
     key:string ->
-    ('a list, unit) result
+    'a list Status.result
 
   val is_list : string -> bool
 
@@ -733,7 +739,7 @@ module Config : sig
 
   val get_current_section_keys : unit -> string list
 
-  val get_section_keys : string -> (string list, unit) result
+  val get_section_keys : string -> string list Status.result
 end
 
 module Orx_thread : sig
