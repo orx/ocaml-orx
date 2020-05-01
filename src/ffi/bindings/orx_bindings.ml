@@ -574,7 +574,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Basic attributes *)
     let get_name = c "orxObject_GetName" (t @-> returning string)
 
+    (* Parent/child relationships *)
     let get_child_object = c "orxObject_GetChild" (t @-> returning t_opt)
+
+    let log_parents = c "orxObject_LogParents" (t @-> returning Status.t)
 
     (* Bounding box *)
     let get_bounding_box =
