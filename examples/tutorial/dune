@@ -2,3 +2,8 @@
  (names tutorial_02_clock tutorial_06_sound tutorial_07_fx
    tutorial_08_physics tutorial_09_scrolling)
  (libraries orx))
+
+(alias
+ (name tutorials)
+ (deps tutorial_02_clock.exe tutorial_06_sound.exe tutorial_07_fx.exe
+   tutorial_08_physics.exe tutorial_09_scrolling.exe))

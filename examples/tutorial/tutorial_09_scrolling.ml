@@ -1,31 +1,20 @@
 (* Adaptation of the scrolling tutorial from Orx *)
 (* This example is a direct adaptation of the 09_Scrolling.c tutorial from Orx *)
 
-(* Helper functions for unwrapping values. *)
-let get_ok (r : ('a, _) result) : 'a =
-  match r with
-  | Ok x -> x
-  | Error _ -> invalid_arg "get_ok: argument must be Ok(_)"
-
-let get_some (o : 'a option) : 'a =
-  match o with
-  | Some x -> x
-  | None -> invalid_arg "get_some: argument must be Some(_)"
-
 module State = struct
   type t = Orx.Camera.t
 
   let state : t option ref = ref None
 
-  let get () = get_some !state
+  let get () = Option.get !state
 end
 
 let update (clock_info : Orx.Clock.Info.t) =
   let camera = State.get () in
 
-  Orx.Config.push_section "Tutorial" |> get_ok;
-  let scroll_speed = Orx.Config.get_vector "ScrollSpeed" in
-  Orx.Config.pop_section () |> get_ok;
+  Orx.Config.push_section "Tutorial" |> Result.get_ok;
+  let scroll_speed = Orx.Config.get_vector "ScrollSpeed" |> Option.get in
+  Orx.Config.pop_section () |> Result.get_ok;
 
   let scroll_speed =
     Orx.Vector.mulf scroll_speed (Orx.Clock.Info.get_dt clock_info)
@@ -58,12 +47,13 @@ let update (clock_info : Orx.Clock.Info.t) =
   let move = Orx.Vector.make ~x:move_x ~y:move_y ~z:move_z in
 
   let camera_position = Orx.Camera.get_position camera in
-  Orx.Camera.set_position camera (Orx.Vector.add camera_position move) |> get_ok
+  Orx.Camera.set_position camera (Orx.Vector.add camera_position move)
+  |> Result.get_ok
 
 let init () =
   (* Print out a hint to the user about what's to come *)
   let get_name (binding : string) : string =
-    let (type_, id, mode) = Orx.Input.get_binding binding 0 |> get_ok in
+    let (type_, id, mode) = Orx.Input.get_binding binding 0 |> Result.get_ok in
     Orx.Input.get_binding_name type_ id mode
   in
 
@@ -79,22 +69,22 @@ let init () =
     (get_name "CameraRight") (get_name "CameraZoomIn")
     (get_name "CameraZoomOut");
 
-  let viewport = Orx.Viewport.create_from_config "Viewport" |> get_some in
-  let camera = Orx.Viewport.get_camera viewport |> get_some in
+  let viewport = Orx.Viewport.create_from_config "Viewport" |> Option.get in
+  let camera = Orx.Viewport.get_camera viewport |> Option.get in
   State.state := Some camera;
 
-  let clock = Orx.Clock.find_first (-1.0) Core |> get_some in
-  Orx.Clock.register clock update Main Normal |> get_ok;
+  let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
+  Orx.Clock.register clock update Main Normal |> Result.get_ok;
 
-  Orx.Object.create_from_config "Scene" |> get_some |> ignore;
+  Orx.Object.create_from_config "Scene" |> Option.get |> ignore;
 
   Ok ()
 
 let run () =
   if Orx.Input.is_active "Quit" then
-    Error ()
+    Orx.Status.error
   else
-    Ok ()
+    Orx.Status.ok
 
 let exit () = ()
 
@@ -103,6 +93,6 @@ let bootstrap () =
   Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
 
 let () =
-  Orx.Config.set_bootstrap bootstrap |> get_ok;
-  Orx.Config.set_basename "09_Scrolling" |> get_ok;
+  Orx.Config.set_bootstrap bootstrap |> Result.get_ok;
+  Orx.Config.set_basename "09_Scrolling" |> Result.get_ok;
   Orx.Main.execute ~init ~run ~exit ()
