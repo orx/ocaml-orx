@@ -815,6 +815,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type 'event payload =
       | Fx : T.Fx_event.Payload.t payload
       | Input : T.Input_event.Payload.t payload
+      | Object : T.Object_event.Payload.t payload
       | Physics : T.Physics_event.Payload.t payload
       | Sound : T.Sound_event.Payload.t payload
 
@@ -822,6 +823,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | Config : T.Config_event.t event
       | Fx : T.Fx_event.t event
       | Input : T.Input_event.t event
+      | Object : T.Object_event.t event
       | Physics : T.Physics_event.t event
       | Sound : T.Sound_event.t event
 
@@ -852,6 +854,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | Input ->
         assert_type event T.Event_type.Input;
         unsafe_get_payload event T.Input_event.Payload.t
+      | Object ->
+        assert_type event T.Event_type.Object;
+        unsafe_get_payload event T.Object_event.Payload.t
       | Physics ->
         assert_type event T.Event_type.Physics;
         unsafe_get_payload event T.Physics_event.Payload.t
@@ -876,6 +881,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | Input ->
         assert_type event T.Event_type.Input;
         get_event_by_id event T.Input_event.map_from_constant
+      | Object ->
+        assert_type event T.Event_type.Object;
+        get_event_by_id event T.Object_event.map_from_constant
       | Physics ->
         assert_type event T.Event_type.Physics;
         get_event_by_id event T.Physics_event.map_from_constant

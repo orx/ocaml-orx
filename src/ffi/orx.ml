@@ -21,6 +21,7 @@ module Event_type = Orx_types.Event_type
 module Config_event = Orx_types.Config_event
 module Fx_event = Orx_types.Fx_event
 module Input_event = Orx_types.Input_event
+module Object_event = Orx_types.Object_event
 module Physics_event = Orx_types.Physics_event
 module Sound_event = Orx_types.Sound_event
 module Input_mode = Orx_types.Input_mode
@@ -364,6 +365,7 @@ module Event = struct
     | Config -> to_flags event_ids Orx_types.Config_event.map_to_constant
     | Fx -> to_flags event_ids Orx_types.Fx_event.map_to_constant
     | Input -> to_flags event_ids Orx_types.Input_event.map_to_constant
+    | Object -> to_flags event_ids Orx_types.Object_event.map_to_constant
     | Physics -> to_flags event_ids Orx_types.Physics_event.map_to_constant
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
 

@@ -272,6 +272,13 @@ module Bindings (F : Ctypes.TYPE) = struct
     let t : t structure = F.structure "__orxSTRUCTURE_t"
   end
 
+  module Object = struct
+    type t
+
+    (* Unsealed structure because the type is anonymous *)
+    let t : t structure = F.structure "__orxOBJECT_t"
+  end
+
   module Input_type = struct
     type t =
       | Keyboard_key
@@ -447,6 +454,45 @@ module Bindings (F : Ctypes.TYPE) = struct
     end
   end
 
+  module Object_event = struct
+    type t =
+      | Create
+      | Delete
+      | Prepare
+      | Enable
+      | Disable
+      | Pause
+      | Unpause
+
+    let make name = F.constant ("orxOBJECT_EVENT_" ^ name) F.int64_t
+    let create = make "CREATE"
+    let delete = make "DELETE"
+    let prepare = make "PREPARE"
+    let enable = make "ENABLE"
+    let disable = make "DISABLE"
+    let pause = make "PAUSE"
+    let unpause = make "UNPAUSE"
+
+    let map_to_constant =
+      [
+        (Create, create);
+        (Delete, delete);
+        (Prepare, prepare);
+        (Enable, enable);
+        (Disable, disable);
+        (Pause, pause);
+        (Unpause, unpause);
+      ]
+
+    let map_from_constant = swap_tuple_list map_to_constant
+
+    let t =
+      F.enum "__orxOBJECT_EVENT_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported object event type enum: %Ld" i)
+
+    module Payload = Object
+  end
+
   module Input_event = struct
     type t =
       | On
@@ -593,13 +639,6 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     (* Unsealed structure because the type is anonymous *)
     let t : t structure = F.structure "__orxCAMERA_t"
-  end
-
-  module Object = struct
-    type t
-
-    (* Unsealed structure because the type is anonymous *)
-    let t : t structure = F.structure "__orxOBJECT_t"
   end
 
   module Obox = struct

@@ -501,6 +501,17 @@ module Input_event : sig
     | Select_set
 end
 
+module Object_event : sig
+  type t =
+    | Create
+    | Delete
+    | Prepare
+    | Enable
+    | Disable
+    | Pause
+    | Unpause
+end
+
 module Physics_event : sig
   type t =
     | Contact_add
@@ -526,6 +537,7 @@ module Event : sig
     | Config : Config_event.t event
     | Fx : Fx_event.t event
     | Input : Input_event.t event
+    | Object : Object_event.t event
     | Physics : Physics_event.t event
     | Sound : Sound_event.t event
 
