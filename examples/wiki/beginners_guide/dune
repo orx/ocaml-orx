@@ -1,3 +1,7 @@
 (executable
  (name beginners_guide)
  (libraries orx))
+
+(alias
+ (name tutorials)
+ (deps beginners_guide.exe))
