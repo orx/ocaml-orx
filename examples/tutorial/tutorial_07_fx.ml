@@ -23,7 +23,7 @@ let fx_event_handler (event : Orx.Event.t) =
   assert (Orx.Event.to_type event = Fx);
 
   let state = State.get () in
-  let recipient = Orx.Event.get_recipient_object event in
+  let recipient = Orx.Event.get_recipient_object event |> Option.get in
   let actual_event = Orx.Event.to_event event Fx in
   ( match actual_event with
   | Start ->

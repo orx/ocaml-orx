@@ -98,8 +98,8 @@ module Physics = struct
     let state = State.get () in
     match Orx.Event.to_event event Physics with
     | Contact_add ->
-      let sender = Orx.Event.get_sender_object event in
-      let recipient = Orx.Event.get_recipient_object event in
+      let sender = Orx.Event.get_sender_object event |> Option.get in
+      let recipient = Orx.Event.get_recipient_object event |> Option.get in
       on_add_contact state ~sender ~recipient
     | Contact_remove -> Ok ()
 end

@@ -14,16 +14,16 @@ end
 
 let event_message (event : Orx.Event.t) kind =
   assert (Orx.Event.to_type event = Sound);
-
   let sound = Orx.Sound_event_details.get_sound event in
-  let recipient = Orx.Event.get_recipient_object event in
+  let recipient = Orx.Event.get_recipient_object event |> Option.get in
   Fmt.pr "Sound [%s]@@[%s] has %s@." (Orx.Sound.get_name sound)
     (Orx.Object.get_name recipient)
     kind
 
 let event_handler (event : Orx.Event.t) =
   let state = State.get () in
-  if Orx.Object.equal state.soldier (Orx.Event.get_recipient_object event) then (
+  let recipient = Orx.Event.get_recipient_object event |> Option.get in
+  if Orx.Object.equal state.soldier recipient then (
     match Orx.Event.to_event event Sound with
     | Start -> event_message event "started"
     | Stop -> event_message event "stopped"

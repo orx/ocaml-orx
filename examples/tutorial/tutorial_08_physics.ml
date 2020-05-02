@@ -13,8 +13,8 @@ let event_handler (event : Orx.Event.t) =
   ( match Orx.Event.to_event event Physics with
   | Contact_remove -> ()
   | Contact_add ->
-    let sender = Orx.Event.get_sender_object event in
-    let recipient = Orx.Event.get_recipient_object event in
+    let sender = Orx.Event.get_sender_object event |> Option.get in
+    let recipient = Orx.Event.get_recipient_object event |> Option.get in
     Orx.Object.add_fx sender "Bump" ~unique:false |> ignore;
     Orx.Object.add_fx recipient "Bump" ~unique:false |> ignore
   );
