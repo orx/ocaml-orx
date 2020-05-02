@@ -157,11 +157,17 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module Structure = struct
     type t = T.Structure.t structure ptr
 
+    type guid = Unsigned.uint64
+
     let t = ptr T.Structure.t
 
     let t_opt = ptr_opt T.Structure.t
 
-    let of_any = c "orxSTRUCTURE" (ptr void @-> returning t)
+    let of_void_pointer = c "orxSTRUCTURE" (ptr void @-> returning t_opt)
+
+    let get_guid = c "orxStructure_GetGUID" (t @-> returning uint64_t)
+
+    let get = c "orxStructure_Get" (uint64_t @-> returning t_opt)
   end
 
   module Texture = struct
@@ -561,7 +567,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let equal a b = compare a b = 0
 
-    let of_void_pointer = c "orxOBJECT" (ptr void @-> returning t)
+    let of_void_pointer = c "orxOBJECT" (ptr void @-> returning t_opt)
 
     let to_void_pointer (o : t) = to_voidp o
 

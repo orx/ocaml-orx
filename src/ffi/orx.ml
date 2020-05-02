@@ -236,13 +236,22 @@ module Graphic = struct
 
   let to_structure (g : t) : Structure.t =
     let g' = Ctypes.to_voidp g in
-    Structure.of_any g'
+    match Structure.of_void_pointer g' with
+    | Some s -> s
+    | None -> assert false
 end
 
 module Camera = struct
   include Orx_gen.Camera
 
-  type parent = unit Ctypes.ptr
+  type parent =
+    | Camera of t
+    | Object of Orx_gen.Object.t
+
+  let set_parent (camera : t) (parent : parent) =
+    match parent with
+    | Camera c -> set_parent camera (Ctypes.to_voidp c)
+    | Object o -> set_parent camera (Orx_gen.Object.to_void_pointer o)
 
   let get_position = get_vector get_position
 end
@@ -326,7 +335,7 @@ module Object = struct
     | None -> None
     | Some bank ->
       let ptrs = Bank.to_list bank in
-      let objects = List.map of_void_pointer ptrs in
+      let objects = List.map (fun p -> of_void_pointer p |> Option.get) ptrs in
       delete_neighbor_list bank;
       Some objects
 
@@ -338,7 +347,15 @@ module Object = struct
     in
     loop None []
 
-  let to_camera_parent = to_void_pointer
+  let to_guid (o : t) : Structure.guid =
+    match to_void_pointer o |> Structure.of_void_pointer with
+    | Some s -> Structure.get_guid s
+    | None -> assert false
+
+  let of_guid (guid : Structure.guid) : t option =
+    let ( let* ) = Option.bind in
+    let* s = Structure.get guid in
+    of_void_pointer (Ctypes.to_voidp s)
 end
 
 module Event = struct
@@ -369,10 +386,10 @@ module Event = struct
     | Physics -> to_flags event_ids Orx_types.Physics_event.map_to_constant
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
 
-  let get_sender_object (event : t) : Object.t =
+  let get_sender_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.sender)
 
-  let get_recipient_object (event : t) : Object.t =
+  let get_recipient_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.recipient)
 
   let event_handler = Ctypes.(t @-> returning Orx_gen.Status.t)

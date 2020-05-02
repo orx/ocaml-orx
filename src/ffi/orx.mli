@@ -24,6 +24,8 @@ end
 
 module Structure : sig
   type t
+
+  type guid
 end
 
 module Vector : sig
@@ -168,46 +170,6 @@ module Graphic : sig
   val set_data : t -> Structure.t -> Status.t
 
   val to_structure : t -> Structure.t
-end
-
-module Camera : sig
-  type t
-
-  type parent
-
-  val create_from_config : string -> t option
-
-  val get : string -> t option
-
-  val get_name : t -> string
-
-  val set_parent : t -> parent -> Status.t
-
-  val get_position : t -> Vector.t
-
-  val set_position : t -> Vector.t -> Status.t
-
-  val get_rotation : t -> float
-
-  val set_rotation : t -> float -> Status.t
-
-  val get_zoom : t -> float
-
-  val set_zoom : t -> float -> Status.t
-
-  val set_frustum : t -> float -> float -> float -> float -> Status.t
-end
-
-module Viewport : sig
-  type t
-
-  val create_from_config : string -> t option
-
-  val get_camera : t -> Camera.t option
-end
-
-module Render : sig
-  val get_world_position : Vector.t -> Viewport.t -> Vector.t option
 end
 
 module Display : sig
@@ -460,7 +422,9 @@ module Object : sig
 
   val set_group_id_recursive : t -> String_id.t -> unit
 
-  val to_camera_parent : t -> Camera.parent
+  val to_guid : t -> Structure.guid
+
+  val of_guid : Structure.guid -> t option
 end
 
 module Event_type : sig
@@ -549,9 +513,9 @@ module Event : sig
 
   val to_event : t -> 'event event -> 'event
 
-  val get_sender_object : t -> Object.t
+  val get_sender_object : t -> Object.t option
 
-  val get_recipient_object : t -> Object.t
+  val get_recipient_object : t -> Object.t option
 
   val add_handler : Event_type.t -> (t -> Status.t) -> Status.t
 end
@@ -655,6 +619,48 @@ module Clock : sig
 
   val register :
     t -> (Info.t -> unit) -> Module_id.t -> Clock_priority.t -> Status.t
+end
+
+module Camera : sig
+  type t
+
+  type parent =
+    | Camera of t
+    | Object of Object.t
+
+  val create_from_config : string -> t option
+
+  val get : string -> t option
+
+  val get_name : t -> string
+
+  val set_parent : t -> parent -> Status.t
+
+  val get_position : t -> Vector.t
+
+  val set_position : t -> Vector.t -> Status.t
+
+  val get_rotation : t -> float
+
+  val set_rotation : t -> float -> Status.t
+
+  val get_zoom : t -> float
+
+  val set_zoom : t -> float -> Status.t
+
+  val set_frustum : t -> float -> float -> float -> float -> Status.t
+end
+
+module Viewport : sig
+  type t
+
+  val create_from_config : string -> t option
+
+  val get_camera : t -> Camera.t option
+end
+
+module Render : sig
+  val get_world_position : Vector.t -> Viewport.t -> Vector.t option
 end
 
 module Config : sig
