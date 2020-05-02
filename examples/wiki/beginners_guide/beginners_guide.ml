@@ -94,9 +94,12 @@ module Physics = struct
     Ok ()
 
   (* Main Orx event handler *)
-  let event_handler (event : Orx.Event.t) =
+  let event_handler
+      (event : Orx.Event.t)
+      (physics : Orx.Physics_event.t)
+      (_payload : Orx.Physics_event.payload) =
     let state = State.get () in
-    match Orx.Event.to_event event Physics with
+    match physics with
     | Contact_add ->
       let sender = Orx.Event.get_sender_object event |> Option.get in
       let recipient = Orx.Event.get_recipient_object event |> Option.get in

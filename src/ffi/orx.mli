@@ -427,28 +427,6 @@ module Object : sig
   val of_guid : Structure.guid -> t option
 end
 
-module Event_type : sig
-  type t =
-    | Anim
-    | Clock
-    | Config
-    | Display
-    | Fx
-    | Input
-    | Locale
-    | Object
-    | Render
-    | Physics
-    | Resource
-    | Shader
-    | Sound
-    | Spawner
-    | System
-    | Texture
-    | Timeline
-    | Viewport
-end
-
 module Config_event : sig
   type t =
     | Reload_start
@@ -462,6 +440,10 @@ module Fx_event : sig
     | Add
     | Remove
     | Loop
+
+  type payload
+
+  val get_name : payload -> string
 end
 
 module Input_event : sig
@@ -469,6 +451,12 @@ module Input_event : sig
     | On
     | Off
     | Select_set
+
+  type payload
+
+  val get_set_name : payload -> string
+
+  val get_input_name : payload -> string
 end
 
 module Object_event : sig
@@ -480,12 +468,16 @@ module Object_event : sig
     | Disable
     | Pause
     | Unpause
+
+  type payload
 end
 
 module Physics_event : sig
   type t =
     | Contact_add
     | Contact_remove
+
+  type payload
 end
 
 module Sound_event : sig
@@ -494,44 +486,40 @@ module Sound_event : sig
     | Stop
     | Add
     | Remove
+
+  type payload
+
+  val get_sound : payload -> Sound.t
 end
 
 module Event : sig
   type t
 
+  module Event_type : sig
+    type ('event, 'payload) t =
+      | Fx : (Fx_event.t, Fx_event.payload) t
+      | Input : (Input_event.t, Input_event.payload) t
+      | Object : (Object_event.t, Object_event.payload) t
+      | Physics : (Physics_event.t, Physics_event.payload) t
+      | Sound : (Sound_event.t, Sound_event.payload) t
+
+    type any = Any : (_, _) t -> any
+  end
+
   val get_flag : String_id.t -> String_id.t
 
-  val to_type : t -> Event_type.t
+  val to_type : t -> Event_type.any
 
-  type 'event event =
-    | Config : Config_event.t event
-    | Fx : Fx_event.t event
-    | Input : Input_event.t event
-    | Object : Object_event.t event
-    | Physics : Physics_event.t event
-    | Sound : Sound_event.t event
-
-  val to_event : t -> 'event event -> 'event
+  val to_event : t -> ('event, _) Event_type.t -> 'event
 
   val get_sender_object : t -> Object.t option
 
   val get_recipient_object : t -> Object.t option
 
-  val add_handler : Event_type.t -> (t -> Status.t) -> Status.t
-end
-
-module Fx_event_details : sig
-  val get_name : Event.t -> string
-end
-
-module Input_event_details : sig
-  val get_set_name : Event.t -> string
-
-  val get_input_name : Event.t -> string
-end
-
-module Sound_event_details : sig
-  val get_sound : Event.t -> Sound.t
+  val add_handler :
+    ('event, 'payload) Event_type.t ->
+    (t -> 'event -> 'payload -> Status.t) ->
+    Status.t
 end
 
 module Module_id : sig

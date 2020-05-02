@@ -14,27 +14,29 @@ module State = struct
   let get () = Option.get !state
 end
 
-let input_event_handler (event : Orx.Event.t) =
-  assert (Orx.Event.to_type event = Input);
+let input_event_handler
+    (_event : Orx.Event.t)
+    (_input : Orx.Input_event.t)
+    (_payload : Orx.Input_event.payload) =
+  (* Do nothing for now... *)
+  Ok ()
 
-  (* Do nothing for now... *) Ok ()
-
-let fx_event_handler (event : Orx.Event.t) =
-  assert (Orx.Event.to_type event = Fx);
-
+let fx_event_handler
+    (event : Orx.Event.t)
+    (fx_event : Orx.Fx_event.t)
+    (payload : Orx.Fx_event.payload) =
   let state = State.get () in
   let recipient = Orx.Event.get_recipient_object event |> Option.get in
-  let actual_event = Orx.Event.to_event event Fx in
-  ( match actual_event with
+  ( match fx_event with
   | Start ->
     Fmt.pr "FX <%s>@<%s> has started!@."
-      (Orx.Fx_event_details.get_name event)
+      (Orx.Fx_event.get_name payload)
       (Orx.Object.get_name recipient);
     if Orx.Object.equal recipient state.soldier then
       state.soldier_fx_lock <- true
   | Stop ->
     Fmt.pr "FX <%s>@<%s> has stopped!@."
-      (Orx.Fx_event_details.get_name event)
+      (Orx.Fx_event.get_name payload)
       (Orx.Object.get_name recipient);
     if Orx.Object.equal recipient state.soldier then
       state.soldier_fx_lock <- false

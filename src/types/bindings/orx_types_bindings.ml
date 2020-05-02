@@ -331,75 +331,6 @@ module Bindings (F : Ctypes.TYPE) = struct
           Fmt.invalid_arg "unsupported input mode enum: %Ld" i)
   end
 
-  module Event_type = struct
-    type t =
-      | Anim
-      | Clock
-      | Config
-      | Display
-      | Fx
-      | Input
-      | Locale
-      | Object
-      | Render
-      | Physics
-      | Resource
-      | Shader
-      | Sound
-      | Spawner
-      | System
-      | Texture
-      | Timeline
-      | Viewport
-
-    let anim = F.constant "orxEVENT_TYPE_ANIM" F.int64_t
-    let clock = F.constant "orxEVENT_TYPE_CLOCK" F.int64_t
-    let config = F.constant "orxEVENT_TYPE_CONFIG" F.int64_t
-    let display = F.constant "orxEVENT_TYPE_DISPLAY" F.int64_t
-    let fx = F.constant "orxEVENT_TYPE_FX" F.int64_t
-    let input = F.constant "orxEVENT_TYPE_INPUT" F.int64_t
-    let locale = F.constant "orxEVENT_TYPE_LOCALE" F.int64_t
-    let object_ = F.constant "orxEVENT_TYPE_OBJECT" F.int64_t
-    let render = F.constant "orxEVENT_TYPE_RENDER" F.int64_t
-    let physics = F.constant "orxEVENT_TYPE_PHYSICS" F.int64_t
-    let resource = F.constant "orxEVENT_TYPE_RESOURCE" F.int64_t
-    let shader = F.constant "orxEVENT_TYPE_SHADER" F.int64_t
-    let sound = F.constant "orxEVENT_TYPE_SOUND" F.int64_t
-    let spawner = F.constant "orxEVENT_TYPE_SPAWNER" F.int64_t
-    let system = F.constant "orxEVENT_TYPE_SYSTEM" F.int64_t
-    let texture = F.constant "orxEVENT_TYPE_TEXTURE" F.int64_t
-    let timeline = F.constant "orxEVENT_TYPE_TIMELINE" F.int64_t
-    let viewport = F.constant "orxEVENT_TYPE_VIEWPORT" F.int64_t
-
-    let map_to_constant =
-      [
-        (Anim, anim);
-        (Clock, clock);
-        (Config, config);
-        (Display, display);
-        (Fx, fx);
-        (Input, input);
-        (Locale, locale);
-        (Object, object_);
-        (Render, render);
-        (Physics, physics);
-        (Resource, resource);
-        (Shader, shader);
-        (Sound, sound);
-        (Spawner, spawner);
-        (System, system);
-        (Texture, texture);
-        (Timeline, timeline);
-        (Viewport, viewport);
-      ]
-
-    let map_from_constant = swap_tuple_list map_to_constant
-
-    let t =
-      F.enum "__orxEVENT_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported event type enum: %Ld" i)
-  end
-
   module Config_event = struct
     type t =
       | Reload_start
@@ -619,6 +550,83 @@ module Bindings (F : Ctypes.TYPE) = struct
     let t =
       F.enum "__orxTEXTURE_EVENT_t" map_to_constant ~unexpected:(fun i ->
           Fmt.invalid_arg "unsupported texture event type enum: %Ld" i)
+  end
+
+  module Event_type = struct
+    type ('event, 'payload) t =
+      (* | Anim : ([ `Unbound ], [ `Unbound ]) t *)
+      (* | Clock : ([ `Unbound ], [ `Unbound ]) t *)
+      (* | Config : (Config_event.t, unit) t *)
+      (* | Display : ([ `Unbound ], [ `Unbound ]) t *)
+      | Fx : (Fx_event.t, Fx_event.Payload.t) t
+      | Input : (Input_event.t, Input_event.Payload.t) t
+      (* | Locale : ([ `Unbound ], [ `Unbound ]) t *)
+      | Object : (Object_event.t, Object_event.Payload.t) t
+      (* | Render : ([ `Unbound ], [ `Unbound ]) t *)
+      | Physics : (Physics_event.t, Physics_event.Payload.t) t
+      (* | Resource : ([ `Unbound ], [ `Unbound ]) t *)
+      (* | Shader : ([ `Unbound ], [ `Unbound ]) t *)
+      | Sound : (Sound_event.t, Sound_event.Payload.t) t
+
+    (* | Spawner : ([ `Unbound ], [ `Unbound ]) t *)
+    (* | System : ([ `Unbound ], [ `Unbound ]) t *)
+    (* | Texture : (Texture_event.t, unit) t *)
+    (* | Timeline : ([ `Unbound ], [ `Unbound ]) t *)
+    (* | Viewport : ([ `Unbound ], [ `Unbuund ]) t *)
+
+    type any = Any : (_, _) t -> any
+
+    (* let anim = F.constant "orxEVENT_TYPE_ANIM" F.int64_t *)
+    (* let clock = F.constant "orxEVENT_TYPE_CLOCK" F.int64_t *)
+    (* let config = F.constant "orxEVENT_TYPE_CONFIG" F.int64_t *)
+
+    (* let display = F.constant "orxEVENT_TYPE_DISPLAY" F.int64_t *)
+    let fx = F.constant "orxEVENT_TYPE_FX" F.int64_t
+    let input = F.constant "orxEVENT_TYPE_INPUT" F.int64_t
+
+    (* let locale = F.constant "orxEVENT_TYPE_LOCALE" F.int64_t *)
+    let object_ = F.constant "orxEVENT_TYPE_OBJECT" F.int64_t
+
+    (* let render = F.constant "orxEVENT_TYPE_RENDER" F.int64_t *)
+    let physics = F.constant "orxEVENT_TYPE_PHYSICS" F.int64_t
+
+    (* let resource = F.constant "orxEVENT_TYPE_RESOURCE" F.int64_t *)
+    (* let shader = F.constant "orxEVENT_TYPE_SHADER" F.int64_t *)
+    let sound = F.constant "orxEVENT_TYPE_SOUND" F.int64_t
+
+    (* let spawner = F.constant "orxEVENT_TYPE_SPAWNER" F.int64_t *)
+    (* let system = F.constant "orxEVENT_TYPE_SYSTEM" F.int64_t *)
+    (* let texture = F.constant "orxEVENT_TYPE_TEXTURE" F.int64_t *)
+    (* let timeline = F.constant "orxEVENT_TYPE_TIMELINE" F.int64_t *)
+    (* let viewport = F.constant "orxEVENT_TYPE_VIEWPORT" F.int64_t *)
+
+    let map_to_constant =
+      [
+        (* (Any Anim, anim); *)
+        (* (Any Clock, clock); *)
+        (* (Any Config, config); *)
+        (* (Any Display, display); *)
+        (Any Fx, fx);
+        (Any Input, input);
+        (* (Any Locale, locale); *)
+        (Any Object, object_);
+        (* (Any Render, render); *)
+        (Any Physics, physics);
+        (* (Any Resource, resource); *)
+        (* (Any Shader, shader); *)
+        (Any Sound, sound);
+        (* (Any Spawner, spawner); *)
+        (* (Any System, system); *)
+        (* (Any Texture, texture); *)
+        (* (Any Timeline, timeline); *)
+        (* (Any Viewport, viewport); *)
+      ]
+
+    let map_from_constant = swap_tuple_list map_to_constant
+
+    let t =
+      F.enum "__orxEVENT_TYPE_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported event type enum: %Ld" i)
   end
 
   module Event = struct

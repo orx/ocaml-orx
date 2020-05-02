@@ -9,8 +9,11 @@ module State = struct
   let get () = Option.get !state
 end
 
-let event_handler (event : Orx.Event.t) =
-  ( match Orx.Event.to_event event Physics with
+let event_handler
+    (event : Orx.Event.t)
+    (physics : Orx.Physics_event.t)
+    (_payload : Orx.Physics_event.payload) =
+  ( match physics with
   | Contact_remove -> ()
   | Contact_add ->
     let sender = Orx.Event.get_sender_object event |> Option.get in

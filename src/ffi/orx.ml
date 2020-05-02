@@ -3,9 +3,6 @@ let ( !@ ) = Ctypes.( !@ )
 module Orx_gen = Orx_bindings.Bindings (Generated)
 module Color = Orx_gen.Color
 module Display = Orx_gen.Display
-module Fx_event_details = Orx_gen.Fx_event_details
-module Input_event_details = Orx_gen.Input_event_details
-module Sound_event_details = Orx_gen.Sound_event_details
 module Resource = Orx_gen.Resource
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
@@ -17,13 +14,12 @@ module Clock_priority = Orx_types.Clock_priority
 module Clock_info = Orx_types.Clock_info
 module Clock_type = Orx_types.Clock_type
 module Module_id = Orx_types.Module_id
-module Event_type = Orx_types.Event_type
 module Config_event = Orx_types.Config_event
-module Fx_event = Orx_types.Fx_event
-module Input_event = Orx_types.Input_event
-module Object_event = Orx_types.Object_event
-module Physics_event = Orx_types.Physics_event
-module Sound_event = Orx_types.Sound_event
+module Fx_event = Orx_gen.Fx_event
+module Input_event = Orx_gen.Input_event
+module Object_event = Orx_gen.Object_event
+module Physics_event = Orx_gen.Physics_event
+module Sound_event = Orx_gen.Sound_event
 module Input_mode = Orx_types.Input_mode
 module Input_type = Orx_types.Input_type
 module Mouse_axis = Orx_types.Mouse_axis
@@ -376,10 +372,11 @@ module Event = struct
       (fun flag id -> Unsigned.UInt32.logor flag id)
       Unsigned.UInt32.zero flags
 
-  let make_flags (type a) (event_type : a event) (event_ids : a list) :
-      event_flag =
+  let make_flags
+      (type event payload)
+      (event_type : (event, payload) Event_type.t)
+      (event_ids : event list) : event_flag =
     match event_type with
-    | Config -> to_flags event_ids Orx_types.Config_event.map_to_constant
     | Fx -> to_flags event_ids Orx_types.Fx_event.map_to_constant
     | Input -> to_flags event_ids Orx_types.Input_event.map_to_constant
     | Object -> to_flags event_ids Orx_types.Object_event.map_to_constant
@@ -407,9 +404,28 @@ module Event = struct
   (* Hold onto callbacks so they're not collected *)
   let registered_callbacks : (t -> Orx_gen.Status.t) list ref = ref []
 
-  let add_handler (event_type : Orx_types.Event_type.t) callback =
+  let add_handler :
+      type e p. (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> Status.t =
+   fun event_type callback ->
     let callback event =
-      match callback event with
+      let f =
+        match event_type with
+        | Fx ->
+          fun () -> callback event (to_event event Fx) (to_payload event Fx)
+        | Input ->
+          fun () ->
+            callback event (to_event event Input) (to_payload event Input)
+        | Object ->
+          fun () ->
+            callback event (to_event event Object) (to_payload event Object)
+        | Physics ->
+          fun () ->
+            callback event (to_event event Physics) (to_payload event Physics)
+        | Sound ->
+          fun () ->
+            callback event (to_event event Sound) (to_payload event Sound)
+      in
+      match f () with
       | result -> result
       | exception exn ->
         Fmt.epr "Unhandled exception in event callback: %a@." Fmt.exn_backtrace
@@ -423,7 +439,9 @@ module Event = struct
       | _ -> Unsigned.UInt32.max_int
     in
     let remove_flags = Unsigned.UInt32.max_int in
-    c_add_handler event_type callback add_flags remove_flags
+    c_add_handler
+      (Event_type.to_c_any event_type)
+      callback add_flags remove_flags
 end
 
 module Clock = struct

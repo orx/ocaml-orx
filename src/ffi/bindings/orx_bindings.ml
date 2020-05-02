@@ -825,35 +825,89 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (T.Input_type.t @-> int @-> T.Input_mode.t @-> returning string)
   end
 
+  module Fx_event = struct
+    include T.Fx_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let get_name (payload : payload) : string =
+      Ctypes.getf !@payload Payload.name
+  end
+
+  module Input_event = struct
+    include T.Input_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let get_set_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Input_event.Payload.set_name
+
+    let get_input_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Input_event.Payload.input_name
+  end
+
+  module Object_event = struct
+    include T.Object_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+  end
+
+  module Physics_event = struct
+    include T.Physics_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+  end
+
+  module Sound_event = struct
+    include T.Sound_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let get_sound (payload : payload) : Sound.t =
+      Ctypes.getf !@payload T.Sound_event.Payload.sound
+  end
+
   module Event = struct
     type t = T.Event.t structure ptr
 
     let t = ptr T.Event.t
 
-    type 'event payload =
-      | Fx : T.Fx_event.Payload.t payload
-      | Input : T.Input_event.Payload.t payload
-      | Object : T.Object_event.Payload.t payload
-      | Physics : T.Physics_event.Payload.t payload
-      | Sound : T.Sound_event.Payload.t payload
+    module Event_type = struct
+      type ('event, 'payload) t =
+        | Fx : (Fx_event.t, Fx_event.payload) t
+        | Input : (Input_event.t, Input_event.payload) t
+        | Object : (Object_event.t, Object_event.payload) t
+        | Physics : (Physics_event.t, Physics_event.payload) t
+        | Sound : (Sound_event.t, Sound_event.payload) t
 
-    type 'event event =
-      | Config : T.Config_event.t event
-      | Fx : T.Fx_event.t event
-      | Input : T.Input_event.t event
-      | Object : T.Object_event.t event
-      | Physics : T.Physics_event.t event
-      | Sound : T.Sound_event.t event
+      type any = Any : (_, _) t -> any
+
+      let of_c_type :
+          type e p.
+          (e, p) T.Event_type.t -> (e, p Ctypes.structure Ctypes.ptr) t =
+        function
+        | Fx -> Fx
+        | Input -> Input
+        | Object -> Object
+        | Physics -> Physics
+        | Sound -> Sound
+
+      let to_c_any : type e p. (e, p) t -> T.Event_type.any = function
+        | Fx -> Any Fx
+        | Input -> Any Input
+        | Object -> Any Object
+        | Physics -> Any Physics
+        | Sound -> Any Sound
+
+      let of_c_any (c : T.Event_type.any) : any =
+        match c with
+        | Any ct -> Any (of_c_type ct)
+    end
 
     let get_flag = c "orxEVENT_GET_FLAG" (uint32_t @-> returning uint32_t)
 
     let to_event_id (event : t) : int64 =
       Ctypes.getf !@event T.Event.event_id |> Unsigned.UInt.to_int64
 
-    let to_type (event : t) : T.Event_type.t =
-      Ctypes.getf !@event T.Event.event_type
+    let to_type (event : t) : Event_type.any =
+      Ctypes.getf !@event T.Event.event_type |> Event_type.of_c_any
 
-    let assert_type (event : t) (typ_ : T.Event_type.t) : unit =
+    let assert_type (event : t) (typ_ : Event_type.any) : unit =
       match to_type event = typ_ with
       | true -> ()
       | false -> Fmt.invalid_arg "Unexpected or invalid event type"
@@ -862,24 +916,26 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       let payload_field = Ctypes.getf !@event T.Event.payload in
       Ctypes.from_voidp payload_type payload_field
 
-    let to_payload (type a) (event : t) (payload_type : a payload) :
-        a structure ptr =
+    let to_payload
+        (type event payload)
+        (event : t)
+        (payload_type : (event, payload) Event_type.t) : payload =
       (* Some dynamic type checking... *)
       match payload_type with
       | Fx ->
-        assert_type event T.Event_type.Fx;
+        assert_type event (Any Fx);
         unsafe_get_payload event T.Fx_event.Payload.t
       | Input ->
-        assert_type event T.Event_type.Input;
+        assert_type event (Any Input);
         unsafe_get_payload event T.Input_event.Payload.t
       | Object ->
-        assert_type event T.Event_type.Object;
+        assert_type event (Any Object);
         unsafe_get_payload event T.Object_event.Payload.t
       | Physics ->
-        assert_type event T.Event_type.Physics;
+        assert_type event (Any Physics);
         unsafe_get_payload event T.Physics_event.Payload.t
       | Sound ->
-        assert_type event T.Event_type.Sound;
+        assert_type event (Any Sound);
         unsafe_get_payload event T.Sound_event.Payload.t
 
     let get_event_by_id (event : t) map_from_constant =
@@ -888,50 +944,26 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | None -> Fmt.invalid_arg "Unhandled event id: %Ld" event_id
       | Some event -> event
 
-    let to_event (type a) (event : t) (event_type : a event) : a =
+    let to_event
+        (type event payload)
+        (event : t)
+        (event_type : (event, payload) Event_type.t) : event =
       match event_type with
-      | Config ->
-        assert_type event T.Event_type.Config;
-        get_event_by_id event T.Config_event.map_from_constant
       | Fx ->
-        assert_type event T.Event_type.Fx;
+        assert_type event (Any Fx);
         get_event_by_id event T.Fx_event.map_from_constant
       | Input ->
-        assert_type event T.Event_type.Input;
+        assert_type event (Any Input);
         get_event_by_id event T.Input_event.map_from_constant
       | Object ->
-        assert_type event T.Event_type.Object;
+        assert_type event (Any Object);
         get_event_by_id event T.Object_event.map_from_constant
       | Physics ->
-        assert_type event T.Event_type.Physics;
+        assert_type event (Any Physics);
         get_event_by_id event T.Physics_event.map_from_constant
       | Sound ->
-        assert_type event T.Event_type.Sound;
+        assert_type event (Any Sound);
         get_event_by_id event T.Sound_event.map_from_constant
-  end
-
-  module Fx_event_details = struct
-    let get_name (event : Event.t) : string =
-      let payload = Event.to_payload event Fx in
-      Ctypes.getf !@payload T.Fx_event.Payload.name
-  end
-
-  module Input_event_details = struct
-    let get_payload_field (event : Event.t) field =
-      let payload = Event.to_payload event Input in
-      Ctypes.getf !@payload field
-
-    let get_set_name (event : Event.t) : string =
-      get_payload_field event T.Input_event.Payload.set_name
-
-    let get_input_name (event : Event.t) : string =
-      get_payload_field event T.Input_event.Payload.input_name
-  end
-
-  module Sound_event_details = struct
-    let get_sound (event : Event.t) : Sound.t =
-      let payload = Event.to_payload event Sound in
-      Ctypes.getf !@payload T.Sound_event.Payload.sound
   end
 
   module Physics = struct

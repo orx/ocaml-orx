@@ -12,24 +12,31 @@ module State = struct
   let get () = Option.get !state
 end
 
-let event_message (event : Orx.Event.t) kind =
-  assert (Orx.Event.to_type event = Sound);
-  let sound = Orx.Sound_event_details.get_sound event in
+let event_message
+    (event : Orx.Event.t)
+    (sound_event_payload : Orx.Sound_event.payload)
+    kind =
+  let sound = Orx.Sound_event.get_sound sound_event_payload in
   let recipient = Orx.Event.get_recipient_object event |> Option.get in
   Fmt.pr "Sound [%s]@@[%s] has %s@." (Orx.Sound.get_name sound)
     (Orx.Object.get_name recipient)
     kind
 
-let event_handler (event : Orx.Event.t) =
+let event_handler
+    (event : Orx.Event.t)
+    (sound_event : Orx.Sound_event.t)
+    (payload : Orx.Sound_event.payload) =
   let state = State.get () in
-  let recipient = Orx.Event.get_recipient_object event |> Option.get in
-  if Orx.Object.equal state.soldier recipient then (
-    match Orx.Event.to_event event Sound with
-    | Start -> event_message event "started"
-    | Stop -> event_message event "stopped"
-    | _ -> ()
-  );
-  Ok ()
+  match Orx.Event.get_recipient_object event with
+  | None -> Error `Orx
+  | Some recipient ->
+    if Orx.Object.equal state.soldier recipient then (
+      match sound_event with
+      | Start -> event_message event payload "started"
+      | Stop -> event_message event payload "stopped"
+      | _ -> ()
+    );
+    Ok ()
 
 let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
   if Orx.Input.has_been_activated "RandomSFX" then (
