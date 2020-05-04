@@ -1,4 +1,4 @@
-# ocaml-orx - OCaml/Reason bindings to the Orx game library
+# ocaml-orx - OCaml bindings to the Orx game library
 
 **NOTE**: This is an early, very work in progress set of bindings. There are
 guaranteed to be bugs and rough edges along with lots of missing documentation.
@@ -7,9 +7,9 @@ These bindings are an occasional nights and weekends project done for fun.
 [Orx] is "an open source, portable, lightweight, plugin-based, data-driven and
 extremely easy to use 2D-oriented game engine."  Orx itself is written in C.
 
-This repository provides bindings to use Orx from Reason and OCaml programs. The
+This repository provides bindings to use Orx from OCaml programs. The
 sound, graphics, physics, input handling and more can be handled by Orx in C,
-with the game logic written in Reason and/or OCaml.
+with the game logic written in OCaml.
 
 These bindings are licensed under the [MIT license](LICENSE.md).
 
@@ -29,12 +29,12 @@ To compile orx-ocaml you will need the following, all available from [opam]:
 
 Once those are installed, you can `dune build` to build the library,
 `dune utop src` to explore the bindings from a REPL if you have [utop]
-installed, or `dune exec examples/tutorial.exe` to try a (slightly modified)
-port of the Orx beginner's guide tutorial.
+installed, or `dune exec examples/wiki/beginners_guide/beginners_guide.exe`
+to try a (slightly modified) port of the Orx beginner's guide tutorial.
 
 ## Examples
-The [beginner's guide][guide] project has been ported to Reason in
-[this example](examples/wiki/beginners_guide/beginners_guide.re).
+The [beginner's guide][guide] project has been ported to OCaml in
+[this example](examples/wiki/beginners_guide/beginners_guide.ml).
 
 Some of the [tutorials][tutorials] have been ported [as well](examples/tutorial/).
 
