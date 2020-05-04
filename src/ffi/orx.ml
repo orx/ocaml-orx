@@ -156,6 +156,11 @@ module Vector = struct
   let move_y (v : t) (delta : float) : unit = set_y v (get_y v +. delta)
 
   let move_z (v : t) (delta : float) : unit = set_z v (get_z v +. delta)
+
+  let of_rotation (rotation : float) : t =
+    let x = cos rotation in
+    let y = sin rotation in
+    make ~x ~y ~z:0.0
 end
 
 module Obox = struct
