@@ -852,6 +852,18 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module Physics_event = struct
     include T.Physics_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let get_position (payload : payload) : Vector.t =
+      !@payload @. T.Physics_event.Payload.position
+
+    let get_normal (payload : payload) : Vector.t =
+      !@payload @. T.Physics_event.Payload.normal
+
+    let get_sender_part_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Physics_event.Payload.sender_part_name
+
+    let get_recipient_part_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Physics_event.Payload.recipient_part_name
   end
 
   module Sound_event = struct

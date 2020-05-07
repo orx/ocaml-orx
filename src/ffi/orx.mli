@@ -480,6 +480,11 @@ module Physics_event : sig
     | Contact_remove
 
   type payload
+
+  val get_position : payload -> Vector.t
+  val get_normal : payload -> Vector.t
+  val get_sender_part_name : payload -> string
+  val get_recipient_part_name : payload -> string
 end
 
 module Sound_event : sig
