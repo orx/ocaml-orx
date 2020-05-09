@@ -116,6 +116,8 @@ module Vector : sig
   val move_z : t -> float -> unit
 
   val of_rotation : float -> t
+
+  val to_rotation : t -> float
 end
 
 module Obox : sig

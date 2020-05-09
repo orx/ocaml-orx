@@ -161,6 +161,8 @@ module Vector = struct
     let x = cos rotation in
     let y = sin rotation in
     make ~x ~y ~z:0.0
+
+  let to_rotation (v : t) : float = Float.atan2 (get_y v) (get_x v)
 end
 
 module Obox = struct
