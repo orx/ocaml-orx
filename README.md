@@ -1,13 +1,9 @@
 # ocaml-orx - OCaml bindings to the Orx game library
 
-**NOTE**: This is an early, very work in progress set of bindings. There are
-guaranteed to be bugs and rough edges along with lots of missing documentation.
-These bindings are an occasional nights and weekends project done for fun.
-
 [Orx] is "an open source, portable, lightweight, plugin-based, data-driven and
 extremely easy to use 2D-oriented game engine."  Orx itself is written in C.
 
-This repository provides bindings to use Orx from OCaml programs. The
+This repository provides bindings to use Orx from OCaml. The
 sound, graphics, physics, input handling and more can be handled by Orx in C,
 with the game logic written in OCaml.
 
