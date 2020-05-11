@@ -338,7 +338,13 @@ module Object = struct
     | None -> None
     | Some bank ->
       let ptrs = Bank.to_list bank in
-      let objects = List.map (fun p -> of_void_pointer p |> Option.get) ptrs in
+      let objects =
+        List.map
+          (fun p ->
+            let ptr_ptr_void = Ctypes.from_voidp (Ctypes.ptr Ctypes.void) p in
+            of_void_pointer !@ptr_ptr_void |> Option.get)
+          ptrs
+      in
       delete_neighbor_list bank;
       Some objects
 
