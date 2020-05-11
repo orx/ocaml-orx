@@ -89,6 +89,10 @@ module Vector : sig
 
   val div : t -> t -> t
 
+  val dot : t -> t -> float
+
+  val dot_2d : t -> t -> float
+
   val cross' : target:t -> t -> t -> unit
 
   val cross : t -> t -> t

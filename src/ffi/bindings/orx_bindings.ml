@@ -92,6 +92,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let div = c "orxVector_Div" (t @-> t @-> t @-> returning t)
 
+    let dot = c "orxVector_Dot" (t @-> t @-> returning float)
+
+    let dot_2d = c "orxVector_2DDot" (t @-> t @-> returning float)
+
     let cross = c "orxVector_Cross" (t @-> t @-> t @-> returning t)
 
     let neg = c "orxVector_Neg" (t @-> t @-> returning t)
