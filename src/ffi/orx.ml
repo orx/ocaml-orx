@@ -356,12 +356,12 @@ module Object = struct
     in
     loop None []
 
-  let to_guid (o : t) : Structure.guid =
+  let to_guid (o : t) : Structure.Guid.t =
     match to_void_pointer o |> Structure.of_void_pointer with
     | Some s -> Structure.get_guid s
     | None -> assert false
 
-  let of_guid (guid : Structure.guid) : t option =
+  let of_guid (guid : Structure.Guid.t) : t option =
     let ( let* ) = Option.bind in
     let* s = Structure.get guid in
     of_void_pointer (Ctypes.to_voidp s)

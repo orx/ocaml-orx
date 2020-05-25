@@ -25,7 +25,13 @@ end
 module Structure : sig
   type t
 
-  type guid
+  module Guid : sig
+    type t
+
+    val compare : t -> t -> int
+    val equal : t -> t -> bool
+    val pp : Format.formatter -> t -> unit
+  end
 end
 
 module Vector : sig
@@ -430,9 +436,9 @@ module Object : sig
 
   val set_group_id_recursive : t -> String_id.t -> unit
 
-  val to_guid : t -> Structure.guid
+  val to_guid : t -> Structure.Guid.t
 
-  val of_guid : Structure.guid -> t option
+  val of_guid : Structure.Guid.t -> t option
 end
 
 module Config_event : sig
@@ -747,6 +753,8 @@ module Config : sig
   val get_current_section_keys : unit -> string list
 
   val get_section_keys : string -> string list Status.result
+
+  val get_guid : string -> Structure.Guid.t
 end
 
 module Orx_thread : sig

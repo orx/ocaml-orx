@@ -161,7 +161,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module Structure = struct
     type t = T.Structure.t structure ptr
 
-    type guid = Unsigned.uint64
+    module Guid = struct
+      type t = Unsigned.uint64
+
+      let t = uint64_t
+
+      let (compare, equal, pp) = Unsigned.UInt64.(compare, equal, pp)
+    end
 
     let t = ptr T.Structure.t
 
@@ -169,9 +175,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let of_void_pointer = c "orxSTRUCTURE" (ptr void @-> returning t_opt)
 
-    let get_guid = c "orxStructure_GetGUID" (t @-> returning uint64_t)
+    let get_guid = c "orxStructure_GetGUID" (t @-> returning Guid.t)
 
-    let get = c "orxStructure_Get" (uint64_t @-> returning t_opt)
+    let get = c "orxStructure_Get" (Guid.t @-> returning t_opt)
   end
 
   module Texture = struct
@@ -294,7 +300,6 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxMouse_GetAxisName" (T.Mouse_axis.t @-> returning string)
   end
 
-  (* This module will be included in the Config module defined in orx.re *)
   module Config = struct
     let set_basename = c "orxConfig_SetBaseName" (string @-> returning Status.t)
 
@@ -411,6 +416,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let append_list_string =
       c "orxConfig_AppendListString"
         (string @-> ptr string @-> int @-> returning Status.t)
+
+    let get_guid = c "orxConfig_GetU64" (string @-> returning Structure.Guid.t)
   end
 
   module Clock = struct
