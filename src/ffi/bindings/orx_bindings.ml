@@ -353,8 +353,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_float = c "orxConfig_GetFloat" (string @-> returning float)
 
-    (* XXX: Pretend a signed 64bit integer is always enough and the values will *)
-    (* always fit in an OCaml int *)
+    (* XXX: Pretend a signed 64bit integer is always enough and the values will
+       always fit in an OCaml int *)
     let get_int = c "orxConfig_GetS64" (string @-> returning int)
 
     let get_vector =
