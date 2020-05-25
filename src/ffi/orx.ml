@@ -60,6 +60,11 @@ module Vector = struct
 
   let get_z (v : t) : float = Ctypes.getf !@v Orx_types.Vector.z
 
+  let equal_2d (a : t) (b : t) : bool =
+    Float.equal (get_x a) (get_x b) && Float.equal (get_y a) (get_y b)
+
+  let pp ppf (v : t) = Fmt.pf ppf "(%g, %g, %g)" (get_x v) (get_y v) (get_z v)
+
   let make ~x ~y ~z : t =
     let v = allocate_raw () in
     let (_ : t) = set v x y z in
@@ -529,6 +534,13 @@ module Config = struct
   let get (get : string -> 'a) ~(section : string) ~(key : string) :
       ('a, 'err) result =
     with_section section (fun () -> get key)
+
+  let set
+      (set : string -> 'a -> Status.t)
+      (v : 'a)
+      ~(section : string)
+      ~(key : string) : Status.t =
+    with_section section (fun () -> set key v) |> Result.join
 
   let get_list_item
       (get : string -> int option -> 'a)

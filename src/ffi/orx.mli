@@ -37,7 +37,11 @@ end
 module Vector : sig
   type t
 
+  val pp : Format.formatter -> t -> unit
+
   val equal : t -> t -> bool
+
+  val equal_2d : t -> t -> bool
 
   val get_x : t -> float
 
@@ -732,6 +736,9 @@ module Config : sig
   val append_list_string : string -> string list -> Status.t
 
   val get : (string -> 'a) -> section:string -> key:string -> 'a Status.result
+
+  val set :
+    (string -> 'a -> Status.t) -> 'a -> section:string -> key:string -> Status.t
 
   val get_list_item :
     (string -> int option -> 'a) ->
