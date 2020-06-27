@@ -71,8 +71,7 @@ let update (_clock_info : Orx.Clock.Info.t) =
 
   if not state.soldier_fx_lock then
     if Orx.Input.has_been_activated "ApplyFX" then
-      Orx.Object.add_fx state.soldier state.selected_fx ~unique:true
-      |> Result.get_ok
+      Orx.Object.add_unique_fx state.soldier state.selected_fx |> Result.get_ok
 
 let init () =
   (* Print out a hint to the user about what's to come *)

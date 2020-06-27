@@ -320,10 +320,17 @@ module Object : sig
 
   val get_bounding_box : t -> Obox.t option
 
-  val add_fx : ?delay:float -> unique:bool -> t -> string -> Status.t
+  val add_fx : t -> string -> Status.t
 
-  val add_fx_recursive :
-    ?delay:float * bool -> unique:bool -> t -> string -> unit
+  val add_unique_fx : t -> string -> Status.t
+
+  val add_delayed_fx : t -> string -> float -> Status.t
+
+  val add_fx_recursive : t -> string -> unit
+
+  val add_unique_fx_recursive : t -> string -> unit
+
+  val add_delayed_fx_recursive : t -> string -> float -> bool -> unit
 
   val remove_fx : t -> string -> Status.t
 

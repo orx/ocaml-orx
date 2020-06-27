@@ -18,8 +18,8 @@ let event_handler
   | Contact_add ->
     let sender = Orx.Event.get_sender_object event |> Option.get in
     let recipient = Orx.Event.get_recipient_object event |> Option.get in
-    Orx.Object.add_fx sender "Bump" ~unique:false |> ignore;
-    Orx.Object.add_fx recipient "Bump" ~unique:false |> ignore
+    Orx.Object.add_fx sender "Bump" |> ignore;
+    Orx.Object.add_fx recipient "Bump" |> ignore
   );
 
   Ok ()
