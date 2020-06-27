@@ -338,6 +338,23 @@ module Object = struct
       else
         add_delayed_fx o fx time
 
+  let add_fx_recursive
+      ?(delay : (float * bool) option)
+      ~(unique : bool)
+      (o : t)
+      (fx : string) =
+    match delay with
+    | None ->
+      if unique then
+        add_unique_fx_recursive o fx
+      else
+        add_fx_recursive o fx
+    | Some (time, propagate) ->
+      if unique then
+        add_unique_delayed_fx_recursive o fx time propagate
+      else
+        add_delayed_fx_recursive o fx time propagate
+
   let get_neighbor_list (box : Obox.t) (group_id : String_id.t) =
     match create_neighbor_list box group_id with
     | None -> None

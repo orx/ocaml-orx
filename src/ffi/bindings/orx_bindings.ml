@@ -622,6 +622,20 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_AddUniqueDelayedFX"
         (t @-> string @-> float @-> returning Status.t)
 
+    let add_fx_recursive =
+      c "orxObject_AddFXRecursive" (t @-> string @-> returning void)
+
+    let add_unique_fx_recursive =
+      c "orxObject_AddUniqueFXRecursive" (t @-> string @-> returning void)
+
+    let add_delayed_fx_recursive =
+      c "orxObject_AddDelayedFXRecursive"
+        (t @-> string @-> float @-> bool @-> returning void)
+
+    let add_unique_delayed_fx_recursive =
+      c "orxObject_AddUniqueDelayedFXRecursive"
+        (t @-> string @-> float @-> bool @-> returning void)
+
     let remove_fx = c "orxObject_RemoveFX" (t @-> string @-> returning Status.t)
 
     (* Position and orientation *)
@@ -665,6 +679,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Time line *)
     let add_time_line_track =
       c "orxObject_AddTimeLineTrack" (t @-> string @-> returning Status.t)
+
+    let add_time_line_track_recursive =
+      c "orxObject_AddTimeLineTrackRecursive" (t @-> string @-> returning void)
 
     let remove_time_line_track =
       c "orxObject_RemoveTimeLineTrack" (t @-> string @-> returning Status.t)

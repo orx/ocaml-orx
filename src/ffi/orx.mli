@@ -322,6 +322,9 @@ module Object : sig
 
   val add_fx : ?delay:float -> unique:bool -> t -> string -> Status.t
 
+  val add_fx_recursive :
+    ?delay:float * bool -> unique:bool -> t -> string -> unit
+
   val remove_fx : t -> string -> Status.t
 
   val get_rotation : t -> float
@@ -351,6 +354,8 @@ module Object : sig
   val get_active_time : t -> float
 
   val add_time_line_track : t -> string -> Status.t
+
+  val add_time_line_track_recursive : t -> string -> unit
 
   val remove_time_line_track : t -> string -> Status.t
 
