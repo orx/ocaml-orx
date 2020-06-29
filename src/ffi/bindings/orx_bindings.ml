@@ -529,6 +529,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t_opt : t option typ = ptr_opt T.Camera.t
 
+    let to_void_pointer (c : t) = to_voidp c
+
     (* Creating cameras *)
     let create_from_config =
       c "orxCamera_CreateFromConfig" (string @-> returning t_opt)
@@ -540,7 +542,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_name = c "orxCamera_GetName" (t @-> returning string)
 
     let set_parent =
-      c "orxCamera_SetParent" (t @-> ptr void @-> returning Status.t)
+      c "orxCamera_SetParent" (t @-> ptr_opt void @-> returning Status.t)
 
     (* Camera positioning *)
     let get_position =
@@ -599,6 +601,16 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Basic attributes *)
     let get_name = c "orxObject_GetName" (t @-> returning string)
+
+    let set_parent =
+      c "orxObject_SetParent" (t @-> ptr_opt void @-> returning Status.t)
+
+    let get_parent = c "orxObject_GetParent" (t @-> returning Structure.t_opt)
+
+    let set_owner =
+      c "orxObject_SetOwner" (t @-> ptr_opt void @-> returning void)
+
+    let get_owner = c "orxObject_GetOwner" (t @-> returning Structure.t_opt)
 
     (* Parent/child relationships *)
     let get_child_object = c "orxObject_GetChild" (t @-> returning t_opt)

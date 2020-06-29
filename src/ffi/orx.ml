@@ -1,6 +1,10 @@
 let ( !@ ) = Ctypes.( !@ )
 
 module Orx_gen = Orx_bindings.Bindings (Generated)
+
+type camera = Orx_gen.Camera.t
+type obj = Orx_gen.Object.t
+
 module Color = Orx_gen.Color
 module Display = Orx_gen.Display
 module Resource = Orx_gen.Resource
@@ -249,17 +253,24 @@ module Graphic = struct
     | None -> assert false
 end
 
+module Parent = struct
+  type t =
+    | Camera of Orx_gen.Camera.t
+    | Object of Orx_gen.Object.t
+
+  let set setter child (parent : t option) =
+    let to_parent_ptr (p : t) =
+      match p with
+      | Camera c -> Orx_gen.Camera.to_void_pointer c
+      | Object o -> Orx_gen.Object.to_void_pointer o
+    in
+    setter child (Option.map to_parent_ptr parent)
+end
+
 module Camera = struct
   include Orx_gen.Camera
 
-  type parent =
-    | Camera of t
-    | Object of Orx_gen.Object.t
-
-  let set_parent (camera : t) (parent : parent) =
-    match parent with
-    | Camera c -> set_parent camera (Ctypes.to_voidp c)
-    | Object o -> set_parent camera (Orx_gen.Object.to_void_pointer o)
+  let set_parent camera parent = Parent.set set_parent camera parent
 
   let get_position = get_vector get_position
 end
@@ -284,6 +295,10 @@ end
 
 module Object = struct
   include Orx_gen.Object
+
+  let set_parent o parent = Parent.set set_parent o parent
+
+  let set_owner o owner = Parent.set set_owner o owner
 
   type collision = {
     colliding_object : t;

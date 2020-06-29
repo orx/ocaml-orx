@@ -1,3 +1,6 @@
+type camera
+type obj
+
 module Status : sig
   type 'ok result = ('ok, [ `Orx ]) Stdlib.result
   type t = unit result
@@ -20,6 +23,12 @@ module String_id : sig
   val get_id : string -> t
 
   val get_from_id : t -> string
+end
+
+module Parent : sig
+  type t =
+    | Camera of camera
+    | Object of obj
 end
 
 module Structure : sig
@@ -296,7 +305,7 @@ module Physics : sig
 end
 
 module Object : sig
-  type t
+  type t = obj
 
   val compare : t -> t -> int
 
@@ -315,6 +324,14 @@ module Object : sig
   val is_paused : t -> bool
 
   val get_name : t -> string
+
+  val set_owner : t -> Parent.t option -> unit
+
+  val get_owner : t -> Structure.t option
+
+  val set_parent : t -> Parent.t option -> Status.t
+
+  val get_parent : t -> Structure.t option
 
   val get_child_object : t -> t option
 
@@ -645,11 +662,7 @@ module Clock : sig
 end
 
 module Camera : sig
-  type t
-
-  type parent =
-    | Camera of t
-    | Object of Object.t
+  type t = camera
 
   val create_from_config : string -> t option
 
@@ -657,7 +670,7 @@ module Camera : sig
 
   val get_name : t -> string
 
-  val set_parent : t -> parent -> Status.t
+  val set_parent : t -> Parent.t option -> Status.t
 
   val get_position : t -> Vector.t
 
