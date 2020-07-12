@@ -175,6 +175,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let of_void_pointer = c "orxSTRUCTURE" (ptr void @-> returning t_opt)
 
+    let to_void_pointer (s : t) = to_voidp s
+
     let get_guid = c "orxStructure_GetGUID" (t @-> returning Guid.t)
 
     let get = c "orxStructure_Get" (Guid.t @-> returning t_opt)
@@ -531,6 +533,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let to_void_pointer (c : t) = to_voidp c
 
+    let of_void_pointer = c "orxCAMERA" (ptr void @-> returning t_opt)
+
     (* Creating cameras *)
     let create_from_config =
       c "orxCamera_CreateFromConfig" (string @-> returning t_opt)
@@ -540,6 +544,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Get/set misc camera properties *)
     let get_name = c "orxCamera_GetName" (t @-> returning string)
+
+    let get_parent = c "orxCamera_GetParent" (t @-> returning Structure.t_opt)
 
     let set_parent =
       c "orxCamera_SetParent" (t @-> ptr_opt void @-> returning Status.t)

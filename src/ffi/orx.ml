@@ -265,12 +265,26 @@ module Parent = struct
       | Object o -> Orx_gen.Object.to_void_pointer o
     in
     setter child (Option.map to_parent_ptr parent)
+
+  let of_void_pointer p : t option =
+    match Orx_gen.Object.of_void_pointer p with
+    | Some o -> Some (Object o)
+    | None ->
+      ( match Orx_gen.Camera.of_void_pointer p with
+      | Some c -> Some (Camera c)
+      | None -> None
+      )
 end
 
 module Camera = struct
   include Orx_gen.Camera
 
   let set_parent camera parent = Parent.set set_parent camera parent
+
+  let get_parent camera =
+    match get_parent camera with
+    | None -> None
+    | Some s -> Parent.of_void_pointer (Structure.to_void_pointer s)
 
   let get_position = get_vector get_position
 end

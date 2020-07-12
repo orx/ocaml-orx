@@ -670,6 +670,8 @@ module Camera : sig
 
   val get_name : t -> string
 
+  val get_parent : t -> Parent.t option
+
   val set_parent : t -> Parent.t option -> Status.t
 
   val get_position : t -> Vector.t
