@@ -762,10 +762,25 @@ module Config : sig
 
   val append_list_string : string -> string list -> Status.t
 
+  val exists : section:string -> key:string -> bool
+  (** [exists ~section ~key] is [true] if [key] exists in [section]. *)
+
   val get : (string -> 'a) -> section:string -> key:string -> 'a Status.result
 
   val set :
     (string -> 'a -> Status.t) -> 'a -> section:string -> key:string -> Status.t
+
+  val get_seq : (string -> 'a) -> section:string -> key:string -> 'a Seq.t
+  (** [get_seq getter ~section ~key] is a sequence of values pulled repeatedly
+      from the same [section] and [key].
+
+      If the values are random then a new random value will be returned for
+      every element of the sequence.
+
+      If the [section] and [key] represent a constant value then the sequence
+      will return the same value for every element.
+
+      If [section] and [key] do not exist then the result will be [Seq.empty]. *)
 
   val get_list_item :
     (string -> int option -> 'a) ->

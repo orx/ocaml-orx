@@ -547,6 +547,11 @@ module Config = struct
       | Ok () -> Ok result
       )
 
+  let exists ~section ~key =
+    match with_section section (fun () -> has_value key) with
+    | Ok answer -> answer
+    | Error `Orx -> false
+
   let get (get : string -> 'a) ~(section : string) ~(key : string) :
       ('a, 'err) result =
     with_section section (fun () -> get key)
@@ -557,6 +562,14 @@ module Config = struct
       ~(section : string)
       ~(key : string) : Status.t =
     with_section section (fun () -> set key v) |> Result.join
+
+  let get_seq (getter : string -> 'a) ~section ~key : 'a Seq.t =
+    let rec next () =
+      match get getter ~section ~key with
+      | Ok x -> Seq.Cons (x, next)
+      | Error `Orx -> Seq.Nil
+    in
+    next
 
   let get_list_item
       (get : string -> int option -> 'a)
