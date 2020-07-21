@@ -398,7 +398,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxConfig_GetListString" (string @-> int_or_random @-> returning string)
 
     let get_list_bool =
-      c "orxConfig_GetListBool" (string @-> int_or_random @-> returning string)
+      c "orxConfig_GetListBool" (string @-> int_or_random @-> returning bool)
 
     let get_list_float =
       c "orxConfig_GetListFloat" (string @-> int_or_random @-> returning float)
