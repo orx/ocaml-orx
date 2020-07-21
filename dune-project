@@ -1,12 +1,15 @@
-(lang dune 1.11)
-(using fmt 1.2)
+(lang dune 2.0)
+
 (name orx)
 
 (license MIT)
+
 (maintainers "Hezekiah M. Carty <hez@0ok.org>")
+
 (authors "Hezekiah M. Carty <hez@0ok.org>")
 
-(source (github orx/ocaml-orx))
+(source
+ (github orx/ocaml-orx))
 
 (generate_opam_files true)
 
@@ -16,6 +19,8 @@
  (depends
   ctypes
   ctypes-foreign
-  (dune (>= 1.11))
+  (dune
+   (>= 2.0))
   fmt
-  (ocaml (>= 4.08.0))))
+  (ocaml
+   (>= 4.08.0))))

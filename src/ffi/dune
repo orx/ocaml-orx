@@ -14,23 +14,17 @@
    %{targets}
    (run %{deps} -c))))
 
-(rule
- (targets orx_types.c)
- (deps stubgen/orx_stubgen.exe)
- (action
-  (with-stdout-to
-   %{targets}
-   (run %{deps} -t))))
-
 (library
  (public_name orx)
  (synopsis "Bindings for orx")
+ (libraries ctypes.foreign.threaded orx_bindings threads)
  (flags
   :standard
   (:include ../orx-ocaml-link-flags.sexp))
- (c_names orx_stubs)
- (c_flags
-  (:include ../orx-c-include-flags.sexp))
+ (foreign_stubs
+  (language c)
+  (names orx_stubs)
+  (flags
+   (:include ../orx-c-include-flags.sexp)))
  (c_library_flags
-  (:include ../orx-c-link-flags.sexp))
- (libraries ctypes.foreign.threaded orx_bindings threads))
+  (:include ../orx-c-link-flags.sexp)))

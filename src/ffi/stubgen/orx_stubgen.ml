@@ -56,7 +56,7 @@ let () =
   let concurrency = Cstubs.sequential in
   match (!generate_ml, !generate_c) with
   | (false, false) | (true, true) ->
-    failwith "Exactly one of -ml, -c, -t must be specified"
+    failwith "Exactly one of -ml, -c must be specified"
   | (true, false) ->
     Cstubs.write_ml ~concurrency Format.std_formatter ~prefix
       (module Orx_bindings.Bindings)
