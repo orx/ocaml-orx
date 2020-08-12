@@ -512,6 +512,7 @@ module Clock = struct
 end
 
 module Config = struct
+  let wrap_get_vector = get_vector
   include Orx_gen.Config
 
   let bootstrap_function = Ctypes.(void @-> returning Orx_gen.Status.t)
@@ -531,11 +532,11 @@ module Config = struct
     let c_values = Ctypes.CArray.of_list Ctypes.string values in
     append_list_string key (Ctypes.CArray.start c_values) length
 
-  let get_vector (key : string) : Vector.t option =
-    get_optional_vector get_vector key
+  let get_vector (key : string) : Vector.t =
+    wrap_get_vector get_vector key
 
-  let get_list_vector (key : string) (i : int option) : Vector.t option =
-    get_optional_vector (fun k v -> get_list_vector k i v) key
+  let get_list_vector (key : string) (i : int option) : Vector.t =
+    wrap_get_vector (fun k v -> get_list_vector k i v) key
 
   let with_section (section : string) f =
     match push_section section with

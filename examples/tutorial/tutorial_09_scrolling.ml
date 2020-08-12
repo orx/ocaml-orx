@@ -13,7 +13,7 @@ let update (clock_info : Orx.Clock.Info.t) =
   let camera = State.get () in
 
   Orx.Config.push_section "Tutorial" |> Result.get_ok;
-  let scroll_speed = Orx.Config.get_vector "ScrollSpeed" |> Option.get in
+  let scroll_speed = Orx.Config.get_vector "ScrollSpeed" in
   Orx.Config.pop_section () |> Result.get_ok;
 
   let scroll_speed =

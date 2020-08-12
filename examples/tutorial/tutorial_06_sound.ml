@@ -43,8 +43,7 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
     Orx.Object.add_sound state.soldier "RandomBip" |> Result.get_ok;
 
     Orx.Config.push_section "Tutorial" |> Result.get_ok;
-    Orx.Object.set_rgb state.soldier
-      (Orx.Config.get_vector "RandomColor" |> Option.get)
+    Orx.Object.set_rgb state.soldier (Orx.Config.get_vector "RandomColor")
     |> Result.get_ok;
     Orx.Object.set_alpha state.soldier 1.0 |> Result.get_ok;
     Orx.Config.pop_section () |> Result.get_ok

@@ -752,11 +752,11 @@ module Config : sig
 
   val set_int : string -> int -> Status.t
 
-  val get_vector : string -> Vector.t option
+  val get_vector : string -> Vector.t
 
   val set_vector : string -> Vector.t -> Status.t
 
-  val get_list_vector : string -> int option -> Vector.t option
+  val get_list_vector : string -> int option -> Vector.t
 
   val set_list_string : string -> string list -> Status.t
 

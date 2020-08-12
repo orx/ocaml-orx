@@ -360,7 +360,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_int = c "orxConfig_GetS64" (string @-> returning int)
 
     let get_vector =
-      c "orxConfig_GetVector" (string @-> Vector.t @-> returning Vector.t_opt)
+      c "orxConfig_GetVector" (string @-> Vector.t @-> returning Vector.t)
 
     (* Set config values *)
     let set_string =
@@ -408,7 +408,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_list_vector =
       c "orxConfig_GetListVector"
-        (string @-> int_or_random @-> Vector.t @-> returning Vector.t_opt)
+        (string @-> int_or_random @-> Vector.t @-> returning Vector.t)
 
     (* Modify a list of config values *)
     let set_list_string =
