@@ -538,6 +538,12 @@ module Config = struct
   let get_list_vector (key : string) (i : int option) : Vector.t =
     wrap_get_vector (fun k v -> get_list_vector k i v) key
 
+  let if_has_value (key : string) (getter : string -> 'a) : 'a option =
+    if has_value key then
+      Some (getter key)
+    else
+      None
+
   let with_section (section : string) f =
     match push_section section with
     | Error _ as e -> Status.open_error e

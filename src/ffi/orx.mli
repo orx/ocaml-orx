@@ -762,6 +762,11 @@ module Config : sig
 
   val append_list_string : string -> string list -> Status.t
 
+  val if_has_value : string -> (string -> 'a) -> 'a option
+  (** [if_has_value key getter] is [Some (getter key)] if [key] exists in the
+      currently selected config section or [None] if [key] does not exist in
+      the current section. *)
+
   val exists : section:string -> key:string -> bool
   (** [exists ~section ~key] is [true] if [key] exists in [section]. *)
 
