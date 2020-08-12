@@ -532,8 +532,7 @@ module Config = struct
     let c_values = Ctypes.CArray.of_list Ctypes.string values in
     append_list_string key (Ctypes.CArray.start c_values) length
 
-  let get_vector (key : string) : Vector.t =
-    wrap_get_vector get_vector key
+  let get_vector (key : string) : Vector.t = wrap_get_vector get_vector key
 
   let get_list_vector (key : string) (i : int option) : Vector.t =
     wrap_get_vector (fun k v -> get_list_vector k i v) key
