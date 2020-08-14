@@ -455,7 +455,12 @@ module Object : sig
 
   val get_neighbor_list : Obox.t -> String_id.t -> t list option
 
-  val get_list : String_id.t -> t list
+  type group =
+    | All_groups
+    | Group of string
+    | Group_id of String_id.t
+
+  val get_group : group -> t Seq.t
 
   val pick : Vector.t -> String_id.t -> t option
 

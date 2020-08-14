@@ -369,13 +369,24 @@ module Object = struct
       delete_neighbor_list bank;
       Some objects
 
-  let get_list (group_id : String_id.t) =
-    let rec loop (o : t option) (accu : t list) =
-      match get_next o group_id with
-      | None -> List.rev accu
-      | Some next as o_next -> loop o_next (next :: accu)
+  type group =
+    | All_groups
+    | Group of string
+    | Group_id of String_id.t
+
+  let get_group (group : group) : t Seq.t =
+    let group_id =
+      match group with
+      | All_groups -> String_id.undefined
+      | Group name -> String_id.get_id name
+      | Group_id id -> id
     in
-    loop None []
+    let rec iter last () : _ Seq.node =
+      match get_next last group_id with
+      | None -> Nil
+      | Some obj as this -> Cons (obj, iter this)
+    in
+    iter None
 
   let to_guid (o : t) : Structure.Guid.t =
     match to_void_pointer o |> Structure.of_void_pointer with
