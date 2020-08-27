@@ -388,6 +388,26 @@ module Object = struct
     in
     iter None
 
+  let get_owned_children (o : t) : t Seq.t =
+    let rec iter sibling () : _ Seq.node =
+      match get_owned_sibling sibling with
+      | None -> Nil
+      | Some next -> Cons (next, iter next)
+    in
+    match get_owned_child o with
+    | None -> Seq.empty
+    | Some first -> iter first
+
+  let get_children (o : t) : t Seq.t =
+    let rec iter sibling () : _ Seq.node =
+      match get_sibling sibling with
+      | None -> Nil
+      | Some next -> Cons (next, iter next)
+    in
+    match get_child o with
+    | None -> Seq.empty
+    | Some first -> iter first
+
   let to_guid (o : t) : Structure.Guid.t =
     match to_void_pointer o |> Structure.of_void_pointer with
     | Some s -> Structure.get_guid s

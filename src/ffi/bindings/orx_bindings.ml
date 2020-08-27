@@ -618,8 +618,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_owner = c "orxObject_GetOwner" (t @-> returning Structure.t_opt)
 
+    let get_owned_child = c "orxObject_GetOwnedChild" (t @-> returning t_opt)
+
+    let get_owned_sibling = c "orxObject_GetOwnedSibling" (t @-> returning t_opt)
+
     (* Parent/child relationships *)
-    let get_child_object = c "orxObject_GetChild" (t @-> returning t_opt)
+    let get_child = c "orxObject_GetChild" (t @-> returning t_opt)
+
+    let get_sibling = c "orxObject_GetSibling" (t @-> returning t_opt)
 
     let log_parents = c "orxObject_LogParents" (t @-> returning Status.t)
 

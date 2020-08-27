@@ -329,11 +329,21 @@ module Object : sig
 
   val get_owner : t -> Structure.t option
 
+  val get_owned_child : t -> t option
+
+  val get_owned_sibling : t -> t option
+
+  val get_owned_children : t -> t Seq.t
+
   val set_parent : t -> Parent.t option -> Status.t
 
   val get_parent : t -> Structure.t option
 
-  val get_child_object : t -> t option
+  val get_child : t -> t option
+
+  val get_sibling : t -> t option
+
+  val get_children : t -> t Seq.t
 
   val get_bounding_box : t -> Obox.t option
 
