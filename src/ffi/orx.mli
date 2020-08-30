@@ -458,7 +458,7 @@ module Object : sig
 
   val stop : t -> Status.t
 
-  val link_structure : t -> Structure.t -> Status.t
+  val link_structure : t -> Structure.t -> unit
 
   type group =
     | All_groups

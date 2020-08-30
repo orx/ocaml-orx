@@ -834,7 +834,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Linking structures *)
     let link_structure =
-      c "orxObject_LinkStructure" (t @-> Structure.t @-> returning Status.t)
+      c "orxObject_LinkStructure" (t @-> Structure.t @-> returning Status.as_exn)
 
     (* Object selection *)
     (* Neighbor = Object(s) within a bounding box *)
