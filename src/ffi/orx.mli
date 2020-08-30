@@ -819,6 +819,8 @@ module Config : sig
   val get_guid : string -> Structure.Guid.t
 
   val set_guid : string -> Structure.Guid.t -> unit
+
+  val with_section : string -> (unit -> 'a) -> 'a
 end
 
 module Orx_thread : sig
