@@ -684,21 +684,21 @@ module Camera : sig
 
   val get_parent : t -> Parent.t option
 
-  val set_parent : t -> Parent.t option -> Status.t
+  val set_parent : t -> Parent.t option -> unit
 
   val get_position : t -> Vector.t
 
-  val set_position : t -> Vector.t -> Status.t
+  val set_position : t -> Vector.t -> unit
 
   val get_rotation : t -> float
 
-  val set_rotation : t -> float -> Status.t
+  val set_rotation : t -> float -> unit
 
   val get_zoom : t -> float
 
-  val set_zoom : t -> float -> Status.t
+  val set_zoom : t -> float -> unit
 
-  val set_frustum : t -> float -> float -> float -> float -> Status.t
+  val set_frustum : t -> float -> float -> float -> float -> unit
 end
 
 module Viewport : sig

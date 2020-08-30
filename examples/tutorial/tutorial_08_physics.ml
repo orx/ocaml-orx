@@ -40,7 +40,7 @@ let update (clock_info : Orx.Clock.Info.t) =
   | Some delta ->
     (* Rotate the camera *)
     let current_rotation = Orx.Camera.get_rotation camera in
-    Orx.Camera.set_rotation camera (current_rotation +. delta) |> Result.get_ok;
+    Orx.Camera.set_rotation camera (current_rotation +. delta);
 
     (* Rotate gravity *)
     let gravity =

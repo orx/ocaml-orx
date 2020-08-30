@@ -575,30 +575,31 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_parent = c "orxCamera_GetParent" (t @-> returning Structure.t_opt)
 
     let set_parent =
-      c "orxCamera_SetParent" (t @-> ptr_opt void @-> returning Status.t)
+      c "orxCamera_SetParent" (t @-> ptr_opt void @-> returning Status.as_exn)
 
     (* Camera positioning *)
     let get_position =
       c "orxCamera_GetPosition" (t @-> Vector.t @-> returning Vector.t)
 
     let set_position =
-      c "orxCamera_SetPosition" (t @-> Vector.t @-> returning Status.t)
+      c "orxCamera_SetPosition" (t @-> Vector.t @-> returning Status.as_exn)
 
     (* Camera rotation *)
     let get_rotation = c "orxCamera_GetRotation" (t @-> returning float)
 
     let set_rotation =
-      c "orxCamera_SetRotation" (t @-> float @-> returning Status.t)
+      c "orxCamera_SetRotation" (t @-> float @-> returning Status.as_exn)
 
     (* Camera zoom *)
     let get_zoom = c "orxCamera_GetZoom" (t @-> returning float)
 
-    let set_zoom = c "orxCamera_SetZoom" (t @-> float @-> returning Status.t)
+    let set_zoom =
+      c "orxCamera_SetZoom" (t @-> float @-> returning Status.as_exn)
 
     (* Camera frustum *)
     let set_frustum =
       c "orxCamera_SetFrustum"
-        (t @-> float @-> float @-> float @-> float @-> returning Status.t)
+        (t @-> float @-> float @-> float @-> float @-> returning Status.as_exn)
   end
 
   module Object = struct

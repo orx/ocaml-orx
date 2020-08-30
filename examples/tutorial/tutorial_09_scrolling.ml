@@ -48,7 +48,6 @@ let update (clock_info : Orx.Clock.Info.t) =
 
   let camera_position = Orx.Camera.get_position camera in
   Orx.Camera.set_position camera (Orx.Vector.add camera_position move)
-  |> Result.get_ok
 
 let init () =
   (* Print out a hint to the user about what's to come *)
