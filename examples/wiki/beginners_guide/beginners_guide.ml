@@ -115,7 +115,7 @@ let init () =
   (* Get some values defined in the game's ini config *)
   let viewport = Orx.Viewport.create_from_config "Viewport" |> Option.get in
   let hero = Orx.Object.create_from_config "HeroObject" |> Option.get in
-  let heros_gun = Orx.Object.get_child hero |> Option.get in
+  let heros_gun = Orx.Object.get_first_child hero Owned_object |> Option.get in
   let score_object =
     Orx.Object.create_from_config "ScoreObject" |> Option.get
   in

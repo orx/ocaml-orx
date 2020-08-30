@@ -272,6 +272,23 @@ module Bindings (F : Ctypes.TYPE) = struct
     let t : t structure = F.structure "__orxSTRUCTURE_t"
   end
 
+  module Structure_id = struct
+    type t =
+      | Camera
+      | Object
+
+    let make name = F.constant ("orxSTRUCTURE_ID_" ^ name) F.int64_t
+
+    let camera = make "CAMERA"
+    let object_ = make "OBJECT"
+
+    let map_to_constant = [ (Camera, camera); (Object, object_) ]
+
+    let t =
+      F.enum "__orxSTRUCTURE_ID_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "Unsupported structre id: %Ld" i)
+  end
+
   module Object = struct
     type t
 

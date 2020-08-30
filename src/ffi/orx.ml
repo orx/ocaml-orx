@@ -13,6 +13,7 @@ module Resource = Orx_gen.Resource
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
+module Structure_id = Orx_types.Structure_id
 module Viewport = Orx_gen.Viewport
 module Status = Orx_gen.Status
 module Clock_modifier = Orx_types.Clock_modifier
@@ -401,14 +402,36 @@ module Object = struct
 
   let set_group_id_recursive o group = set_group_id_recursive o (group_id group)
 
-  let get_group (group : group) : t Seq.t =
-    let group_id = group_id group in
+  let get_seq get_f =
     let rec iter last () : _ Seq.node =
-      match get_next last group_id with
+      match get_f last with
       | None -> Nil
-      | Some obj as this -> Cons (obj, iter this)
+      | Some v as this -> Cons (v, iter this)
     in
     iter None
+
+  let get_group (group : group) : t Seq.t =
+    let group_id = group_id group in
+    get_seq (fun o -> get_next o group_id)
+
+  type _ child =
+    | Child_object : t child
+    | Owned_object : t child
+    | Child_camera : camera child
+
+  let get_camera_children (o : t) : Camera.t Seq.t =
+    get_seq (fun c ->
+        let c = Option.map Camera.to_void_pointer c in
+        let s = get_next_child o c Camera in
+        let p = Option.map Structure.to_void_pointer s in
+        Option.map Camera.of_void_pointer p |> Option.join)
+
+  let get_object_children (o : t) : t Seq.t =
+    get_seq (fun c ->
+        let c = Option.map to_void_pointer c in
+        let s = get_next_child o c Object in
+        let p = Option.map Structure.to_void_pointer s in
+        Option.map of_void_pointer p |> Option.join)
 
   let get_owned_children (o : t) : t Seq.t =
     let rec iter sibling () : _ Seq.node =
@@ -418,17 +441,23 @@ module Object = struct
     in
     match get_owned_child o with
     | None -> Seq.empty
-    | Some first -> iter first
+    | Some first -> fun () -> Cons (first, iter first)
 
-  let get_children (o : t) : t Seq.t =
-    let rec iter sibling () : _ Seq.node =
-      match get_sibling sibling with
-      | None -> Nil
-      | Some next -> Cons (next, iter next)
-    in
-    match get_child o with
-    | None -> Seq.empty
-    | Some first -> iter first
+  let get_children (type c) (o : t) (child : c child) : c Seq.t =
+    match child with
+    | Child_object -> get_object_children o
+    | Owned_object -> get_owned_children o
+    | Child_camera -> get_camera_children o
+
+  let get_first_child (type c) (o : t) (child : c child) : c option =
+    match child with
+    | Child_object -> get_child o
+    | Owned_object -> get_owned_child o
+    | Child_camera ->
+      get_next_child o None Camera
+      |> Option.map Structure.to_void_pointer
+      |> Option.map Camera.of_void_pointer
+      |> Option.join
 
   let to_guid (o : t) : Structure.Guid.t =
     match to_void_pointer o |> Structure.of_void_pointer with

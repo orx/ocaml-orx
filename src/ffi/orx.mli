@@ -329,21 +329,18 @@ module Object : sig
 
   val get_owner : t -> Structure.t option
 
-  val get_owned_child : t -> t option
-
-  val get_owned_sibling : t -> t option
-
-  val get_owned_children : t -> t Seq.t
-
   val set_parent : t -> Parent.t option -> unit
 
   val get_parent : t -> Structure.t option
 
-  val get_child : t -> t option
+  type _ child =
+    | Child_object : t child
+    | Owned_object : t child
+    | Child_camera : camera child
 
-  val get_sibling : t -> t option
+  val get_children : t -> 'a child -> 'a Seq.t
 
-  val get_children : t -> t Seq.t
+  val get_first_child : t -> 'a child -> 'a option
 
   val get_bounding_box : t -> Obox.t
 
