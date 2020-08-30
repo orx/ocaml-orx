@@ -31,6 +31,11 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | 0 -> Error `Orx
       | _ -> Fmt.invalid_arg "Unsupported ORX status %d" i
 
+    let of_int_exn i : unit =
+      match of_int i with
+      | Ok () -> ()
+      | Error `Orx -> Fmt.invalid_arg "Unsupported orx status code %d" i
+
     let to_int (s : t) : int =
       match s with
       | Ok () -> 1
@@ -40,6 +45,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       Fmt.(result ~ok:(const string "success") ~error:(const string "failure"))
 
     let t = view ~format:pp ~read:of_int ~write:to_int int
+
+    let as_exn = view ~read:of_int_exn ~write:(fun _ -> 1) int
   end
 
   module Bank = struct
@@ -420,6 +427,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (string @-> ptr string @-> int @-> returning Status.t)
 
     let get_guid = c "orxConfig_GetU64" (string @-> returning Structure.Guid.t)
+
+    let set_guid =
+      c "orxConfig_SetU64" (string @-> Structure.Guid.t @-> returning Status.t)
   end
 
   module Clock = struct
@@ -666,35 +676,35 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_rotation = c "orxObject_GetRotation" (t @-> returning float)
 
     let set_rotation =
-      c "orxObject_SetRotation" (t @-> float @-> returning Status.t)
+      c "orxObject_SetRotation" (t @-> float @-> returning Status.as_exn)
 
     let get_world_position =
       c "orxObject_GetWorldPosition" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_world_position =
-      c "orxObject_SetWorldPosition" (t @-> Vector.t @-> returning Status.t)
+      c "orxObject_SetWorldPosition" (t @-> Vector.t @-> returning Status.as_exn)
 
     let get_position =
       c "orxObject_GetPosition" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_position =
-      c "orxObject_SetPosition" (t @-> Vector.t @-> returning Status.t)
+      c "orxObject_SetPosition" (t @-> Vector.t @-> returning Status.as_exn)
 
     let get_scale =
       c "orxObject_GetScale" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_scale =
-      c "orxObject_SetScale" (t @-> Vector.t @-> returning Status.t)
+      c "orxObject_SetScale" (t @-> Vector.t @-> returning Status.as_exn)
 
     (* Text *)
     let set_text_string =
-      c "orxObject_SetTextString" (t @-> string @-> returning Status.t)
+      c "orxObject_SetTextString" (t @-> string @-> returning Status.as_exn)
 
     let get_text_string = c "orxObject_GetTextString" (t @-> returning string)
 
     (* Life time *)
     let set_life_time =
-      c "orxObject_SetLifeTime" (t @-> float @-> returning Status.t)
+      c "orxObject_SetLifeTime" (t @-> float @-> returning Status.as_exn)
 
     let get_life_time = c "orxObject_GetLifeTime" (t @-> returning float)
 

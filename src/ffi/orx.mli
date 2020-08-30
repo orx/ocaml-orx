@@ -335,7 +335,7 @@ module Object : sig
 
   val get_owned_children : t -> t Seq.t
 
-  val set_parent : t -> Parent.t option -> Status.t
+  val set_parent : t -> Parent.t option -> unit
 
   val get_parent : t -> Structure.t option
 
@@ -345,7 +345,7 @@ module Object : sig
 
   val get_children : t -> t Seq.t
 
-  val get_bounding_box : t -> Obox.t option
+  val get_bounding_box : t -> Obox.t
 
   val add_fx : t -> string -> Status.t
 
@@ -363,25 +363,25 @@ module Object : sig
 
   val get_rotation : t -> float
 
-  val set_rotation : t -> float -> Status.t
+  val set_rotation : t -> float -> unit
 
-  val get_world_position : t -> Vector.t option
+  val get_world_position : t -> Vector.t
 
-  val set_world_position : t -> Vector.t -> Status.t
+  val set_world_position : t -> Vector.t -> unit
 
-  val get_position : t -> Vector.t option
+  val get_position : t -> Vector.t
 
-  val set_position : t -> Vector.t -> Status.t
+  val set_position : t -> Vector.t -> unit
 
-  val get_scale : t -> Vector.t option
+  val get_scale : t -> Vector.t
 
-  val set_scale : t -> Vector.t -> Status.t
+  val set_scale : t -> Vector.t -> unit
 
-  val set_text_string : t -> string -> Status.t
+  val set_text_string : t -> string -> unit
 
   val get_text_string : t -> string
 
-  val set_life_time : t -> float -> Status.t
+  val set_life_time : t -> float -> unit
 
   val get_life_time : t -> float
 
@@ -405,11 +405,11 @@ module Object : sig
 
   val set_speed : t -> Vector.t -> Status.t
 
-  val get_speed : t -> Vector.t option
+  val get_speed : t -> Vector.t
 
   val set_relative_speed : t -> Vector.t -> Status.t
 
-  val get_relative_speed : t -> Vector.t option
+  val get_relative_speed : t -> Vector.t
 
   val set_angular_velocity : t -> float -> Status.t
 
@@ -463,26 +463,26 @@ module Object : sig
 
   val link_structure : t -> Structure.t -> Status.t
 
-  val get_neighbor_list : Obox.t -> String_id.t -> t list option
-
   type group =
     | All_groups
     | Group of string
     | Group_id of String_id.t
 
+  val get_neighbor_list : Obox.t -> group -> t list
+
   val get_group : group -> t Seq.t
 
-  val pick : Vector.t -> String_id.t -> t option
+  val pick : Vector.t -> group -> t option
 
-  val box_pick : Obox.t -> String_id.t -> t option
+  val box_pick : Obox.t -> group -> t option
 
   val get_default_group_id : unit -> String_id.t
 
   val get_group_id : t -> String_id.t
 
-  val set_group_id : t -> String_id.t -> Status.t
+  val set_group_id : t -> group -> unit
 
-  val set_group_id_recursive : t -> String_id.t -> unit
+  val set_group_id_recursive : t -> group -> unit
 
   val to_guid : t -> Structure.Guid.t
 
@@ -824,6 +824,8 @@ module Config : sig
   val get_section_keys : string -> string list Status.result
 
   val get_guid : string -> Structure.Guid.t
+
+  val set_guid : string -> Structure.Guid.t -> Status.t
 end
 
 module Orx_thread : sig

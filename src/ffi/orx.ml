@@ -1,5 +1,7 @@
 let ( !@ ) = Ctypes.( !@ )
 
+let fail fmt = Fmt.kstr failwith ("Orx: " ^^ fmt)
+
 module Orx_gen = Orx_bindings.Bindings (Generated)
 
 type camera = Orx_gen.Camera.t
@@ -211,6 +213,11 @@ let get_optional_vector get o =
   | None -> None
   | Some _v -> Some v
 
+let get_vector_exn get o =
+  match get_optional_vector get o with
+  | None -> fail "Failed to set vector"
+  | Some v -> v
+
 let get_vector get o =
   let v = Vector.allocate_raw () in
   let (_ : Vector.t) = get o v in
@@ -218,11 +225,11 @@ let get_vector get o =
 
 (* Wrapper for functions which return a obox property. *)
 (* Orx uses the return value to indicate if the get was a success or not. *)
-let get_optional_obox get o =
+let get_obox_exn get o =
   let v = Obox.allocate_raw () in
   match get o v with
-  | None -> None
-  | Some _v -> Some v
+  | None -> fail "Failed to allocate obox"
+  | Some _v -> v
 
 module Render = struct
   include Orx_gen.Render
@@ -310,7 +317,10 @@ end
 module Object = struct
   include Orx_gen.Object
 
-  let set_parent o parent = Parent.set set_parent o parent
+  let set_parent o parent =
+    match Parent.set set_parent o parent with
+    | Ok () -> ()
+    | Error `Orx -> fail "Failed to set parent"
 
   let set_owner o owner = Parent.set set_owner o owner
 
@@ -320,17 +330,17 @@ module Object = struct
     normal : Vector.t;
   }
 
-  let get_bounding_box = get_optional_obox get_bounding_box
+  let get_bounding_box = get_obox_exn get_bounding_box
 
-  let get_world_position = get_optional_vector get_world_position
+  let get_world_position = get_vector_exn get_world_position
 
-  let get_position = get_optional_vector get_position
+  let get_position = get_vector_exn get_position
 
-  let get_scale = get_optional_vector get_scale
+  let get_scale = get_vector_exn get_scale
 
-  let get_speed = get_optional_vector get_speed
+  let get_speed = get_vector_exn get_speed
 
-  let get_relative_speed = get_optional_vector get_relative_speed
+  let get_relative_speed = get_vector_exn get_relative_speed
 
   let get_custom_gravity = get_optional_vector get_custom_gravity
 
@@ -354,9 +364,20 @@ module Object = struct
     | None -> None
     | Some o -> Some { colliding_object = o; contact; normal }
 
-  let get_neighbor_list (box : Obox.t) (group_id : String_id.t) =
-    match create_neighbor_list box group_id with
-    | None -> None
+  type group =
+    | All_groups
+    | Group of string
+    | Group_id of String_id.t
+
+  let group_id group =
+    match group with
+    | All_groups -> String_id.undefined
+    | Group name -> String_id.get_id name
+    | Group_id id -> id
+
+  let get_neighbor_list (box : Obox.t) group =
+    match create_neighbor_list box (group_id group) with
+    | None -> fail "Failed to allocate neighbor list"
     | Some bank ->
       let ptrs = Bank.to_list bank in
       let objects =
@@ -367,20 +388,21 @@ module Object = struct
           ptrs
       in
       delete_neighbor_list bank;
-      Some objects
+      objects
 
-  type group =
-    | All_groups
-    | Group of string
-    | Group_id of String_id.t
+  let pick v group = pick v (group_id group)
+
+  let box_pick obox group = box_pick obox (group_id group)
+
+  let set_group_id o group =
+    match set_group_id o (group_id group) with
+    | Ok () -> ()
+    | Error `Orx -> fail "Failed to set group id"
+
+  let set_group_id_recursive o group = set_group_id_recursive o (group_id group)
 
   let get_group (group : group) : t Seq.t =
-    let group_id =
-      match group with
-      | All_groups -> String_id.undefined
-      | Group name -> String_id.get_id name
-      | Group_id id -> id
-    in
+    let group_id = group_id group in
     let rec iter last () : _ Seq.node =
       match get_next last group_id with
       | None -> Nil

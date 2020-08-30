@@ -28,7 +28,6 @@ let update (clock_info : Orx.Clock.Info.t) =
   let clock = Orx.Clock.Info.get_clock clock_info |> Option.get in
   let obj = State.Clock_map.find clock (State.get ()) in
   Orx.Object.set_rotation obj (Float.pi *. Orx.Clock.Info.get_time clock_info)
-  |> Result.get_ok
 
 let input_update (_clock_info : Orx.Clock.Info.t) =
   Orx.Config.push_section "Main" |> Result.get_ok;

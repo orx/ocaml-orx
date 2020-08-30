@@ -63,7 +63,6 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
       (Orx.Object.get_rotation state.soldier
       +. (4.0 *. Orx.Clock.Info.get_dt clock_info)
       )
-    |> Result.get_ok
   );
   if Orx.Input.is_active "PitchDown" then (
     Orx.Sound.set_pitch state.music
@@ -73,7 +72,6 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
       (Orx.Object.get_rotation state.soldier
       -. (4.0 *. Orx.Clock.Info.get_dt clock_info)
       )
-    |> Result.get_ok
   );
 
   if Orx.Input.is_active "VolumeDown" then (
@@ -81,16 +79,14 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
       (max (Orx.Sound.get_volume state.music -. 0.05) 0.0)
     |> Result.get_ok;
     Orx.Object.set_scale state.soldier
-      (Orx.Vector.mulf (Orx.Object.get_scale state.soldier |> Option.get) 0.98)
-    |> Result.get_ok
+      (Orx.Vector.mulf (Orx.Object.get_scale state.soldier) 0.98)
   );
   if Orx.Input.is_active "VolumeUp" then (
     Orx.Sound.set_volume state.music
       (min (Orx.Sound.get_volume state.music +. 0.05) 1.0)
     |> Result.get_ok;
     Orx.Object.set_scale state.soldier
-      (Orx.Vector.mulf (Orx.Object.get_scale state.soldier |> Option.get) 1.02)
-    |> Result.get_ok
+      (Orx.Vector.mulf (Orx.Object.get_scale state.soldier) 1.02)
   )
 
 let update (clock_info : Orx.Clock.Info.t) =
