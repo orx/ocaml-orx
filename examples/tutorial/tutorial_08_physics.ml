@@ -43,10 +43,8 @@ let update (clock_info : Orx.Clock.Info.t) =
     Orx.Camera.set_rotation camera (current_rotation +. delta);
 
     (* Rotate gravity *)
-    let gravity =
-      Orx.Vector.rotate_2d (Orx.Physics.get_gravity () |> Option.get) delta
-    in
-    Orx.Physics.set_gravity gravity |> Result.get_ok
+    let gravity = Orx.Vector.rotate_2d (Orx.Physics.get_gravity ()) delta in
+    Orx.Physics.set_gravity gravity
 
 let init () =
   let (type_, id, mode) =

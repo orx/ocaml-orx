@@ -312,7 +312,7 @@ end
 module Physics = struct
   include Orx_gen.Physics
 
-  let get_gravity = get_optional_vector (fun () v -> get_gravity v)
+  let get_gravity = get_vector_exn (fun () v -> get_gravity v)
 end
 
 module Object = struct

@@ -299,9 +299,9 @@ module Input : sig
 end
 
 module Physics : sig
-  val get_gravity : unit -> Vector.t option
+  val get_gravity : unit -> Vector.t
 
-  val set_gravity : Vector.t -> Status.t
+  val set_gravity : Vector.t -> unit
 end
 
 module Object : sig

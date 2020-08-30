@@ -1071,7 +1071,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_gravity =
       c "orxPhysics_GetGravity" (Vector.t @-> returning Vector.t_opt)
 
-    let set_gravity = c "orxPhysics_SetGravity" (Vector.t @-> returning Status.t)
+    let set_gravity =
+      c "orxPhysics_SetGravity" (Vector.t @-> returning Status.as_exn)
   end
 
   module Display = struct
