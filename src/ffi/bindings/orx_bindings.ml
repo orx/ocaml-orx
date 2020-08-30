@@ -261,6 +261,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t_opt = ptr_opt T.Sound.t
 
+    let status_err_no_data = Status.invalid "No sound data or invalid setting"
+
     let create_from_config =
       c "orxSound_CreateFromConfig" (string @-> returning t_opt)
 
@@ -268,26 +270,28 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_status = c "orxSound_GetStatus" (t @-> returning T.Sound_status.t)
 
-    let play = c "orxSound_Play" (t @-> returning Status.t)
+    let play = c "orxSound_Play" (t @-> returning status_err_no_data)
 
-    let pause = c "orxSound_Pause" (t @-> returning Status.t)
+    let pause = c "orxSound_Pause" (t @-> returning status_err_no_data)
 
-    let stop = c "orxSound_Stop" (t @-> returning Status.t)
+    let stop = c "orxSound_Stop" (t @-> returning status_err_no_data)
 
     let get_duration = c "orxSound_GetDuration" (t @-> returning float)
 
     let get_pitch = c "orxSound_GetPitch" (t @-> returning float)
 
-    let set_pitch = c "orxSound_SetPitch" (t @-> float @-> returning Status.t)
+    let set_pitch =
+      c "orxSound_SetPitch" (t @-> float @-> returning status_err_no_data)
 
     let get_volume = c "orxSound_GetVolume" (t @-> returning float)
 
-    let set_volume = c "orxSound_SetVolume" (t @-> float @-> returning Status.t)
+    let set_volume =
+      c "orxSound_SetVolume" (t @-> float @-> returning status_err_no_data)
 
     let get_attenuation = c "orxSound_GetAttenuation" (t @-> returning float)
 
     let set_attenuation =
-      c "orxSound_SetAttenuation" (t @-> float @-> returning Status.t)
+      c "orxSound_SetAttenuation" (t @-> float @-> returning status_err_no_data)
   end
 
   module Mouse = struct

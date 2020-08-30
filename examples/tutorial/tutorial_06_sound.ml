@@ -57,8 +57,7 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
 
   if Orx.Input.is_active "PitchUp" then (
     Orx.Sound.set_pitch state.music
-      (min (Orx.Sound.get_pitch state.music +. 0.01) 1.0)
-    |> Result.get_ok;
+      (min (Orx.Sound.get_pitch state.music +. 0.01) 1.0);
     Orx.Object.set_rotation state.soldier
       (Orx.Object.get_rotation state.soldier
       +. (4.0 *. Orx.Clock.Info.get_dt clock_info)
@@ -66,8 +65,7 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
   );
   if Orx.Input.is_active "PitchDown" then (
     Orx.Sound.set_pitch state.music
-      (max (Orx.Sound.get_pitch state.music -. 0.01) 0.0)
-    |> Result.get_ok;
+      (max (Orx.Sound.get_pitch state.music -. 0.01) 0.0);
     Orx.Object.set_rotation state.soldier
       (Orx.Object.get_rotation state.soldier
       -. (4.0 *. Orx.Clock.Info.get_dt clock_info)
@@ -76,15 +74,13 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
 
   if Orx.Input.is_active "VolumeDown" then (
     Orx.Sound.set_volume state.music
-      (max (Orx.Sound.get_volume state.music -. 0.05) 0.0)
-    |> Result.get_ok;
+      (max (Orx.Sound.get_volume state.music -. 0.05) 0.0);
     Orx.Object.set_scale state.soldier
       (Orx.Vector.mulf (Orx.Object.get_scale state.soldier) 0.98)
   );
   if Orx.Input.is_active "VolumeUp" then (
     Orx.Sound.set_volume state.music
-      (min (Orx.Sound.get_volume state.music +. 0.05) 1.0)
-    |> Result.get_ok;
+      (min (Orx.Sound.get_volume state.music +. 0.05) 1.0);
     Orx.Object.set_scale state.soldier
       (Orx.Vector.mulf (Orx.Object.get_scale state.soldier) 1.02)
   )
@@ -119,7 +115,7 @@ let init () =
   let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
   Orx.Object.add_sound soldier "Music" |> Result.get_ok;
   let music = Orx.Object.get_last_added_sound soldier |> Option.get in
-  Orx.Sound.play music |> Result.get_ok;
+  Orx.Sound.play music;
   Orx.Clock.register clock update Main Normal;
   Orx.Event.add_handler Sound event_handler;
 

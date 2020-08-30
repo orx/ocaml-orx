@@ -218,25 +218,25 @@ module Sound : sig
 
   val get_status : t -> Sound_status.t
 
-  val play : t -> Status.t
+  val play : t -> unit
 
-  val pause : t -> Status.t
+  val pause : t -> unit
 
-  val stop : t -> Status.t
+  val stop : t -> unit
 
   val get_duration : t -> float
 
   val get_pitch : t -> float
 
-  val set_pitch : t -> float -> Status.t
+  val set_pitch : t -> float -> unit
 
   val get_volume : t -> float
 
-  val set_volume : t -> float -> Status.t
+  val set_volume : t -> float -> unit
 
   val get_attenuation : t -> float
 
-  val set_attenuation : t -> float -> Status.t
+  val set_attenuation : t -> float -> unit
 end
 
 module Resource : sig
