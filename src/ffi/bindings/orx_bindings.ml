@@ -29,12 +29,12 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       match i with
       | 1 -> Ok ()
       | 0 -> Error `Orx
-      | _ -> Fmt.invalid_arg "Unsupported ORX status %d" i
+      | _ -> Fmt.invalid_arg "Unsupported Orx status %d" i
 
-    let of_int_exn i : unit =
+    let of_int_exn msg i : unit =
       match of_int i with
       | Ok () -> ()
-      | Error `Orx -> Fmt.invalid_arg "Unsupported orx status code %d" i
+      | Error `Orx -> invalid_arg msg
 
     let to_int (s : t) : int =
       match s with
@@ -46,7 +46,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t = view ~format:pp ~read:of_int ~write:to_int int
 
-    let as_exn = view ~read:of_int_exn ~write:(fun _ -> 1) int
+    let as_exn =
+      view
+        ~read:(of_int_exn "Unsupported Orx failure state")
+        ~write:(fun _ -> 1)
+        int
+
+    let invalid msg = view ~read:(of_int_exn msg) ~write:(fun _ -> 1) int
   end
 
   module Bank = struct
@@ -310,7 +316,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   end
 
   module Config = struct
-    let set_basename = c "orxConfig_SetBaseName" (string @-> returning Status.t)
+    let set_basename =
+      c "orxConfig_SetBaseName" (string @-> returning Status.as_exn)
 
     (* Load config from a file *)
     let load = c "orxConfig_Load" (string @-> returning Status.t)
@@ -320,16 +327,23 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxConfig_LoadFromMemory" (string @-> int @-> returning Status.t)
 
     (* Select a config section to work within (stack-based) *)
-    let push_section = c "orxConfig_PushSection" (string @-> returning Status.t)
+    let push_section =
+      c "orxConfig_PushSection" (string @-> returning Status.as_exn)
 
-    let pop_section = c "orxConfig_PopSection" (void @-> returning Status.t)
+    let pop_section =
+      c "orxConfig_PopSection"
+        (void
+        @-> returning
+              (Status.invalid
+                 "Orx.Config.pop_section: Empty config section stack")
+        )
 
     (* Select a config section to work with (manually manage state) *)
     let get_current_section =
       c "orxConfig_GetCurrentSection" (void @-> returning string)
 
     let select_section =
-      c "orxConfig_SelectSection" (string @-> returning Status.t)
+      c "orxConfig_SelectSection" (string @-> returning Status.as_exn)
 
     (* Enumerate sections *)
     let get_section_count =
@@ -371,17 +385,19 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     (* Set config values *)
     let set_string =
-      c "orxConfig_SetString" (string @-> string @-> returning Status.t)
+      c "orxConfig_SetString" (string @-> string @-> returning Status.as_exn)
 
-    let set_bool = c "orxConfig_SetBool" (string @-> bool @-> returning Status.t)
+    let set_bool =
+      c "orxConfig_SetBool" (string @-> bool @-> returning Status.as_exn)
 
     let set_float =
-      c "orxConfig_SetFloat" (string @-> float @-> returning Status.t)
+      c "orxConfig_SetFloat" (string @-> float @-> returning Status.as_exn)
 
-    let set_int = c "orxConfig_SetS64" (string @-> int @-> returning Status.t)
+    let set_int =
+      c "orxConfig_SetS64" (string @-> int @-> returning Status.as_exn)
 
     let set_vector =
-      c "orxConfig_SetVector" (string @-> Vector.t @-> returning Status.t)
+      c "orxConfig_SetVector" (string @-> Vector.t @-> returning Status.as_exn)
 
     (* Get/Set values from a list *)
     let is_list = c "orxConfig_IsList" (string @-> returning bool)
@@ -420,16 +436,17 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Modify a list of config values *)
     let set_list_string =
       c "orxConfig_SetListString"
-        (string @-> ptr string @-> int @-> returning Status.t)
+        (string @-> ptr string @-> int @-> returning Status.as_exn)
 
     let append_list_string =
       c "orxConfig_AppendListString"
-        (string @-> ptr string @-> int @-> returning Status.t)
+        (string @-> ptr string @-> int @-> returning Status.as_exn)
 
     let get_guid = c "orxConfig_GetU64" (string @-> returning Structure.Guid.t)
 
     let set_guid =
-      c "orxConfig_SetU64" (string @-> Structure.Guid.t @-> returning Status.t)
+      c "orxConfig_SetU64"
+        (string @-> Structure.Guid.t @-> returning Status.as_exn)
   end
 
   module Clock = struct

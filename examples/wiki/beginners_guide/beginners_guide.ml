@@ -181,7 +181,8 @@ let exit () = ()
 
 let () =
   (* Setup our bootstrap function *)
-  Orx.Config.set_bootstrap bootstrap |> Result.get_ok;
+  Orx.Config.set_bootstrap bootstrap;
   (* Set the basename for Orx - used to know which config file to read *)
-  Orx.Config.set_basename "tutorial" |> Result.get_ok;
-  (* Start Orx and run the main loop *) Orx.Main.execute ~init ~run ~exit ()
+  Orx.Config.set_basename "tutorial";
+  (* Start Orx and run the main loop *)
+  Orx.Main.execute ~init ~run ~exit ()

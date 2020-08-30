@@ -42,11 +42,11 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
   if Orx.Input.has_been_activated "RandomSFX" then (
     Orx.Object.add_sound state.soldier "RandomBip" |> Result.get_ok;
 
-    Orx.Config.push_section "Tutorial" |> Result.get_ok;
+    Orx.Config.push_section "Tutorial";
     Orx.Object.set_rgb state.soldier (Orx.Config.get_vector "RandomColor")
     |> Result.get_ok;
     Orx.Object.set_alpha state.soldier 1.0 |> Result.get_ok;
-    Orx.Config.pop_section () |> Result.get_ok
+    Orx.Config.pop_section ()
   );
 
   if Orx.Input.has_been_activated "DefaultSFX" then (
@@ -140,6 +140,6 @@ let bootstrap () =
   Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
 
 let () =
-  Orx.Config.set_bootstrap bootstrap |> Result.get_ok;
-  Orx.Config.set_basename "06_Sound" |> Result.get_ok;
+  Orx.Config.set_bootstrap bootstrap;
+  Orx.Config.set_basename "06_Sound";
   Orx.Main.execute ~init ~run ~exit ()

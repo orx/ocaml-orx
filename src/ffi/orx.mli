@@ -714,21 +714,21 @@ module Render : sig
 end
 
 module Config : sig
-  val set_basename : string -> Status.t
+  val set_basename : string -> unit
 
   val load : string -> Status.t
 
-  val load_from_memory : string -> int -> Status.t
+  val load_from_memory : string -> Status.t
 
-  val set_bootstrap : (unit -> Status.t) -> Status.t
+  val set_bootstrap : (unit -> Status.t) -> unit
 
-  val push_section : string -> Status.t
+  val push_section : string -> unit
 
-  val pop_section : unit -> Status.t
+  val pop_section : unit -> unit
 
   val get_current_section : unit -> string
 
-  val select_section : string -> Status.t
+  val select_section : string -> unit
 
   val get_section_count : unit -> int
 
@@ -750,29 +750,29 @@ module Config : sig
 
   val get_string : string -> string
 
-  val set_string : string -> string -> Status.t
+  val set_string : string -> string -> unit
 
   val get_bool : string -> bool
 
-  val set_bool : string -> bool -> Status.t
+  val set_bool : string -> bool -> unit
 
   val get_float : string -> float
 
-  val set_float : string -> float -> Status.t
+  val set_float : string -> float -> unit
 
   val get_int : string -> int
 
-  val set_int : string -> int -> Status.t
+  val set_int : string -> int -> unit
 
   val get_vector : string -> Vector.t
 
-  val set_vector : string -> Vector.t -> Status.t
+  val set_vector : string -> Vector.t -> unit
 
   val get_list_vector : string -> int option -> Vector.t
 
-  val set_list_string : string -> string list -> Status.t
+  val set_list_string : string -> string list -> unit
 
-  val append_list_string : string -> string list -> Status.t
+  val append_list_string : string -> string list -> unit
 
   val if_has_value : string -> (string -> 'a) -> 'a option
   (** [if_has_value key getter] is [Some (getter key)] if [key] exists in the
@@ -782,10 +782,9 @@ module Config : sig
   val exists : section:string -> key:string -> bool
   (** [exists ~section ~key] is [true] if [key] exists in [section]. *)
 
-  val get : (string -> 'a) -> section:string -> key:string -> 'a Status.result
+  val get : (string -> 'a) -> section:string -> key:string -> 'a
 
-  val set :
-    (string -> 'a -> Status.t) -> 'a -> section:string -> key:string -> Status.t
+  val set : (string -> 'a -> unit) -> 'a -> section:string -> key:string -> unit
 
   val get_seq : (string -> 'a) -> section:string -> key:string -> 'a Seq.t
   (** [get_seq getter ~section ~key] is a sequence of values pulled repeatedly
@@ -804,13 +803,10 @@ module Config : sig
     int option ->
     section:string ->
     key:string ->
-    'a Status.result
+    'a
 
   val get_list :
-    (string -> int option -> 'a) ->
-    section:string ->
-    key:string ->
-    'a list Status.result
+    (string -> int option -> 'a) -> section:string -> key:string -> 'a list
 
   val is_list : string -> bool
 
@@ -818,11 +814,11 @@ module Config : sig
 
   val get_current_section_keys : unit -> string list
 
-  val get_section_keys : string -> string list Status.result
+  val get_section_keys : string -> string list
 
   val get_guid : string -> Structure.Guid.t
 
-  val set_guid : string -> Structure.Guid.t -> Status.t
+  val set_guid : string -> Structure.Guid.t -> unit
 end
 
 module Orx_thread : sig

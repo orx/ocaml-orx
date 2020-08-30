@@ -12,9 +12,9 @@ end
 let update (clock_info : Orx.Clock.Info.t) =
   let camera = State.get () in
 
-  Orx.Config.push_section "Tutorial" |> Result.get_ok;
+  Orx.Config.push_section "Tutorial";
   let scroll_speed = Orx.Config.get_vector "ScrollSpeed" in
-  Orx.Config.pop_section () |> Result.get_ok;
+  Orx.Config.pop_section ();
 
   let scroll_speed =
     Orx.Vector.mulf scroll_speed (Orx.Clock.Info.get_dt clock_info)
@@ -93,6 +93,6 @@ let bootstrap () =
   Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
 
 let () =
-  Orx.Config.set_bootstrap bootstrap |> Result.get_ok;
-  Orx.Config.set_basename "09_Scrolling" |> Result.get_ok;
+  Orx.Config.set_bootstrap bootstrap;
+  Orx.Config.set_basename "09_Scrolling";
   Orx.Main.execute ~init ~run ~exit ()

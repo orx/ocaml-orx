@@ -126,6 +126,6 @@ let bootstrap () =
   Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
 
 let () =
-  Orx.Config.set_bootstrap bootstrap |> Result.get_ok;
-  Orx.Config.set_basename "07_FX" |> Result.get_ok;
+  Orx.Config.set_bootstrap bootstrap;
+  Orx.Config.set_basename "07_FX";
   Orx.Main.execute ~init ~run ~exit ()

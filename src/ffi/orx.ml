@@ -597,12 +597,19 @@ module Config = struct
   let wrap_get_vector = get_vector
   include Orx_gen.Config
 
+  let load_from_memory s = load_from_memory s (String.length s)
+
   let bootstrap_function = Ctypes.(void @-> returning Orx_gen.Status.t)
 
   let set_bootstrap =
     Ctypes.(
       Foreign.foreign ~release_runtime_lock:false "orxConfig_SetBootstrap"
         (Foreign.funptr bootstrap_function @-> returning Orx_gen.Status.t))
+
+  let set_bootstrap f =
+    match set_bootstrap f with
+    | Ok () -> ()
+    | Error `Orx -> fail "Unable to set config bootstrap function"
 
   let set_list_string (key : string) (values : string list) =
     let length = List.length values in
@@ -626,50 +633,40 @@ module Config = struct
       None
 
   let with_section (section : string) f =
-    match push_section section with
-    | Error _ as e -> Status.open_error e
-    | Ok () ->
-      let result = f () in
-      ( match pop_section () with
-      | Error _ as e -> Status.open_error e
-      | Ok () -> Ok result
-      )
+    push_section section;
+    Fun.protect ~finally:pop_section f
 
   let exists ~section ~key =
-    match with_section section (fun () -> has_value key) with
-    | Ok answer -> answer
-    | Error `Orx -> false
+    has_section section && with_section section (fun () -> has_value key)
 
-  let get (get : string -> 'a) ~(section : string) ~(key : string) :
-      ('a, 'err) result =
+  let get (get : string -> 'a) ~(section : string) ~(key : string) : 'a =
     with_section section (fun () -> get key)
 
   let set
-      (set : string -> 'a -> Status.t)
+      (set : string -> 'a -> unit)
       (v : 'a)
       ~(section : string)
-      ~(key : string) : Status.t =
-    with_section section (fun () -> set key v) |> Result.join
+      ~(key : string) : unit =
+    with_section section (fun () -> set key v)
 
   let get_seq (getter : string -> 'a) ~section ~key : 'a Seq.t =
-    let rec next () =
-      match get getter ~section ~key with
-      | Ok x -> Seq.Cons (x, next)
-      | Error `Orx -> Seq.Nil
-    in
-    next
+    if exists ~section ~key then (
+      let rec next () = Seq.Cons (get getter ~section ~key, next) in
+      next
+    ) else
+      Seq.empty
 
   let get_list_item
       (get : string -> int option -> 'a)
       (i : int option)
       ~(section : string)
-      ~(key : string) : ('a, 'error) result =
+      ~(key : string) : 'a =
     with_section section (fun () -> get key i)
 
   let get_list
       (get : string -> int option -> 'a)
       ~(section : string)
-      ~(key : string) : ('a list, [> `Orx ]) result =
+      ~(key : string) : 'a list =
     let get_all () =
       let count = get_list_count key in
       List.init count (fun i -> get key (Some i))

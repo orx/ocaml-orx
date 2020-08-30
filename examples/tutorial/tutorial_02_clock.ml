@@ -15,7 +15,7 @@ module State = struct
 end
 
 let update (clock_info : Orx.Clock.Info.t) =
-  Orx.Config.push_section "Main" |> Result.get_ok;
+  Orx.Config.push_section "Main";
 
   if Orx.Config.get_bool "DisplayLog" then
     Fmt.pr "<%s>: Time = %.3f / DT = %.3f@."
@@ -23,18 +23,17 @@ let update (clock_info : Orx.Clock.Info.t) =
       (Orx.Clock.Info.get_time clock_info)
       (Orx.Clock.Info.get_dt clock_info);
 
-  Orx.Config.pop_section () |> Result.get_ok;
+  Orx.Config.pop_section ();
 
   let clock = Orx.Clock.Info.get_clock clock_info |> Option.get in
   let obj = State.Clock_map.find clock (State.get ()) in
   Orx.Object.set_rotation obj (Float.pi *. Orx.Clock.Info.get_time clock_info)
 
 let input_update (_clock_info : Orx.Clock.Info.t) =
-  Orx.Config.push_section "Main" |> Result.get_ok;
+  Orx.Config.push_section "Main";
   if Orx.Input.has_been_activated "Log" then
-    Orx.Config.set_bool "DisplayLog" (not (Orx.Config.get_bool "DisplayLog"))
-    |> Result.get_ok;
-  Orx.Config.pop_section () |> Result.get_ok;
+    Orx.Config.set_bool "DisplayLog" (not (Orx.Config.get_bool "DisplayLog"));
+  Orx.Config.pop_section ();
 
   match Orx.Clock.get "Clock1" with
   | None -> ()
@@ -92,6 +91,6 @@ let bootstrap () =
   Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
 
 let () =
-  Orx.Config.set_bootstrap bootstrap |> Result.get_ok;
-  Orx.Config.set_basename "02_Clock" |> Result.get_ok;
+  Orx.Config.set_bootstrap bootstrap;
+  Orx.Config.set_basename "02_Clock";
   Orx.Main.execute ~init ~run ~exit ()
