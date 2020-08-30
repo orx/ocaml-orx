@@ -108,8 +108,8 @@ let init () =
   let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
   Orx.Clock.register clock update Main Normal;
 
-  Orx.Event.add_handler Fx fx_event_handler |> Result.get_ok;
-  Orx.Event.add_handler Input input_event_handler |> Result.get_ok;
+  Orx.Event.add_handler Fx fx_event_handler;
+  Orx.Event.add_handler Input input_event_handler;
 
   Ok ()
 

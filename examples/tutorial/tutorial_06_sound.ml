@@ -121,7 +121,7 @@ let init () =
   let music = Orx.Object.get_last_added_sound soldier |> Option.get in
   Orx.Sound.play music |> Result.get_ok;
   Orx.Clock.register clock update Main Normal;
-  Orx.Event.add_handler Sound event_handler |> Result.get_ok;
+  Orx.Event.add_handler Sound event_handler;
 
   State.state := Some { soldier; music };
 

@@ -521,7 +521,7 @@ module Event = struct
   let registered_callbacks : (t -> Orx_gen.Status.t) list ref = ref []
 
   let add_handler :
-      type e p. (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> Status.t =
+      type e p. (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> unit =
    fun event_type callback ->
     let callback event =
       let f =
@@ -555,9 +555,14 @@ module Event = struct
       | _ -> Unsigned.UInt32.max_int
     in
     let remove_flags = Unsigned.UInt32.max_int in
-    c_add_handler
-      (Event_type.to_c_any event_type)
-      callback add_flags remove_flags
+    let result =
+      c_add_handler
+        (Event_type.to_c_any event_type)
+        callback add_flags remove_flags
+    in
+    match result with
+    | Ok () -> ()
+    | Error `Orx -> fail "Failed to set event callback"
 end
 
 module Clock = struct

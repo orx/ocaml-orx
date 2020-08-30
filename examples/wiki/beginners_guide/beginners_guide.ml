@@ -129,7 +129,7 @@ let init () =
   (* No shooting to start out *) Orx.Object.enable heros_gun false;
 
   (* Setup our physics event handler *)
-  Orx.Event.add_handler Physics Physics.event_handler |> Result.get_ok;
+  Orx.Event.add_handler Physics Physics.event_handler;
 
   Ok ()
 

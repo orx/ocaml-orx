@@ -583,7 +583,7 @@ module Event : sig
   val add_handler :
     ('event, 'payload) Event_type.t ->
     (t -> 'event -> 'payload -> Status.t) ->
-    Status.t
+    unit
 end
 
 module Module_id : sig

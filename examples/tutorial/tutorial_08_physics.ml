@@ -71,7 +71,7 @@ let init () =
 
   State.state := Some camera;
 
-  Orx.Event.add_handler Physics event_handler |> Result.get_ok;
+  Orx.Event.add_handler Physics event_handler;
 
   Orx.Object.create_from_config "Scene" |> Option.get |> ignore;
 
