@@ -74,7 +74,7 @@ let init () =
   State.state := Some camera;
 
   let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
-  Orx.Clock.register clock update Main Normal |> Result.get_ok;
+  Orx.Clock.register clock update Main Normal;
 
   Orx.Object.create_from_config "Scene" |> Option.get |> ignore;
 

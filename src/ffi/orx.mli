@@ -657,20 +657,20 @@ module Clock : sig
 
   val get_info : t -> Info.t
 
-  val set_modifier : t -> Clock_modifier.t -> float -> Status.t
+  val set_modifier : t -> Clock_modifier.t -> float -> unit
 
-  val set_tick_size : t -> float -> Status.t
+  val set_tick_size : t -> float -> unit
 
   val restart : t -> Status.t
 
-  val pause : t -> Status.t
+  val pause : t -> unit
 
-  val unpause : t -> Status.t
+  val unpause : t -> unit
 
   val is_paused : t -> bool
 
   val register :
-    t -> (Info.t -> unit) -> Module_id.t -> Clock_priority.t -> Status.t
+    t -> (Info.t -> unit) -> Module_id.t -> Clock_priority.t -> unit
 end
 
 module Camera : sig

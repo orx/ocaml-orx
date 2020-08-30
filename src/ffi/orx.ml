@@ -590,7 +590,9 @@ module Clock = struct
         raise exn
     in
     registered_callbacks := callback_wrapper :: !registered_callbacks;
-    c_register clock callback_wrapper Ctypes.null module_ priority
+    match c_register clock callback_wrapper Ctypes.null module_ priority with
+    | Ok () -> ()
+    | Error `Orx -> fail "Failed to set clock callback"
 end
 
 module Config = struct

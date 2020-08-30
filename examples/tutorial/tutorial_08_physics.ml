@@ -67,7 +67,7 @@ let init () =
   let camera = Orx.Viewport.get_camera viewport |> Option.get in
 
   let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
-  Orx.Clock.register clock update Main Normal |> Result.get_ok;
+  Orx.Clock.register clock update Main Normal;
 
   State.state := Some camera;
 

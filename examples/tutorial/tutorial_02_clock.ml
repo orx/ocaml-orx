@@ -39,11 +39,11 @@ let input_update (_clock_info : Orx.Clock.Info.t) =
   | None -> ()
   | Some clock ->
     if Orx.Input.is_active "Faster" then
-      Orx.Clock.set_modifier clock Multiply 4.0 |> Result.get_ok
+      Orx.Clock.set_modifier clock Multiply 4.0
     else if Orx.Input.is_active "Slower" then
-      Orx.Clock.set_modifier clock Multiply 0.25 |> Result.get_ok
+      Orx.Clock.set_modifier clock Multiply 0.25
     else if Orx.Input.is_active "Normal" then
-      Orx.Clock.set_modifier clock None 0.0 |> Result.get_ok
+      Orx.Clock.set_modifier clock None 0.0
 
 let init () =
   let get_name (binding : string) : string =
@@ -70,11 +70,11 @@ let init () =
   State.add clock1 object1;
   State.add clock2 object2;
 
-  Orx.Clock.register clock1 update Main Normal |> Result.get_ok;
-  Orx.Clock.register clock2 update Main Normal |> Result.get_ok;
+  Orx.Clock.register clock1 update Main Normal;
+  Orx.Clock.register clock2 update Main Normal;
 
   let main_clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
-  Orx.Clock.register main_clock input_update Main Normal |> Result.get_ok;
+  Orx.Clock.register main_clock input_update Main Normal;
 
   Ok ()
 

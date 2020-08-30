@@ -513,17 +513,17 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Change a clock *)
     let set_modifier =
       c "orxClock_SetModifier"
-        (t @-> T.Clock_modifier.t @-> float @-> returning Status.t)
+        (t @-> T.Clock_modifier.t @-> float @-> returning Status.as_exn)
 
     let set_tick_size =
-      c "orxClock_SetTickSize" (t @-> float @-> returning Status.t)
+      c "orxClock_SetTickSize" (t @-> float @-> returning Status.as_exn)
 
     (* Adjust clock's progress *)
     let restart = c "orxClock_Restart" (t @-> returning Status.t)
 
-    let pause = c "orxClock_Pause" (t @-> returning Status.t)
+    let pause = c "orxClock_Pause" (t @-> returning Status.as_exn)
 
-    let unpause = c "orxClock_Unpause" (t @-> returning Status.t)
+    let unpause = c "orxClock_Unpause" (t @-> returning Status.as_exn)
 
     let is_paused = c "orxClock_IsPaused" (t @-> returning bool)
   end
