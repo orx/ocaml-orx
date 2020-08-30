@@ -403,11 +403,11 @@ module Object : sig
 
   val apply_torque : t -> float -> Status.t
 
-  val set_speed : t -> Vector.t -> Status.t
+  val set_speed : t -> Vector.t -> unit
 
   val get_speed : t -> Vector.t
 
-  val set_relative_speed : t -> Vector.t -> Status.t
+  val set_relative_speed : t -> Vector.t -> unit
 
   val get_relative_speed : t -> Vector.t
 

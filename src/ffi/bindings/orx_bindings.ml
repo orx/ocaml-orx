@@ -739,13 +739,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_ApplyTorque" (t @-> float @-> returning Status.t)
 
     let set_speed =
-      c "orxObject_SetSpeed" (t @-> Vector.t @-> returning Status.t)
+      c "orxObject_SetSpeed" (t @-> Vector.t @-> returning Status.as_exn)
 
     let get_speed =
       c "orxObject_GetSpeed" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_relative_speed =
-      c "orxObject_SetRelativeSpeed" (t @-> Vector.t @-> returning Status.t)
+      c "orxObject_SetRelativeSpeed" (t @-> Vector.t @-> returning Status.as_exn)
 
     let get_relative_speed =
       c "orxObject_GetRelativeSpeed" (t @-> Vector.t @-> returning Vector.t_opt)
