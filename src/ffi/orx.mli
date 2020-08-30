@@ -182,17 +182,17 @@ module Graphic : sig
 
   val delete : t -> Status.t
 
-  val set_size : t -> Vector.t -> Status.t
+  val set_size : t -> Vector.t -> unit
 
   val get_size : t -> Vector.t
 
-  val set_origin : t -> Vector.t -> Status.t
+  val set_origin : t -> Vector.t -> unit
 
   val get_origin : t -> Vector.t
 
-  val set_flip : t -> bool -> bool -> Status.t
+  val set_flip : t -> bool -> bool -> unit
 
-  val set_pivot : t -> Vector.t -> Status.t
+  val set_pivot : t -> Vector.t -> unit
 
   val set_data : t -> Structure.t -> Status.t
 

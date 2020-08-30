@@ -229,24 +229,25 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let delete = c "orxGraphic_Delete" (t @-> returning Status.t)
 
     (* Graphic dimensions on the source texture *)
-    let set_size = c "orxGraphic_SetSize" (t @-> Vector.t @-> returning Status.t)
+    let set_size =
+      c "orxGraphic_SetSize" (t @-> Vector.t @-> returning Status.as_exn)
 
     let get_size = c "orxGraphic_GetSize" (t @-> Vector.t @-> returning Vector.t)
 
     (* Graphic origin on the source texture *)
     let set_origin =
-      c "orxGraphic_SetOrigin" (t @-> Vector.t @-> returning Status.t)
+      c "orxGraphic_SetOrigin" (t @-> Vector.t @-> returning Status.as_exn)
 
     let get_origin =
       c "orxGraphic_GetOrigin" (t @-> Vector.t @-> returning Vector.t)
 
     (* Flip a graphic on the X or Y axis *)
     let set_flip =
-      c "orxGraphic_SetFlip" (t @-> bool @-> bool @-> returning Status.t)
+      c "orxGraphic_SetFlip" (t @-> bool @-> bool @-> returning Status.as_exn)
 
     (* Set the pivot point for a graphic *)
     let set_pivot =
-      c "orxGraphic_SetPivot" (t @-> Vector.t @-> returning Status.t)
+      c "orxGraphic_SetPivot" (t @-> Vector.t @-> returning Status.as_exn)
 
     (* Set texture data associated with this graphic *)
     let set_data =
