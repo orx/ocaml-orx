@@ -237,6 +237,9 @@ module Render = struct
 
   let get_world_position vector viewport =
     get_optional_vector (fun () v -> get_world_position vector viewport v) ()
+
+  let get_screen_position vector viewport =
+    get_optional_vector (fun () v -> get_screen_position vector viewport v) ()
 end
 
 module Mouse = struct

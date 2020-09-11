@@ -711,6 +711,8 @@ end
 
 module Render : sig
   val get_world_position : Vector.t -> Viewport.t -> Vector.t option
+
+  val get_screen_position : Vector.t -> Viewport.t -> Vector.t option
 end
 
 module Config : sig

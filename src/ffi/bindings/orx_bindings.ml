@@ -889,6 +889,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_world_position =
       c "orxRender_GetWorldPosition"
         (Vector.t @-> Viewport.t @-> Vector.t @-> returning Vector.t_opt)
+
+    let get_screen_position =
+      c "orxRender_GetScreenPosition"
+        (Vector.t @-> Viewport.t @-> Vector.t @-> returning Vector.t_opt)
   end
 
   module Input = struct
