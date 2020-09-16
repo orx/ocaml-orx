@@ -318,8 +318,36 @@ module Physics = struct
   let get_gravity = get_vector_exn (fun () v -> get_gravity v)
 end
 
+module Body_part = struct
+  include Orx_gen.Body_part
+
+  let set_self_flags part flags =
+    set_self_flags part (Unsigned.UInt16.of_int flags)
+end
+
+module Body = struct
+  include Orx_gen.Body
+
+  let get_parts (body : t) : Body_part.t Seq.t =
+    let rec iter prev_part () =
+      match get_next_part body prev_part with
+      | None -> Seq.Nil
+      | Some next as part -> Seq.Cons (next, iter part)
+    in
+    iter None
+end
+
 module Object = struct
   include Orx_gen.Object
+
+  type 'a associated_structure = Body : Body.t associated_structure
+
+  let get_structure (type s) (o : t) (s : s associated_structure) : s option =
+    match s with
+    | Body ->
+      let ( let* ) = Option.bind in
+      let* structure = get_structure o Body in
+      Body.of_void_pointer (Structure.to_void_pointer structure)
 
   let set_parent o parent =
     match Parent.set set_parent o parent with

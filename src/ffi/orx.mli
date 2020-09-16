@@ -304,14 +304,36 @@ module Physics : sig
   val set_gravity : Vector.t -> unit
 end
 
+module Body_part : sig
+  type t
+
+  val set_self_flags : t -> int -> unit
+end
+
+module Body : sig
+  type t
+
+  val get_parts : t -> Body_part.t Seq.t
+end
+
 module Object : sig
+  (** {1 Objects in the Orx engine's world} *)
+
   type t = obj
+  (** An Orx object *)
 
   val compare : t -> t -> int
+  (** Comparison defining a total ordering over objects. This is primarily
+      useful for defining containers like {!Stdlib.Map} and {!Stdlib.Set}. *)
 
   val equal : t -> t -> bool
+  (** Object equality *)
+
+  (** {2 Object creation} *)
 
   val create_from_config : string -> t option
+
+  (** {2 Enabling/disabling objects} *)
 
   val enable : t -> bool -> unit
 
@@ -323,7 +345,7 @@ module Object : sig
 
   val is_paused : t -> bool
 
-  val get_name : t -> string
+  (** {2 Object ownership} *)
 
   val set_owner : t -> Parent.t option -> unit
 
@@ -342,7 +364,13 @@ module Object : sig
 
   val get_first_child : t -> 'a child -> 'a option
 
+  (** {2 Basic object properties} *)
+
+  val get_name : t -> string
+
   val get_bounding_box : t -> Obox.t
+
+  (** {2 FX} *)
 
   val add_fx : t -> string -> Status.t
 
@@ -357,6 +385,8 @@ module Object : sig
   val add_delayed_fx_recursive : t -> string -> float -> bool -> unit
 
   val remove_fx : t -> string -> Status.t
+
+  (** {2 Placement and dimensions} *)
 
   val get_rotation : t -> float
 
@@ -374,15 +404,21 @@ module Object : sig
 
   val set_scale : t -> Vector.t -> unit
 
+  (** {2 Text} *)
+
   val set_text_string : t -> string -> unit
 
   val get_text_string : t -> string
+
+  (** {2 Lifetime} *)
 
   val set_life_time : t -> float -> unit
 
   val get_life_time : t -> float
 
   val get_active_time : t -> float
+
+  (** {2 Timeline tracks} *)
 
   val add_time_line_track : t -> string -> Status.t
 
@@ -394,11 +430,7 @@ module Object : sig
 
   val is_time_line_enabled : t -> bool
 
-  val apply_force : t -> Vector.t -> Vector.t option -> Status.t
-
-  val apply_impulse : t -> Vector.t -> Vector.t option -> Status.t
-
-  val apply_torque : t -> float -> Status.t
+  (** {2 Speed} *)
 
   val set_speed : t -> Vector.t -> unit
 
@@ -407,6 +439,14 @@ module Object : sig
   val set_relative_speed : t -> Vector.t -> unit
 
   val get_relative_speed : t -> Vector.t
+
+  (** {2 Physics} *)
+
+  val apply_force : t -> Vector.t -> Vector.t option -> Status.t
+
+  val apply_impulse : t -> Vector.t -> Vector.t option -> Status.t
+
+  val apply_torque : t -> float -> Status.t
 
   val set_angular_velocity : t -> float -> Status.t
 
@@ -434,6 +474,8 @@ module Object : sig
     v1:Vector.t ->
     collision option
 
+  (** {2 Color} *)
+
   val set_rgb : t -> Vector.t -> Status.t
 
   val set_rgb_recursive : t -> Vector.t -> unit
@@ -442,7 +484,11 @@ module Object : sig
 
   val set_alpha_recursive : t -> float -> unit
 
+  (** {2 Animation} *)
+
   val set_target_anim : t -> string -> Status.t
+
+  (** {2 Sound} *)
 
   val add_sound : t -> string -> Status.t
 
@@ -458,7 +504,15 @@ module Object : sig
 
   val stop : t -> Status.t
 
+  (** {2 Associated structures} *)
+
+  type 'a associated_structure = Body : Body.t associated_structure
+
   val link_structure : t -> Structure.t -> unit
+
+  val get_structure : t -> 'a associated_structure -> 'a option
+
+  (** {2 Spatial selection} *)
 
   type group =
     | All_groups
@@ -473,6 +527,8 @@ module Object : sig
 
   val box_pick : Obox.t -> group -> t option
 
+  (** {2 Groups} *)
+
   val get_default_group_id : unit -> String_id.t
 
   val get_group_id : t -> String_id.t
@@ -480,6 +536,8 @@ module Object : sig
   val set_group_id : t -> group -> unit
 
   val set_group_id_recursive : t -> group -> unit
+
+  (** {2 Object GUIDs} *)
 
   val to_guid : t -> Structure.Guid.t
 

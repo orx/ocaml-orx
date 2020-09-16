@@ -274,15 +274,17 @@ module Bindings (F : Ctypes.TYPE) = struct
 
   module Structure_id = struct
     type t =
+      | Body
       | Camera
       | Object
 
     let make name = F.constant ("orxSTRUCTURE_ID_" ^ name) F.int64_t
 
+    let body = make "BODY"
     let camera = make "CAMERA"
     let object_ = make "OBJECT"
 
-    let map_to_constant = [ (Camera, camera); (Object, object_) ]
+    let map_to_constant = [ (Body, body); (Camera, camera); (Object, object_) ]
 
     let t =
       F.enum "__orxSTRUCTURE_ID_t" map_to_constant ~unexpected:(fun i ->
@@ -657,6 +659,18 @@ module Bindings (F : Ctypes.TYPE) = struct
     let payload = F.field t "pstPayload" (F.ptr F.void)
     let context = F.field t "pContext" (F.ptr F.void)
     let () = F.seal t
+  end
+
+  module Body_part = struct
+    type t
+
+    let t : t structure = F.structure "__orxBODY_PART_t"
+  end
+
+  module Body = struct
+    type t
+
+    let t : t structure = F.structure "__orxBODY_t"
   end
 
   module Camera = struct

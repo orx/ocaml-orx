@@ -195,6 +195,31 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get = c "orxStructure_Get" (Guid.t @-> returning t_opt)
   end
 
+  module Body_part = struct
+    type t = T.Body_part.t structure ptr
+
+    let t = ptr T.Body_part.t
+
+    let t_opt = ptr_opt T.Body_part.t
+
+    let set_self_flags =
+      c "orxBody_SetPartSelfFlags" (t @-> uint16_t @-> returning Status.as_exn)
+  end
+
+  module Body = struct
+    type t = T.Body.t structure ptr
+
+    let t = ptr T.Body.t
+
+    let t_opt = ptr_opt T.Body.t
+
+    let of_void_pointer = c "orxBODY" (ptr void @-> returning t_opt)
+
+    let get_next_part =
+      c "orxBody_GetNextPart"
+        (t @-> Body_part.t_opt @-> returning Body_part.t_opt)
+  end
+
   module Texture = struct
     type t = T.Texture.t structure ptr
 
@@ -841,6 +866,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Linking structures *)
     let link_structure =
       c "orxObject_LinkStructure" (t @-> Structure.t @-> returning Status.as_exn)
+
+    let get_structure =
+      c "_orxObject_GetStructure"
+        (t @-> T.Structure_id.t @-> returning Structure.t_opt)
 
     (* Object selection *)
     (* Neighbor = Object(s) within a bounding box *)
