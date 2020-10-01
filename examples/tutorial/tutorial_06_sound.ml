@@ -43,16 +43,14 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
     Orx.Object.add_sound state.soldier "RandomBip" |> Result.get_ok;
 
     Orx.Config.push_section "Tutorial";
-    Orx.Object.set_rgb state.soldier (Orx.Config.get_vector "RandomColor")
-    |> Result.get_ok;
-    Orx.Object.set_alpha state.soldier 1.0 |> Result.get_ok;
+    Orx.Object.set_rgb state.soldier (Orx.Config.get_vector "RandomColor");
+    Orx.Object.set_alpha state.soldier 1.0;
     Orx.Config.pop_section ()
   );
 
   if Orx.Input.has_been_activated "DefaultSFX" then (
     Orx.Object.add_sound state.soldier "DefaultBip" |> Result.get_ok;
     Orx.Object.set_rgb state.soldier (Orx.Vector.make ~x:1.0 ~y:1.0 ~z:1.0)
-    |> Result.get_ok
   );
 
   if Orx.Input.is_active "PitchUp" then (

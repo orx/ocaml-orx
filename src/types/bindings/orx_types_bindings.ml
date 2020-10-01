@@ -276,15 +276,26 @@ module Bindings (F : Ctypes.TYPE) = struct
     type t =
       | Body
       | Camera
+      | Graphic
       | Object
+      | Sound
 
     let make name = F.constant ("orxSTRUCTURE_ID_" ^ name) F.int64_t
 
     let body = make "BODY"
     let camera = make "CAMERA"
+    let graphic = make "GRAPHIC"
     let object_ = make "OBJECT"
+    let sound = make "SOUND"
 
-    let map_to_constant = [ (Body, body); (Camera, camera); (Object, object_) ]
+    let map_to_constant =
+      [
+        (Body, body);
+        (Camera, camera);
+        (Graphic, graphic);
+        (Object, object_);
+        (Sound, sound);
+      ]
 
     let t =
       F.enum "__orxSTRUCTURE_ID_t" map_to_constant ~unexpected:(fun i ->

@@ -152,11 +152,11 @@ let run () =
     (* Left/right movement *)
     if Orx.Input.is_active "GoLeft" then (
       Orx.Object.set_scale state.hero flip_left;
-      Orx.Object.apply_impulse state.hero left_speed None |> Result.get_ok;
+      Orx.Object.apply_impulse state.hero left_speed;
       Orx.Object.set_target_anim state.hero "HeroRun" |> Result.get_ok
     ) else if Orx.Input.is_active "GoRight" then (
       Orx.Object.set_scale state.hero flip_right;
-      Orx.Object.apply_impulse state.hero right_speed None |> Result.get_ok;
+      Orx.Object.apply_impulse state.hero right_speed;
       Orx.Object.set_target_anim state.hero "HeroRun" |> Result.get_ok
     ) else
       Orx.Object.set_target_anim state.hero "HeroIdle" |> Result.get_ok;
@@ -169,7 +169,7 @@ let run () =
 
     (* Jumping *)
     if Orx.Input.is_active "Jump" && Orx.Input.has_new_status "Jump" then
-      Orx.Object.apply_impulse state.hero jump_speed None |> Result.get_ok;
+      Orx.Object.apply_impulse state.hero jump_speed;
 
     (* Done! *)
     Orx.Status.ok

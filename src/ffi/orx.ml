@@ -340,14 +340,23 @@ end
 module Object = struct
   include Orx_gen.Object
 
-  type 'a associated_structure = Body : Body.t associated_structure
+  type 'a associated_structure =
+    | Body : Body.t associated_structure
+    | Graphic : Graphic.t associated_structure
+    | Sound : Sound.t associated_structure
 
   let get_structure (type s) (o : t) (s : s associated_structure) : s option =
+    let ( let* ) = Option.bind in
     match s with
     | Body ->
-      let ( let* ) = Option.bind in
       let* structure = get_structure o Body in
       Body.of_void_pointer (Structure.to_void_pointer structure)
+    | Graphic ->
+      let* structure = get_structure o Graphic in
+      Graphic.of_void_pointer (Structure.to_void_pointer structure)
+    | Sound ->
+      let* structure = get_structure o Sound in
+      Sound.of_void_pointer (Structure.to_void_pointer structure)
 
   let set_parent o parent =
     match Parent.set set_parent o parent with
@@ -376,7 +385,13 @@ module Object = struct
 
   let get_custom_gravity = get_optional_vector get_custom_gravity
 
-  let get_mass_center = get_optional_vector get_mass_center
+  let get_mass_center o =
+    match get_optional_vector get_mass_center o with
+    | Some v -> v
+    | None -> invalid_arg Status.body_error_message
+
+  let apply_force ?location o f = apply_force o f location
+  let apply_impulse ?location o f = apply_impulse o f location
 
   let raycast
       ?(self_flags = 0xffff)

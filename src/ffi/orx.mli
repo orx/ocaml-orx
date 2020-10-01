@@ -442,23 +442,23 @@ module Object : sig
 
   (** {2 Physics} *)
 
-  val apply_force : t -> Vector.t -> Vector.t option -> Status.t
+  val apply_force : ?location:Vector.t -> t -> Vector.t -> unit
 
-  val apply_impulse : t -> Vector.t -> Vector.t option -> Status.t
+  val apply_impulse : ?location:Vector.t -> t -> Vector.t -> unit
 
-  val apply_torque : t -> float -> Status.t
+  val apply_torque : t -> float -> unit
 
-  val set_angular_velocity : t -> float -> Status.t
+  val set_angular_velocity : t -> float -> unit
 
   val get_angular_velocity : t -> float
 
-  val set_custom_gravity : t -> Vector.t -> Status.t
+  val set_custom_gravity : t -> Vector.t option -> unit
 
   val get_custom_gravity : t -> Vector.t option
 
   val get_mass : t -> float
 
-  val get_mass_center : t -> Vector.t option
+  val get_mass_center : t -> Vector.t
 
   type collision = {
     colliding_object : t;
@@ -476,11 +476,11 @@ module Object : sig
 
   (** {2 Color} *)
 
-  val set_rgb : t -> Vector.t -> Status.t
+  val set_rgb : t -> Vector.t -> unit
 
   val set_rgb_recursive : t -> Vector.t -> unit
 
-  val set_alpha : t -> float -> Status.t
+  val set_alpha : t -> float -> unit
 
   val set_alpha_recursive : t -> float -> unit
 
@@ -496,17 +496,20 @@ module Object : sig
 
   val get_last_added_sound : t -> Sound.t option
 
-  val set_volume : t -> float -> Status.t
+  val set_volume : t -> float -> unit
 
-  val set_pitch : t -> float -> Status.t
+  val set_pitch : t -> float -> unit
 
-  val play : t -> Status.t
+  val play : t -> unit
 
-  val stop : t -> Status.t
+  val stop : t -> unit
 
   (** {2 Associated structures} *)
 
-  type 'a associated_structure = Body : Body.t associated_structure
+  type 'a associated_structure =
+    | Body : Body.t associated_structure
+    | Graphic : Graphic.t associated_structure
+    | Sound : Sound.t associated_structure
 
   val link_structure : t -> Structure.t -> unit
 

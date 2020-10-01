@@ -53,6 +53,11 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         int
 
     let invalid msg = view ~read:(of_int_exn msg) ~write:(fun _ -> 1) int
+
+    let body_error_message = "No physics body associated with orx object"
+    let body_exn = invalid body_error_message
+    let graphic_exn = invalid "No graphic associated with orx object"
+    let sound_exn = invalid "No sound associated with orx object"
   end
 
   module Bank = struct
@@ -246,6 +251,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t_opt = ptr_opt T.Graphic.t
 
+    let of_void_pointer = c "orxGRAPHIC" (ptr void @-> returning t_opt)
+
     let create = c "orxGraphic_Create" (void @-> returning t_opt)
 
     let create_from_config =
@@ -285,6 +292,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let t = ptr T.Sound.t
 
     let t_opt = ptr_opt T.Sound.t
+
+    let of_void_pointer = c "orxSOUND" (ptr void @-> returning t_opt)
 
     let status_err_no_data = Status.invalid "No sound data or invalid setting"
 
@@ -781,14 +790,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     (* Physics *)
     let apply_force =
       c "orxObject_ApplyForce"
-        (t @-> Vector.t @-> Vector.t_opt @-> returning Status.t)
+        (t @-> Vector.t @-> Vector.t_opt @-> returning Status.body_exn)
 
     let apply_impulse =
       c "orxObject_ApplyImpulse"
-        (t @-> Vector.t @-> Vector.t_opt @-> returning Status.t)
+        (t @-> Vector.t @-> Vector.t_opt @-> returning Status.body_exn)
 
     let apply_torque =
-      c "orxObject_ApplyTorque" (t @-> float @-> returning Status.t)
+      c "orxObject_ApplyTorque" (t @-> float @-> returning Status.body_exn)
 
     let set_speed =
       c "orxObject_SetSpeed" (t @-> Vector.t @-> returning Status.as_exn)
@@ -803,13 +812,15 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_GetRelativeSpeed" (t @-> Vector.t @-> returning Vector.t_opt)
 
     let set_angular_velocity =
-      c "orxObject_SetAngularVelocity" (t @-> float @-> returning Status.t)
+      c "orxObject_SetAngularVelocity"
+        (t @-> float @-> returning Status.body_exn)
 
     let get_angular_velocity =
       c "orxObject_GetAngularVelocity" (t @-> returning float)
 
     let set_custom_gravity =
-      c "orxObject_SetCustomGravity" (t @-> Vector.t @-> returning Status.t)
+      c "orxObject_SetCustomGravity"
+        (t @-> Vector.t_opt @-> returning Status.body_exn)
 
     let get_custom_gravity =
       c "orxObject_GetCustomGravity" (t @-> Vector.t @-> returning Vector.t_opt)
@@ -832,12 +843,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         )
 
     (* Color *)
-    let set_rgb = c "orxObject_SetRGB" (t @-> Vector.t @-> returning Status.t)
+    let set_rgb =
+      c "orxObject_SetRGB" (t @-> Vector.t @-> returning Status.graphic_exn)
 
     let set_rgb_recursive =
       c "orxObject_SetRGBRecursive" (t @-> Vector.t @-> returning void)
 
-    let set_alpha = c "orxObject_SetAlpha" (t @-> float @-> returning Status.t)
+    let set_alpha =
+      c "orxObject_SetAlpha" (t @-> float @-> returning Status.graphic_exn)
 
     let set_alpha_recursive =
       c "orxObject_SetAlphaRecursive" (t @-> float @-> returning void)
@@ -855,13 +868,15 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_last_added_sound =
       c "orxObject_GetLastAddedSound" (t @-> returning Sound.t_opt)
 
-    let set_volume = c "orxObject_SetVolume" (t @-> float @-> returning Status.t)
+    let set_volume =
+      c "orxObject_SetVolume" (t @-> float @-> returning Status.sound_exn)
 
-    let set_pitch = c "orxObject_SetPitch" (t @-> float @-> returning Status.t)
+    let set_pitch =
+      c "orxObject_SetPitch" (t @-> float @-> returning Status.sound_exn)
 
-    let play = c "orxObject_Play" (t @-> returning Status.t)
+    let play = c "orxObject_Play" (t @-> returning Status.sound_exn)
 
-    let stop = c "orxObject_Stop" (t @-> returning Status.t)
+    let stop = c "orxObject_Stop" (t @-> returning Status.sound_exn)
 
     (* Linking structures *)
     let link_structure =
