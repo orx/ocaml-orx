@@ -58,6 +58,28 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let body_exn = invalid body_error_message
     let graphic_exn = invalid "No graphic associated with orx object"
     let sound_exn = invalid "No sound associated with orx object"
+
+    let raise_error () = invalid_arg "Orx.Status.get* called on error"
+
+    let get (result : t) =
+      match result with
+      | Ok () -> ()
+      | Error `Orx -> raise_error ()
+
+    let get_ok (result : _ result) =
+      match result with
+      | Ok v -> v
+      | Error `Orx -> raise_error ()
+
+    let ignore (result : t) = ignore result
+
+    let raise fmt =
+      Fmt.kstr
+        (fun error_message (result : _ result) ->
+          match result with
+          | Ok v -> v
+          | Error `Orx -> invalid_arg error_message)
+        fmt
   end
 
   module Bank = struct

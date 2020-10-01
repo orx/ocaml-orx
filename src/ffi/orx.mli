@@ -9,6 +9,18 @@ module Status : sig
   val error : t
 
   val open_error : 'ok result -> ('ok, [> `Orx ]) Stdlib.result
+
+  val get : t -> unit
+  (** [get result] is [()] if [result] is [Ok ()], otherwise it raises
+      {!Invalid_argument}. *)
+
+  val get_ok : 'ok result -> 'ok
+  (** [get_ok result] is [o] if [result] is [Ok o], otherwise it raises
+      {!Invalid_argument}. *)
+
+  val ignore : t -> unit
+  (** [ignore result] is {!Stdlib.ignore} constrained for more precise type
+      checking. *)
 end
 
 module Color : sig
@@ -333,6 +345,8 @@ module Object : sig
 
   val create_from_config : string -> t option
 
+  val create_from_config_exn : string -> t
+
   (** {2 Enabling/disabling objects} *)
 
   val enable : t -> bool -> unit
@@ -374,9 +388,15 @@ module Object : sig
 
   val add_fx : t -> string -> Status.t
 
+  val add_fx_exn : t -> string -> unit
+
   val add_unique_fx : t -> string -> Status.t
 
+  val add_unique_fx_exn : t -> string -> unit
+
   val add_delayed_fx : t -> string -> float -> Status.t
+
+  val add_delayed_fx_exn : t -> string -> float -> unit
 
   val add_fx_recursive : t -> string -> unit
 
@@ -385,6 +405,8 @@ module Object : sig
   val add_delayed_fx_recursive : t -> string -> float -> bool -> unit
 
   val remove_fx : t -> string -> Status.t
+
+  val remove_fx_exn : t -> string -> unit
 
   (** {2 Placement and dimensions} *)
 
@@ -422,9 +444,13 @@ module Object : sig
 
   val add_time_line_track : t -> string -> Status.t
 
+  val add_time_line_track_exn : t -> string -> unit
+
   val add_time_line_track_recursive : t -> string -> unit
 
   val remove_time_line_track : t -> string -> Status.t
+
+  val remove_time_line_track_exn : t -> string -> unit
 
   val enable_time_line : t -> bool -> unit
 
@@ -488,11 +514,17 @@ module Object : sig
 
   val set_target_anim : t -> string -> Status.t
 
+  val set_target_anim_exn : t -> string -> unit
+
   (** {2 Sound} *)
 
   val add_sound : t -> string -> Status.t
 
+  val add_sound_exn : t -> string -> unit
+
   val remove_sound : t -> string -> Status.t
+
+  val remove_sound_exn : t -> string -> unit
 
   val get_last_added_sound : t -> Sound.t option
 
@@ -545,6 +577,8 @@ module Object : sig
   val to_guid : t -> Structure.Guid.t
 
   val of_guid : Structure.Guid.t -> t option
+
+  val of_guid_exn : Structure.Guid.t -> t
 end
 
 module Config_event : sig

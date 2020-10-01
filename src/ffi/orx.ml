@@ -514,6 +514,45 @@ module Object = struct
     let ( let* ) = Option.bind in
     let* s = Structure.get guid in
     of_void_pointer (Ctypes.to_voidp s)
+
+  (* Exception-raising variants of functions which use config names *)
+
+  let create_from_config_exn name =
+    match create_from_config name with
+    | Some o -> o
+    | None -> Fmt.invalid_arg "Unable to create object %s" name
+
+  let add_fx_exn_wrapper add o name =
+    add o name |> Status.raise "Unable to add FX %s" name
+  let add_fx_exn = add_fx_exn_wrapper add_fx
+  let add_unique_fx_exn = add_fx_exn_wrapper add_unique_fx
+  let add_delayed_fx_exn o name delay =
+    add_fx_exn_wrapper (fun o name -> add_delayed_fx o name delay) o name
+  let remove_fx_exn o name =
+    remove_fx o name |> Status.raise "Unable to remove FX %s" name
+
+  let add_time_line_track_exn o name =
+    add_time_line_track o name
+    |> Status.raise "Unable to add time line track %s" name
+  let remove_time_line_track_exn o name =
+    remove_time_line_track o name
+    |> Status.raise "Unable to remove time line track %s" name
+
+  let set_target_anim_exn o name =
+    set_target_anim o name
+    |> Status.raise "Unable to set target animation %s" name
+
+  let add_sound_exn o name =
+    add_sound o name |> Status.raise "Unable to add sound %s" name
+  let remove_sound_exn o name =
+    remove_sound o name |> Status.raise "Unable to remove sound %s" name
+
+  let of_guid_exn guid =
+    match of_guid guid with
+    | Some o -> o
+    | None ->
+      Fmt.invalid_arg "Unable to find object with GUID %a" Structure.Guid.pp
+        guid
 end
 
 module Event = struct
