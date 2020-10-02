@@ -61,17 +61,17 @@ let init () =
   Fmt.pr "* Gravity will follow the camera@.";
   Fmt.pr "* a bump visual FX is played on objects that collide@.";
 
-  let viewport = Orx.Viewport.create_from_config "Viewport" |> Option.get in
+  let viewport = Orx.Viewport.create_from_config_exn "Viewport" in
   let camera = Orx.Viewport.get_camera viewport |> Option.get in
 
-  let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
+  let clock = Orx.Clock.get_core () in
   Orx.Clock.register clock update Main Normal;
 
   State.state := Some camera;
 
   Orx.Event.add_handler Physics event_handler;
 
-  Orx.Object.create_from_config "Scene" |> Option.get |> ignore;
+  let (_scene : Orx.Object.t) = Orx.Object.create_from_config_exn "Scene" in
 
   Ok ()
 

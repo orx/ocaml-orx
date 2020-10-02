@@ -59,13 +59,15 @@ let init () =
     )
     (get_name "Log") (get_name "Faster") (get_name "Slower") (get_name "Normal");
 
-  Orx.Viewport.create_from_config "Viewport" |> Option.get |> ignore;
+  let (_viewport : Orx.Viewport.t) =
+    Orx.Viewport.create_from_config_exn "Viewport"
+  in
 
-  let object1 = Orx.Object.create_from_config "Object1" |> Option.get in
-  let object2 = Orx.Object.create_from_config "Object2" |> Option.get in
+  let object1 = Orx.Object.create_from_config_exn "Object1" in
+  let object2 = Orx.Object.create_from_config_exn "Object2" in
 
-  let clock1 = Orx.Clock.create_from_config "Clock1" |> Option.get in
-  let clock2 = Orx.Clock.create_from_config "Clock2" |> Option.get in
+  let clock1 = Orx.Clock.create_from_config_exn "Clock1" in
+  let clock2 = Orx.Clock.create_from_config_exn "Clock2" in
 
   State.add clock1 object1;
   State.add clock2 object2;
@@ -73,7 +75,7 @@ let init () =
   Orx.Clock.register clock1 update Main Normal;
   Orx.Clock.register clock2 update Main Normal;
 
-  let main_clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
+  let main_clock = Orx.Clock.get_core () in
   Orx.Clock.register main_clock input_update Main Normal;
 
   Ok ()

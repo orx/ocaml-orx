@@ -2,6 +2,11 @@ let ( !@ ) = Ctypes.( !@ )
 
 let fail fmt = Fmt.kstr failwith ("Orx: " ^^ fmt)
 
+let create_exn create_from_config what name =
+  match create_from_config name with
+  | Some o -> o
+  | None -> Fmt.invalid_arg "Unable to create %s %s" what name
+
 module Orx_gen = Orx_bindings.Bindings (Generated)
 
 type camera = Orx_gen.Camera.t
@@ -14,7 +19,6 @@ module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
 module Structure_id = Orx_types.Structure_id
-module Viewport = Orx_gen.Viewport
 module Status = Orx_gen.Status
 module Clock_modifier = Orx_types.Clock_modifier
 module Clock_priority = Orx_types.Clock_priority
@@ -32,6 +36,12 @@ module Input_type = Orx_types.Input_type
 module Mouse_axis = Orx_types.Mouse_axis
 module Mouse_button = Orx_types.Mouse_button
 module Sound_status = Orx_types.Sound_status
+
+module Viewport = struct
+  include Orx_gen.Viewport
+
+  let create_from_config_exn = create_exn create_from_config "viewport"
+end
 
 module Texture = struct
   include Orx_gen.Texture
@@ -298,6 +308,8 @@ module Camera = struct
     | Some s -> Parent.of_void_pointer (Structure.to_void_pointer s)
 
   let get_position = get_vector get_position
+
+  let create_from_config_exn = create_exn create_from_config "camera"
 end
 
 module Input = struct
@@ -517,10 +529,7 @@ module Object = struct
 
   (* Exception-raising variants of functions which use config names *)
 
-  let create_from_config_exn name =
-    match create_from_config name with
-    | Some o -> o
-    | None -> Fmt.invalid_arg "Unable to create object %s" name
+  let create_from_config_exn = create_exn create_from_config "object"
 
   let add_fx_exn_wrapper add o name =
     add o name |> Status.raise "Unable to add FX %s" name
@@ -683,6 +692,16 @@ module Clock = struct
     match c_register clock callback_wrapper Ctypes.null module_ priority with
     | Ok () -> ()
     | Error `Orx -> fail "Failed to set clock callback"
+
+  let get_core () =
+    match get "core" with
+    | Some clock -> clock
+    | None -> invalid_arg "Unable to get core clock"
+
+  let find_first ?(tick_size = ~-.1.0) clock_type =
+    find_first tick_size clock_type
+
+  let create_from_config_exn = create_exn create_from_config "clock"
 end
 
 module Config = struct

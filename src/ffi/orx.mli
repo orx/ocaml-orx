@@ -714,6 +714,8 @@ module Clock_priority : sig
 end
 
 module Clock : sig
+  (** {1 Engine clocks} *)
+
   type t
 
   module Info : sig
@@ -742,11 +744,16 @@ module Clock : sig
 
   val create_from_config : string -> t option
 
+  val create_from_config_exn : string -> t
+
   val create : float -> Clock_type.t -> t option
 
   val get : string -> t option
 
-  val find_first : float -> Clock_type.t -> t option
+  val get_core : unit -> t
+  (** [get_core ()] returns the core engine clock. *)
+
+  val find_first : ?tick_size:float -> Clock_type.t -> t option
 
   val get_name : t -> string
 
@@ -772,6 +779,8 @@ module Camera : sig
   type t = camera
 
   val create_from_config : string -> t option
+
+  val create_from_config_exn : string -> t
 
   val get : string -> t option
 
@@ -800,6 +809,8 @@ module Viewport : sig
   type t
 
   val create_from_config : string -> t option
+
+  val create_from_config_exn : string -> t
 
   val get_camera : t -> Camera.t option
 end

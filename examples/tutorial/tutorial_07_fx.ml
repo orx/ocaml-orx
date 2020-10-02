@@ -71,7 +71,7 @@ let update (_clock_info : Orx.Clock.Info.t) =
 
   if not state.soldier_fx_lock then
     if Orx.Input.has_been_activated "ApplyFX" then
-      Orx.Object.add_unique_fx state.soldier state.selected_fx |> Result.get_ok
+      Orx.Object.add_unique_fx_exn state.soldier state.selected_fx
 
 let init () =
   (* Print out a hint to the user about what's to come *)
@@ -98,14 +98,16 @@ let init () =
     (get_name "SelectFlash") (get_name "SelectMove") (get_name "SelectFlip")
     (get_name "SelectMultiFX") (get_name "ApplyFX");
 
-  Orx.Viewport.create_from_config "Viewport" |> Option.get |> ignore;
+  let (_viewport : Orx.Viewport.t) =
+    Orx.Viewport.create_from_config_exn "Viewport"
+  in
 
-  let soldier = Orx.Object.create_from_config "Soldier" |> Option.get in
-  let box = Orx.Object.create_from_config "Box" |> Option.get in
+  let soldier = Orx.Object.create_from_config_exn "Soldier" in
+  let box = Orx.Object.create_from_config_exn "Box" in
   State.state :=
     Some { soldier; box; soldier_fx_lock = false; selected_fx = "WobbleFX" };
 
-  let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
+  let clock = Orx.Clock.get_core () in
   Orx.Clock.register clock update Main Normal;
 
   Orx.Event.add_handler Fx fx_event_handler;

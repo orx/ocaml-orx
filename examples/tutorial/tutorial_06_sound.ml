@@ -40,7 +40,7 @@ let event_handler
 
 let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
   if Orx.Input.has_been_activated "RandomSFX" then (
-    Orx.Object.add_sound state.soldier "RandomBip" |> Result.get_ok;
+    Orx.Object.add_sound_exn state.soldier "RandomBip";
 
     Orx.Config.push_section "Tutorial";
     Orx.Object.set_rgb state.soldier (Orx.Config.get_vector "RandomColor");
@@ -49,7 +49,7 @@ let update_state (state : State.t) (clock_info : Orx.Clock.Info.t) =
   );
 
   if Orx.Input.has_been_activated "DefaultSFX" then (
-    Orx.Object.add_sound state.soldier "DefaultBip" |> Result.get_ok;
+    Orx.Object.add_sound_exn state.soldier "DefaultBip";
     Orx.Object.set_rgb state.soldier (Orx.Vector.make ~x:1.0 ~y:1.0 ~z:1.0)
   );
 
@@ -108,10 +108,12 @@ let init () =
     (get_name "PitchDown") (get_name "ToggleMusic") (get_name "RandomSFX")
     (get_name "DefaultSFX");
 
-  Orx.Viewport.create_from_config "Viewport" |> Option.get |> ignore;
-  let soldier = Orx.Object.create_from_config "Soldier" |> Option.get in
-  let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
-  Orx.Object.add_sound soldier "Music" |> Result.get_ok;
+  let (_viewport : Orx.Viewport.t) =
+    Orx.Viewport.create_from_config_exn "Viewport"
+  in
+  let soldier = Orx.Object.create_from_config_exn "Soldier" in
+  let clock = Orx.Clock.get_core () in
+  Orx.Object.add_sound_exn soldier "Music";
   let music = Orx.Object.get_last_added_sound soldier |> Option.get in
   Orx.Sound.play music;
   Orx.Clock.register clock update Main Normal;

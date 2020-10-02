@@ -10,7 +10,7 @@ module Helpers = struct
   let create_explosion_at_object (o : Orx.Object.t) (name : string) =
     let position = Orx.Object.get_world_position o in
     Orx.Vector.set_z position 0.0;
-    let explosion = Orx.Object.create_from_config name |> Option.get in
+    let explosion = Orx.Object.create_from_config_exn name in
     Orx.Object.set_position explosion position
 end
 
@@ -76,8 +76,7 @@ module Physics = struct
       Helpers.create_explosion_at_object recipient "HeroExploder";
       Orx.Object.set_life_time sender 0.0;
       Orx.Object.enable recipient false;
-      Orx.Object.add_time_line_track state.scene "PopUpGameOverTrack"
-      |> Result.get_ok
+      Orx.Object.add_time_line_track_exn state.scene "PopUpGameOverTrack"
     );
     if
       String.equal sender_name "HeroObject"
@@ -86,8 +85,7 @@ module Physics = struct
       Helpers.create_explosion_at_object sender "HeroExploder";
       Orx.Object.set_life_time recipient 0.0;
       Orx.Object.enable sender false;
-      Orx.Object.add_time_line_track state.scene "PopUpGameOverTrack"
-      |> Result.get_ok
+      Orx.Object.add_time_line_track_exn state.scene "PopUpGameOverTrack"
     );
 
     Ok ()
@@ -114,19 +112,18 @@ let bootstrap () =
 let init () =
   (* Get some values defined in the game's ini config *)
   let viewport = Orx.Viewport.create_from_config "Viewport" |> Option.get in
-  let hero = Orx.Object.create_from_config "HeroObject" |> Option.get in
+  let hero = Orx.Object.create_from_config_exn "HeroObject" in
   let heros_gun = Orx.Object.get_first_child hero Owned_object |> Option.get in
-  let score_object =
-    Orx.Object.create_from_config "ScoreObject" |> Option.get
-  in
-  let scene = Orx.Object.create_from_config "Scene" |> Option.get in
+  let score_object = Orx.Object.create_from_config_exn "ScoreObject" in
+  let scene = Orx.Object.create_from_config_exn "Scene" in
 
   State.state :=
     Some { hero; heros_gun; viewport; score_object; scene; score = 0 };
 
-  Orx.Object.create_from_config "PlatformObject" |> Option.get |> ignore;
+  Orx.Object.create_from_config_exn "PlatformObject" |> ignore;
 
-  (* No shooting to start out *) Orx.Object.enable heros_gun false;
+  (* No shooting to start out *)
+  Orx.Object.enable heros_gun false;
 
   (* Setup our physics event handler *)
   Orx.Event.add_handler Physics Physics.event_handler;
@@ -153,13 +150,13 @@ let run () =
     if Orx.Input.is_active "GoLeft" then (
       Orx.Object.set_scale state.hero flip_left;
       Orx.Object.apply_impulse state.hero left_speed;
-      Orx.Object.set_target_anim state.hero "HeroRun" |> Result.get_ok
+      Orx.Object.set_target_anim_exn state.hero "HeroRun"
     ) else if Orx.Input.is_active "GoRight" then (
       Orx.Object.set_scale state.hero flip_right;
       Orx.Object.apply_impulse state.hero right_speed;
-      Orx.Object.set_target_anim state.hero "HeroRun" |> Result.get_ok
+      Orx.Object.set_target_anim_exn state.hero "HeroRun"
     ) else
-      Orx.Object.set_target_anim state.hero "HeroIdle" |> Result.get_ok;
+      Orx.Object.set_target_anim_exn state.hero "HeroIdle";
 
     (* Shooting *)
     if Orx.Input.is_active "Shoot" then

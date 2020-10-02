@@ -68,14 +68,14 @@ let init () =
     (get_name "CameraRight") (get_name "CameraZoomIn")
     (get_name "CameraZoomOut");
 
-  let viewport = Orx.Viewport.create_from_config "Viewport" |> Option.get in
+  let viewport = Orx.Viewport.create_from_config_exn "Viewport" in
   let camera = Orx.Viewport.get_camera viewport |> Option.get in
   State.state := Some camera;
 
-  let clock = Orx.Clock.find_first (-1.0) Core |> Option.get in
+  let clock = Orx.Clock.get_core () in
   Orx.Clock.register clock update Main Normal;
 
-  Orx.Object.create_from_config "Scene" |> Option.get |> ignore;
+  let _scene : Orx.Object.t = Orx.Object.create_from_config_exn "Scene" in
 
   Ok ()
 
