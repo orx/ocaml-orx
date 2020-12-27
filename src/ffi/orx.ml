@@ -443,7 +443,8 @@ module Object = struct
         List.map
           (fun p ->
             let ptr_ptr_void = Ctypes.from_voidp (Ctypes.ptr Ctypes.void) p in
-            of_void_pointer !@ptr_ptr_void |> Option.get)
+            of_void_pointer !@ptr_ptr_void |> Option.get
+            )
           ptrs
       in
       delete_neighbor_list bank;
@@ -482,14 +483,16 @@ module Object = struct
         let c = Option.map Camera.to_void_pointer c in
         let s = get_next_child o c Camera in
         let p = Option.map Structure.to_void_pointer s in
-        Option.map Camera.of_void_pointer p |> Option.join)
+        Option.map Camera.of_void_pointer p |> Option.join
+    )
 
   let get_object_children (o : t) : t Seq.t =
     get_seq (fun c ->
         let c = Option.map to_void_pointer c in
         let s = get_next_child o c Object in
         let p = Option.map Structure.to_void_pointer s in
-        Option.map of_void_pointer p |> Option.join)
+        Option.map of_void_pointer p |> Option.join
+    )
 
   let get_owned_children (o : t) : t Seq.t =
     let rec iter sibling () : _ Seq.node =
@@ -609,7 +612,8 @@ module Event = struct
         @-> uint32_t
         @-> uint32_t
         @-> returning Orx_gen.Status.t
-        ))
+        )
+    )
 
   (* Hold onto callbacks so they're not collected *)
   let registered_callbacks : (t -> Orx_gen.Status.t) list ref = ref []
@@ -673,7 +677,8 @@ module Clock = struct
         @-> Orx_types.Module_id.t
         @-> Orx_types.Clock_priority.t
         @-> returning Orx_gen.Status.t
-        ))
+        )
+    )
 
   (* Hold onto callbacks so they're not collected *)
   let registered_callbacks : (Info.t -> unit Ctypes.ptr -> unit) list ref =
@@ -715,7 +720,8 @@ module Config = struct
   let set_bootstrap =
     Ctypes.(
       Foreign.foreign ~release_runtime_lock:false "orxConfig_SetBootstrap"
-        (Foreign.funptr bootstrap_function @-> returning Orx_gen.Status.t))
+        (Foreign.funptr bootstrap_function @-> returning Orx_gen.Status.t)
+    )
 
   let set_bootstrap f =
     match set_bootstrap f with
@@ -801,7 +807,8 @@ module Orx_thread = struct
   let set_ocaml_callbacks =
     Ctypes.(
       Foreign.foreign ~release_runtime_lock:false "ml_orx_thread_set_callbacks"
-        (void @-> returning void))
+        (void @-> returning void)
+    )
 end
 
 module Main = struct
@@ -822,7 +829,8 @@ module Main = struct
         @-> Foreign.funptr ~runtime_lock:false run_function
         @-> Foreign.funptr ~runtime_lock:false exit_function
         @-> returning void
-        ))
+        )
+    )
 
   let execute ~init ~run ~exit () =
     (* Start the orx main loop *)

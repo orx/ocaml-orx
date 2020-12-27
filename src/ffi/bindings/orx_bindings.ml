@@ -78,7 +78,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (fun error_message (result : _ result) ->
           match result with
           | Ok v -> v
-          | Error `Orx -> invalid_arg error_message)
+          | Error `Orx -> invalid_arg error_message
+          )
         fmt
   end
 
@@ -396,7 +397,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (void
         @-> returning
               (Status.invalid
-                 "Orx.Config.pop_section: Empty config section stack")
+                 "Orx.Config.pop_section: Empty config section stack"
+              )
         )
 
     (* Select a config section to work with (manually manage state) *)
