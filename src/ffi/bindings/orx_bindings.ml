@@ -1195,4 +1195,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_key = c "orxLocale_GetKey" (uint32_t @-> returning string)
   end
+
+  module Log = struct
+    let log = c "orxLOG" (string @-> returning void)
+
+    let terminal = c "orxLOG_TERMINAL" (string @-> returning void)
+
+    let file = c "orxLOG_FILE" (string @-> returning void)
+
+    let console = c "orxLOG_CONSOLE" (string @-> returning void)
+  end
 end
