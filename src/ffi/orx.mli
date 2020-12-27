@@ -23,6 +23,24 @@ module Status : sig
       checking. *)
 end
 
+module Log : sig
+  type 'a format_logger =
+    ('a, Format.formatter, unit, unit, unit, unit) format6 -> 'a
+  (** All formatting functions act as standard {!Stdlib.Format} formatters. *)
+
+  val log : 'a format_logger
+  (** Log with output going to all of Orx's log targets. *)
+
+  val terminal : 'a format_logger
+  (** Log with output going to the terminal. *)
+
+  val file : 'a format_logger
+  (** Log with output going to Orx's log file(s). *)
+
+  val console : 'a format_logger
+  (** Log with output going to the Orx console. *)
+end
+
 module Color : sig
   type t
 end
