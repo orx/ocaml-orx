@@ -960,4 +960,34 @@ module Main : sig
     exit:(unit -> unit) ->
     unit ->
     unit
+  (** [execute ~init ~run ~exit ()] starts the Orx engine loop.
+
+      Many games will be able to use {!start} instead of [execute] for slightly
+      simpler application code. *)
+
+  val start :
+    ?config_dir:string ->
+    ?exit:(unit -> unit) ->
+    init:(unit -> (unit, [ `Orx ]) result) ->
+    run:(unit -> (unit, [ `Orx ]) result) ->
+    string ->
+    unit
+  (** [start ?config_dir ?exit ~init ~run name] starts the Orx engine loop.
+
+      [start] automates a few common steps a game will often need when getting
+      ready to call {!execute}. [start] defines a custom bootstrap function to
+      specify where the game engine configuration resides and calls
+      {!Config.set_basename} with [name] to define the root configuration file
+      for a game.
+
+      @param config_dir specifies the directory holding engine configuration
+      files. The current working directory will be used if this is not provided.
+      @param exit specifies a function to be run when the engine loop exits. It
+      can be used to clean up game data which is not managed by or within the
+      game engine.
+      @param init specifies a function to run after the engine has initialized
+      and before the game loop begins.
+      @param run specifies a function that will be run once per frame.
+      @param name species the name of the root configuration file without an
+      extension. *)
 end

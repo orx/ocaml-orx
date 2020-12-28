@@ -7,6 +7,33 @@ let create_exn create_from_config what name =
   | Some o -> o
   | None -> Fmt.invalid_arg "Unable to create %s %s" what name
 
+(* Protect OCaml values from GC collection so they can be safely passed to Orx.
+   Code from
+   https://discuss.ocaml.org/t/ctypes-whats-the-most-idiomatic-way-to-anchor-an-ocaml-value-so-that-its-not-garbage-collected/6258/2 *)
+module Store : sig
+  (* type ticket *)
+  val retain_permanently : 'a -> unit
+
+  (* val retain : 'a -> ticket *)
+  (* val is_live : ticket -> bool *)
+  (* val release : ticket -> unit *)
+end = struct
+  type ticket = int
+  type element = E : _ -> element
+  let counter = ref 0
+  let store = Hashtbl.create 10
+  let retain v =
+    let ticket = !counter in
+    incr counter;
+    Hashtbl.add store ticket (E v);
+    ticket
+  let retain_permanently v =
+    let (_ : ticket) = retain v in
+    ()
+  let _is_live = Hashtbl.mem store
+  let _release = Hashtbl.remove store
+end
+
 module Orx_gen = Orx_bindings.Bindings (Generated)
 
 type camera = Orx_gen.Camera.t
@@ -847,4 +874,19 @@ module Main = struct
     let empty_argv = Ctypes.from_voidp Ctypes.string Ctypes.null in
     execute_c 0 empty_argv (Sys.opaque_identity init) (Sys.opaque_identity run)
       (Sys.opaque_identity exit)
+
+  let start ?config_dir ?exit ~init ~run name =
+    ( match config_dir with
+    | None -> ()
+    | Some dir ->
+      let bootstrap () = Resource.add_storage Config dir false in
+      Store.retain_permanently bootstrap;
+      Config.set_bootstrap bootstrap
+    );
+    Config.set_basename name;
+    let exit = Option.value exit ~default:(fun () -> ()) in
+    Store.retain_permanently init;
+    Store.retain_permanently run;
+    Store.retain_permanently exit;
+    execute ~init ~run ~exit ()
 end
