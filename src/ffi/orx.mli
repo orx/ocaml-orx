@@ -823,6 +823,22 @@ module Camera : sig
   val set_frustum : t -> float -> float -> float -> float -> unit
 end
 
+module Shader : sig
+  type t
+
+  val set_float_param_exn : t -> string -> float -> unit
+
+  val set_vector_param_exn : t -> string -> Vector.t -> unit
+
+  val get_name : t -> string
+end
+
+module Shader_pointer : sig
+  type t
+
+  val get_shader : t -> int -> Shader.t option
+end
+
 module Viewport : sig
   type t
 
@@ -831,6 +847,12 @@ module Viewport : sig
   val create_from_config_exn : string -> t
 
   val get_camera : t -> Camera.t option
+
+  val get_shader_pointer : t -> Shader_pointer.t option
+
+  val get_shader_exn : ?index:int -> t -> Shader.t
+
+  val get_name : t -> string
 end
 
 module Render : sig

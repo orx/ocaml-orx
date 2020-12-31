@@ -717,4 +717,18 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* Unsealed structure because the type is anonymous *)
     let t : t structure = F.structure "__orxVIEWPORT_t"
   end
+
+  module Shader_pointer = struct
+    type t
+
+    (* Unsealed structure because the type is anonymous *)
+    let t : t structure = F.structure "__orxSHADERPOINTER_t"
+  end
+
+  module Shader = struct
+    type t
+
+    (* Unsealed structure because the type is anonymous *)
+    let t : t structure = F.structure "__orxSHADER_t"
+  end
 end

@@ -63,6 +63,7 @@ module Input_type = Orx_types.Input_type
 module Mouse_axis = Orx_types.Mouse_axis
 module Mouse_button = Orx_types.Mouse_button
 module Sound_status = Orx_types.Sound_status
+module Shader_pointer = Orx_gen.Shader_pointer
 
 module Log = struct
   type 'a format_logger =
@@ -72,12 +73,6 @@ module Log = struct
   let terminal fmt = Fmt.kstr Orx_gen.Log.terminal fmt
   let file fmt = Fmt.kstr Orx_gen.Log.file fmt
   let console fmt = Fmt.kstr Orx_gen.Log.console fmt
-end
-
-module Viewport = struct
-  include Orx_gen.Viewport
-
-  let create_from_config_exn = create_exn create_from_config "viewport"
 end
 
 module Texture = struct
@@ -251,6 +246,44 @@ module Obox = struct
     let rotated : t = allocate_raw () in
     let (_ : t) = rotate_2d rotated ob angle in
     rotated
+end
+
+module Shader = struct
+  include Orx_gen.Shader
+
+  let set_float_param_exn shader name value =
+    let argument = Ctypes.(allocate float value) in
+    match set_float_param shader name 0 argument with
+    | Error `Orx ->
+      Fmt.invalid_arg "Unable to set parameter %s to %g in shader %s" name value
+        (get_name shader)
+    | Ok () -> ()
+
+  let set_vector_param_exn shader name value =
+    match set_vector_param shader name 0 value with
+    | Error `Orx ->
+      Fmt.invalid_arg "Unable to set parameter %s to %a in shader %s" name
+        Vector.pp value (get_name shader)
+    | Ok () -> ()
+end
+
+module Viewport = struct
+  include Orx_gen.Viewport
+
+  let create_from_config_exn = create_exn create_from_config "viewport"
+
+  let get_shader_exn ?(index = 0) v =
+    match get_shader_pointer v with
+    | None ->
+      Fmt.invalid_arg "No shader pointer associated with viewport %s"
+        (get_name v)
+    | Some pointer ->
+      ( match Orx_gen.Shader_pointer.get_shader pointer index with
+      | None ->
+        Fmt.invalid_arg "No shader %d associated with viewport %s" index
+          (get_name v)
+      | Some shader -> shader
+      )
 end
 
 (* Wrapper for functions which return a vector property. *)

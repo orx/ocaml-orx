@@ -940,6 +940,35 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_GetNext" (t_opt @-> String_id.t @-> returning t_opt)
   end
 
+  module Shader = struct
+    type t = T.Shader.t structure ptr
+
+    let t = ptr T.Shader.t
+
+    let t_opt = ptr_opt T.Shader.t
+
+    let set_float_param =
+      c "orxShader_SetFloatParam"
+        (t @-> string @-> int @-> ptr float @-> returning Status.t)
+
+    let set_vector_param =
+      c "orxShader_SetVectorParam"
+        (t @-> string @-> int @-> Vector.t @-> returning Status.t)
+
+    let get_name = c "orxShader_GetName" (t @-> returning string)
+  end
+
+  module Shader_pointer = struct
+    type t = T.Shader_pointer.t structure ptr
+
+    let t = ptr T.Shader_pointer.t
+
+    let t_opt = ptr_opt T.Shader_pointer.t
+
+    let get_shader =
+      c "orxShaderPointer_GetShader" (t @-> int @-> returning Shader.t_opt)
+  end
+
   module Viewport = struct
     type t = T.Viewport.t structure ptr
 
@@ -951,6 +980,11 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxViewport_CreateFromConfig" (string @-> returning t_opt)
 
     let get_camera = c "orxViewport_GetCamera" (t @-> returning Camera.t_opt)
+
+    let get_shader_pointer =
+      c "orxViewport_GetShaderPointer" (t @-> returning Shader_pointer.t_opt)
+
+    let get_name = c "orxViewport_GetName" (t @-> returning string)
   end
 
   module Render = struct
