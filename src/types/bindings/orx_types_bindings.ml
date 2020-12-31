@@ -68,7 +68,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxMODULE_ID_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported module id enum: %Ld" i)
+          Fmt.invalid_arg "unsupported module id enum: %Ld" i
+      )
   end
 
   module Clock_modifier = struct
@@ -88,7 +89,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxCLOCK_MOD_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported clock mod type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported clock mod type enum: %Ld" i
+      )
   end
 
   module Clock_type = struct
@@ -105,7 +107,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxCLOCK_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported clock mod type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported clock mod type enum: %Ld" i
+      )
   end
 
   module Clock_info = struct
@@ -152,7 +155,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxCLOCK_PRIORITY_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported clock priority enum: %Ld" i)
+          Fmt.invalid_arg "unsupported clock priority enum: %Ld" i
+      )
   end
 
   module Clock = struct
@@ -200,7 +204,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxSOUND_STATUS_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported sound status enum: %Ld" i)
+          Fmt.invalid_arg "unsupported sound status enum: %Ld" i
+      )
   end
 
   module Mouse_button = struct
@@ -245,7 +250,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxMOUSE_BUTTON_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported mouse button enum: %Ld" i)
+          Fmt.invalid_arg "unsupported mouse button enum: %Ld" i
+      )
   end
 
   module Mouse_axis = struct
@@ -262,7 +268,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxMOUSE_AXIS_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported mouse axis enum: %Ld" i)
+          Fmt.invalid_arg "unsupported mouse axis enum: %Ld" i
+      )
   end
 
   module Structure = struct
@@ -299,7 +306,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxSTRUCTURE_ID_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "Unsupported structre id: %Ld" i)
+          Fmt.invalid_arg "Unsupported structre id: %Ld" i
+      )
   end
 
   module Object = struct
@@ -340,7 +348,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxINPUT_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported input type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported input type enum: %Ld" i
+      )
   end
 
   module Input_mode = struct
@@ -358,7 +367,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxINPUT_MODE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported input mode enum: %Ld" i)
+          Fmt.invalid_arg "unsupported input mode enum: %Ld" i
+      )
   end
 
   module Config_event = struct
@@ -377,7 +387,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxCONFIG_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported config event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported config event type enum: %Ld" i
+      )
   end
 
   module Fx_event = struct
@@ -403,7 +414,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxFX_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported fx event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported fx event type enum: %Ld" i
+      )
 
     module Payload = struct
       type t
@@ -449,7 +461,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxOBJECT_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported object event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported object event type enum: %Ld" i
+      )
 
     module Payload = Object
   end
@@ -470,7 +483,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxINPUT_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported input event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported input event type enum: %Ld" i
+      )
 
     module Payload = struct
       type t
@@ -504,7 +518,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxPHYSICS_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported physics event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported physics event type enum: %Ld" i
+      )
 
     module Payload = struct
       type t
@@ -552,7 +567,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxSOUND_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported sound event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported sound event type enum: %Ld" i
+      )
 
     module Payload = struct
       type t
@@ -579,7 +595,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxTEXTURE_EVENT_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported texture event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported texture event type enum: %Ld" i
+      )
   end
 
   module Event_type = struct
@@ -656,7 +673,8 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let t =
       F.enum "__orxEVENT_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported event type enum: %Ld" i)
+          Fmt.invalid_arg "unsupported event type enum: %Ld" i
+      )
   end
 
   module Event = struct
