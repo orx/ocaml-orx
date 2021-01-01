@@ -284,6 +284,11 @@ module Viewport = struct
           (get_name v)
       | Some shader -> shader
       )
+
+  let get_exn name =
+    match get name with
+    | None -> Fmt.invalid_arg "No viewport %s available" name
+    | Some viewport -> viewport
 end
 
 (* Wrapper for functions which return a vector property. *)

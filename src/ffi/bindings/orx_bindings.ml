@@ -985,6 +985,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxViewport_GetShaderPointer" (t @-> returning Shader_pointer.t_opt)
 
     let get_name = c "orxViewport_GetName" (t @-> returning string)
+
+    let get = c "orxViewport_Get" (string @-> returning t_opt)
   end
 
   module Render = struct

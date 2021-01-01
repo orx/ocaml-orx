@@ -853,6 +853,10 @@ module Viewport : sig
   val get_shader_exn : ?index:int -> t -> Shader.t
 
   val get_name : t -> string
+
+  val get : string -> t option
+
+  val get_exn : string -> t
 end
 
 module Render : sig
