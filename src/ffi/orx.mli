@@ -599,6 +599,30 @@ module Object : sig
   val of_guid_exn : Structure.Guid.t -> t
 end
 
+module Shader_param_type : sig
+  type t =
+    | Float
+    | Texture
+    | Vector
+    | Time
+end
+
+module Shader : sig
+  type t
+
+  val set_float_param_exn : t -> string -> float -> unit
+
+  val set_vector_param_exn : t -> string -> Vector.t -> unit
+
+  val get_name : t -> string
+end
+
+module Shader_pointer : sig
+  type t
+
+  val get_shader : t -> int -> Shader.t option
+end
+
 module Config_event : sig
   type t =
     | Reload_start
@@ -657,6 +681,18 @@ module Physics_event : sig
   val get_recipient_part_name : payload -> string
 end
 
+module Shader_event : sig
+  type t = Set_param
+
+  type payload
+
+  val get_shader : payload -> Shader.t
+  val get_shader_name : payload -> string
+  val get_param_name : payload -> string
+  val get_param_type : payload -> Shader_param_type.t
+  val get_param_index : payload -> int
+end
+
 module Sound_event : sig
   type t =
     | Start
@@ -678,6 +714,7 @@ module Event : sig
       | Input : (Input_event.t, Input_event.payload) t
       | Object : (Object_event.t, Object_event.payload) t
       | Physics : (Physics_event.t, Physics_event.payload) t
+      | Shader : (Shader_event.t, Shader_event.payload) t
       | Sound : (Sound_event.t, Sound_event.payload) t
 
     type any = Any : (_, _) t -> any
@@ -821,22 +858,6 @@ module Camera : sig
   val set_zoom : t -> float -> unit
 
   val set_frustum : t -> float -> float -> float -> float -> unit
-end
-
-module Shader : sig
-  type t
-
-  val set_float_param_exn : t -> string -> float -> unit
-
-  val set_vector_param_exn : t -> string -> Vector.t -> unit
-
-  val get_name : t -> string
-end
-
-module Shader_pointer : sig
-  type t
-
-  val get_shader : t -> int -> Shader.t option
 end
 
 module Viewport : sig

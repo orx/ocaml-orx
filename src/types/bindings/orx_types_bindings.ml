@@ -371,6 +371,44 @@ module Bindings (F : Ctypes.TYPE) = struct
       )
   end
 
+  module Shader_param_type = struct
+    type t =
+      | Float
+      | Texture
+      | Vector
+      | Time
+
+    let make tag = F.constant ("orxSHADER_PARAM_TYPE_" ^ tag) F.int64_t
+    let float = make "FLOAT"
+    let texture = make "TEXTURE"
+    let vector = make "VECTOR"
+    let time = make "TIME"
+
+    let map_to_constant =
+      [ (Float, float); (Texture, texture); (Vector, vector); (Time, time) ]
+
+    let map_from_constant = swap_tuple_list map_to_constant
+
+    let t =
+      F.enum "__orxSHADER_PARAM_TYPE_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported shader param type enum: %Ld" i
+      )
+  end
+
+  module Shader_pointer = struct
+    type t
+
+    (* Unsealed structure because the type is anonymous *)
+    let t : t structure = F.structure "__orxSHADERPOINTER_t"
+  end
+
+  module Shader = struct
+    type t
+
+    (* Unsealed structure because the type is anonymous *)
+    let t : t structure = F.structure "__orxSHADER_t"
+  end
+
   module Config_event = struct
     type t =
       | Reload_start
@@ -533,6 +571,34 @@ module Bindings (F : Ctypes.TYPE) = struct
     end
   end
 
+  module Shader_event = struct
+    type t = Set_param
+
+    let set_param = F.constant "orxSHADER_EVENT_SET_PARAM" F.int64_t
+
+    let map_to_constant = [ (Set_param, set_param) ]
+
+    let map_from_constant = swap_tuple_list map_to_constant
+
+    let t =
+      F.enum "__orxSHADER_EVENT_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported shader event type enum: %Ld" i
+      )
+
+    module Payload = struct
+      type t
+
+      let t : t structure = F.structure "__orxSHADER_EVENT_PAYLOAD_t"
+      let shader = F.field t "pstShader" (F.ptr Shader.t)
+      let shader_name = F.field t "zShaderName" F.string
+      let param_name = F.field t "zParamName" F.string
+      let param_type = F.field t "eParamType" Shader_param_type.t
+      let param_index = F.field t "s32ParamIndex" F.int32_t
+
+      (* Unsealed until we get the union parameter bound *)
+    end
+  end
+
   module Sound_event = struct
     type t =
       | Start
@@ -612,7 +678,7 @@ module Bindings (F : Ctypes.TYPE) = struct
       (* | Render : ([ `Unbound ], [ `Unbound ]) t *)
       | Physics : (Physics_event.t, Physics_event.Payload.t) t
       (* | Resource : ([ `Unbound ], [ `Unbound ]) t *)
-      (* | Shader : ([ `Unbound ], [ `Unbound ]) t *)
+      | Shader : (Shader_event.t, Shader_event.Payload.t) t
       | Sound : (Sound_event.t, Sound_event.Payload.t) t
 
     (* | Spawner : ([ `Unbound ], [ `Unbound ]) t *)
@@ -638,7 +704,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     let physics = F.constant "orxEVENT_TYPE_PHYSICS" F.int64_t
 
     (* let resource = F.constant "orxEVENT_TYPE_RESOURCE" F.int64_t *)
-    (* let shader = F.constant "orxEVENT_TYPE_SHADER" F.int64_t *)
+    let shader = F.constant "orxEVENT_TYPE_SHADER" F.int64_t
     let sound = F.constant "orxEVENT_TYPE_SOUND" F.int64_t
 
     (* let spawner = F.constant "orxEVENT_TYPE_SPAWNER" F.int64_t *)
@@ -660,7 +726,7 @@ module Bindings (F : Ctypes.TYPE) = struct
         (* (Any Render, render); *)
         (Any Physics, physics);
         (* (Any Resource, resource); *)
-        (* (Any Shader, shader); *)
+        (Any Shader, shader);
         (Any Sound, sound);
         (* (Any Spawner, spawner); *)
         (* (Any System, system); *)
@@ -734,19 +800,5 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     (* Unsealed structure because the type is anonymous *)
     let t : t structure = F.structure "__orxVIEWPORT_t"
-  end
-
-  module Shader_pointer = struct
-    type t
-
-    (* Unsealed structure because the type is anonymous *)
-    let t : t structure = F.structure "__orxSHADERPOINTER_t"
-  end
-
-  module Shader = struct
-    type t
-
-    (* Unsealed structure because the type is anonymous *)
-    let t : t structure = F.structure "__orxSHADER_t"
   end
 end

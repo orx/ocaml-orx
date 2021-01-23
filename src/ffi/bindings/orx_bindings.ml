@@ -940,6 +940,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_GetNext" (t_opt @-> String_id.t @-> returning t_opt)
   end
 
+  module Shader_param_type = struct
+    include T.Shader_param_type
+  end
+
   module Shader = struct
     type t = T.Shader.t structure ptr
 
@@ -1063,6 +1067,26 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       Ctypes.getf !@payload T.Physics_event.Payload.recipient_part_name
   end
 
+  module Shader_event = struct
+    include T.Shader_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let get_shader (payload : payload) : Shader.t =
+      Ctypes.getf !@payload T.Shader_event.Payload.shader
+
+    let get_shader_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Shader_event.Payload.shader_name
+
+    let get_param_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Shader_event.Payload.param_name
+
+    let get_param_type (payload : payload) : Shader_param_type.t =
+      Ctypes.getf !@payload T.Shader_event.Payload.param_type
+
+    let get_param_index (payload : payload) : int =
+      Ctypes.getf !@payload T.Shader_event.Payload.param_index |> Int32.to_int
+  end
+
   module Sound_event = struct
     include T.Sound_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
@@ -1082,6 +1106,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         | Input : (Input_event.t, Input_event.payload) t
         | Object : (Object_event.t, Object_event.payload) t
         | Physics : (Physics_event.t, Physics_event.payload) t
+        | Shader : (Shader_event.t, Shader_event.payload) t
         | Sound : (Sound_event.t, Sound_event.payload) t
 
       type any = Any : (_, _) t -> any
@@ -1094,6 +1119,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         | Input -> Input
         | Object -> Object
         | Physics -> Physics
+        | Shader -> Shader
         | Sound -> Sound
 
       let to_c_any : type e p. (e, p) t -> T.Event_type.any = function
@@ -1101,6 +1127,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         | Input -> Any Input
         | Object -> Any Object
         | Physics -> Any Physics
+        | Shader -> Any Shader
         | Sound -> Any Sound
 
       let of_c_any (c : T.Event_type.any) : any =
@@ -1143,6 +1170,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | Physics ->
         assert_type event (Any Physics);
         unsafe_get_payload event T.Physics_event.Payload.t
+      | Shader ->
+        assert_type event (Any Shader);
+        unsafe_get_payload event T.Shader_event.Payload.t
       | Sound ->
         assert_type event (Any Sound);
         unsafe_get_payload event T.Sound_event.Payload.t
@@ -1170,6 +1200,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       | Physics ->
         assert_type event (Any Physics);
         get_event_by_id event T.Physics_event.map_from_constant
+      | Shader ->
+        assert_type event (Any Shader);
+        get_event_by_id event T.Shader_event.map_from_constant
       | Sound ->
         assert_type event (Any Sound);
         get_event_by_id event T.Sound_event.map_from_constant

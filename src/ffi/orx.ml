@@ -52,11 +52,13 @@ module Clock_priority = Orx_types.Clock_priority
 module Clock_info = Orx_types.Clock_info
 module Clock_type = Orx_types.Clock_type
 module Module_id = Orx_types.Module_id
+module Shader_param_type = Orx_gen.Shader_param_type
 module Config_event = Orx_types.Config_event
 module Fx_event = Orx_gen.Fx_event
 module Input_event = Orx_gen.Input_event
 module Object_event = Orx_gen.Object_event
 module Physics_event = Orx_gen.Physics_event
+module Shader_event = Orx_gen.Shader_event
 module Sound_event = Orx_gen.Sound_event
 module Input_mode = Orx_types.Input_mode
 module Input_type = Orx_types.Input_type
@@ -669,6 +671,7 @@ module Event = struct
     | Input -> to_flags event_ids Orx_types.Input_event.map_to_constant
     | Object -> to_flags event_ids Orx_types.Object_event.map_to_constant
     | Physics -> to_flags event_ids Orx_types.Physics_event.map_to_constant
+    | Shader -> to_flags event_ids Orx_types.Shader_event.map_to_constant
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
 
   let get_sender_object (event : t) : Object.t option =
@@ -710,6 +713,9 @@ module Event = struct
         | Physics ->
           fun () ->
             callback event (to_event event Physics) (to_payload event Physics)
+        | Shader ->
+          fun () ->
+            callback event (to_event event Shader) (to_payload event Shader)
         | Sound ->
           fun () ->
             callback event (to_event event Sound) (to_payload event Sound)
