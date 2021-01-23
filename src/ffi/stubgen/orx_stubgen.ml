@@ -4,6 +4,16 @@ let prologue =
   {|
 #include <orx.h>
 
+inline void ml_orx_shader_param_set_float(orxSHADER_EVENT_PAYLOAD *payload, orxFLOAT v) {
+  orxASSERT(payload->eParamType == orxSHADER_PARAM_TYPE_FLOAT);
+  payload->fValue = v;
+}
+
+inline void ml_orx_shader_param_set_vector(orxSHADER_EVENT_PAYLOAD *payload, orxVECTOR *v) {
+  orxASSERT(payload->eParamType == orxSHADER_PARAM_TYPE_VECTOR);
+  orxVector_Copy(&(payload->vValue), v);
+}
+
 orxSTATUS ml_orx_event_add_handler(orxEVENT_TYPE event_type, orxEVENT_HANDLER event_handler, orxU32 add_id_flags, orxU32 remove_id_flags) {
   orxSTATUS result = orxSTATUS_SUCCESS;
   result = orxEvent_AddHandler(event_type, event_handler);
@@ -50,7 +60,8 @@ let () =
         ("-c", Set generate_c, "Generate C (bindings)");
       ]
       (fun _ -> failwith "unexpected anonymous argument")
-      "stubgen [-ml|-c]");
+      "stubgen [-ml|-c]"
+  );
 
   (* OCaml/C concurrency model to use in the generated stubs *)
   let concurrency = Cstubs.sequential in

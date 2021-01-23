@@ -691,6 +691,8 @@ module Shader_event : sig
   val get_param_name : payload -> string
   val get_param_type : payload -> Shader_param_type.t
   val get_param_index : payload -> int
+  val set_param_float : payload -> float -> unit
+  val set_param_vector : payload -> Vector.t -> unit
 end
 
 module Sound_event : sig

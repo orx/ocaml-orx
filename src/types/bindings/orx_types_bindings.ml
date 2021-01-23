@@ -595,7 +595,9 @@ module Bindings (F : Ctypes.TYPE) = struct
       let param_type = F.field t "eParamType" Shader_param_type.t
       let param_index = F.field t "s32ParamIndex" F.int32_t
 
-      (* Unsealed until we get the union parameter bound *)
+      (* TODO: This is a hack to allow lookup of other fields in the structure *)
+      let _value_placeholder = F.field t "vValue" Vector.t
+      let () = F.seal t
     end
   end
 

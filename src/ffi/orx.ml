@@ -58,7 +58,6 @@ module Fx_event = Orx_gen.Fx_event
 module Input_event = Orx_gen.Input_event
 module Object_event = Orx_gen.Object_event
 module Physics_event = Orx_gen.Physics_event
-module Shader_event = Orx_gen.Shader_event
 module Sound_event = Orx_gen.Sound_event
 module Input_mode = Orx_types.Input_mode
 module Input_type = Orx_types.Input_type
@@ -267,6 +266,22 @@ module Shader = struct
       Fmt.invalid_arg "Unable to set parameter %s to %a in shader %s" name
         Vector.pp value (get_name shader)
     | Ok () -> ()
+end
+
+module Shader_event = struct
+  include Orx_gen.Shader_event
+
+  let set_param_float payload v =
+    if get_param_type payload <> Float then
+      Fmt.invalid_arg "Shader param %s is not of type float"
+        (get_param_name payload);
+    set_param_float payload v
+
+  let set_param_vector payload v =
+    if get_param_type payload <> Vector then
+      Fmt.invalid_arg "Shader param %s is not of type vector"
+        (get_param_name payload);
+    set_param_vector payload v
 end
 
 module Viewport = struct

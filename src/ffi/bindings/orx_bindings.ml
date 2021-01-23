@@ -1071,6 +1071,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     include T.Shader_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
 
+    let payload = ptr T.Shader_event.Payload.t
+
     let get_shader (payload : payload) : Shader.t =
       Ctypes.getf !@payload T.Shader_event.Payload.shader
 
@@ -1085,6 +1087,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_param_index (payload : payload) : int =
       Ctypes.getf !@payload T.Shader_event.Payload.param_index |> Int32.to_int
+
+    let set_param_float =
+      c "ml_orx_shader_param_set_float" (payload @-> float @-> returning void)
+
+    let set_param_vector =
+      c "ml_orx_shader_param_set_vector"
+        (payload @-> Vector.t @-> returning void)
   end
 
   module Sound_event = struct
