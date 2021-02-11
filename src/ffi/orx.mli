@@ -444,6 +444,12 @@ module Object : sig
 
   val set_scale : t -> Vector.t -> unit
 
+  (** {2 Repetition} *)
+
+  val get_repeat : t -> float * float
+
+  val set_repeat : t -> float -> float -> unit
+
   (** {2 Text} *)
 
   val set_text_string : t -> string -> unit

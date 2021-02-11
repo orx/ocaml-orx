@@ -469,6 +469,12 @@ module Object = struct
 
   let set_owner o owner = Parent.set set_owner o owner
 
+  let get_repeat o =
+    let x = Ctypes.allocate_n Ctypes.float ~count:1 in
+    let y = Ctypes.allocate_n Ctypes.float ~count:1 in
+    get_repeat o x y;
+    (!@x, !@y)
+
   type collision = {
     colliding_object : t;
     contact : Vector.t;

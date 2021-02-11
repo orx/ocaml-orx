@@ -713,6 +713,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_owned_sibling = c "orxObject_GetOwnedSibling" (t @-> returning t_opt)
 
+    let set_repeat =
+      c "orxObject_SetRepeat" (t @-> float @-> float @-> returning Status.as_exn)
+
+    let get_repeat =
+      c "orxObject_GetRepeat"
+        (t @-> ptr float @-> ptr float @-> returning Status.as_exn)
+
     (* Parent/child relationships *)
     let get_child = c "orxObject_GetChild" (t @-> returning t_opt)
 
