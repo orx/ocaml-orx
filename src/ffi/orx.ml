@@ -507,8 +507,8 @@ module Object = struct
       ?(self_flags = 0xffff)
       ?(check_mask = 0xffff)
       ?(early_exit = false)
-      ~(v0 : Vector.t)
-      ~(v1 : Vector.t) : collision option =
+      (v0 : Vector.t)
+      (v1 : Vector.t) : collision option =
     let contact = Vector.allocate_raw () in
     let normal = Vector.allocate_raw () in
     let collision =

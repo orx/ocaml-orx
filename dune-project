@@ -17,10 +17,11 @@
  (name orx)
  (synopsis "OCaml interface to the Orx game engine")
  (depends
-  ctypes
+  (ctypes (>= 0.18.0))
   ctypes-foreign
   (dune
-   (>= 2.0))
+   (>= 2.8.2))
+  dune-configurator
   fmt
   (ocaml
    (>= 4.08.0))))

@@ -7,9 +7,10 @@ license: "MIT"
 homepage: "https://github.com/orx/ocaml-orx"
 bug-reports: "https://github.com/orx/ocaml-orx/issues"
 depends: [
-  "ctypes"
+  "ctypes" {>= "0.18.0"}
   "ctypes-foreign"
-  "dune" {>= "2.0"}
+  "dune" {>= "2.8.2"}
+  "dune-configurator"
   "fmt"
   "ocaml" {>= "4.08.0"}
 ]

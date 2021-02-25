@@ -17,7 +17,7 @@
 (library
  (public_name orx)
  (synopsis "Bindings for orx")
- (libraries ctypes.foreign.threaded orx_bindings threads)
+ (libraries ctypes.foreign orx_bindings threads)
  (flags
   :standard
   (:include ../orx-ocaml-link-flags.sexp))

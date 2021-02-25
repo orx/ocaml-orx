@@ -520,8 +520,8 @@ module Object : sig
     ?self_flags:int ->
     ?check_mask:int ->
     ?early_exit:bool ->
-    v0:Vector.t ->
-    v1:Vector.t ->
+    Vector.t ->
+    Vector.t ->
     collision option
 
   (** {2 Color} *)
