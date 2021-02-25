@@ -714,9 +714,6 @@ module Event = struct
         )
     )
 
-  (* Hold onto callbacks so they're not collected *)
-  let registered_callbacks : (t -> Orx_gen.Status.t) list ref = ref []
-
   let add_handler :
       type e p. (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> unit =
    fun event_type callback ->
@@ -748,7 +745,7 @@ module Event = struct
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
-    registered_callbacks := callback :: !registered_callbacks;
+    Store.retain_permanently callback;
     let add_flags =
       match event_type with
       | Sound -> make_flags Sound [ Start; Stop; Add; Remove ]
@@ -782,10 +779,6 @@ module Clock = struct
         )
     )
 
-  (* Hold onto callbacks so they're not collected *)
-  let registered_callbacks : (Info.t -> unit Ctypes.ptr -> unit) list ref =
-    ref []
-
   let register (clock : t) callback module_ priority =
     let callback_wrapper info _ctx =
       match callback info with
@@ -795,7 +788,7 @@ module Clock = struct
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
-    registered_callbacks := callback_wrapper :: !registered_callbacks;
+    Store.retain_permanently callback_wrapper;
     match c_register clock callback_wrapper Ctypes.null module_ priority with
     | Ok () -> ()
     | Error `Orx -> fail "Failed to set clock callback"
