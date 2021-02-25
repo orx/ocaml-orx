@@ -1004,6 +1004,57 @@ module Config : sig
   val with_section : string -> (unit -> 'a) -> 'a
 end
 
+module Command : sig
+  (** {1 Define and run custom engine commands} *)
+
+  module Var_type : sig
+    type _ t =
+      | String : string t
+      | Float : float t
+      | Int : int t
+      | Bool : bool t
+      | Vector : Vector.t t
+  end
+
+  module Var_def : sig
+    type t
+
+    val make : string -> _ Var_type.t -> t
+  end
+
+  module Var : sig
+    type t
+
+    val make : 'a Var_type.t -> 'a -> t
+
+    val set : t -> 'a Var_type.t -> 'a -> unit
+
+    val get : t -> 'a Var_type.t -> 'a
+  end
+
+  val register :
+    string ->
+    (Var.t list -> Var.t -> unit) ->
+    Var_def.t list ->
+    Var_def.t ->
+    Status.t
+
+  val register_exn :
+    string ->
+    (Var.t list -> Var.t -> unit) ->
+    Var_def.t list ->
+    Var_def.t ->
+    unit
+
+  val unregister : string -> Status.t
+
+  val unregister_exn : string -> unit
+
+  val is_registered : string -> bool
+
+  val evaluate : string -> Var.t option
+end
+
 module Orx_thread : sig
   val set_ocaml_callbacks : unit -> unit
 end

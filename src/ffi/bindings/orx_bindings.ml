@@ -162,6 +162,61 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let rotate_2d = c "orxVector_2DRotate" (t @-> t @-> float @-> returning t)
   end
 
+  module Command_var_def = struct
+    type t = T.Command_var_def.t structure ptr
+
+    let t = ptr T.Command_var_def.t
+
+    let t_opt = ptr_opt T.Command_var_def.t
+
+    let allocate_raw () : t = allocate_n T.Command_var_def.t ~count:1
+
+    let of_list defs = CArray.of_list T.Command_var_def.t defs
+  end
+
+  module Command_var = struct
+    type t = T.Command_var.t structure ptr
+
+    let t = ptr T.Command_var.t
+
+    let t_opt = ptr_opt T.Command_var.t
+
+    let allocate_raw () : t = allocate_n T.Command_var.t ~count:1
+
+    let get_type =
+      c "ml_orx_command_var_get_type" (t @-> returning T.Command_var_type.t)
+    let set_type =
+      c "ml_orx_command_var_set_type"
+        (t @-> T.Command_var_type.t @-> returning void)
+
+    let get_vector =
+      c "ml_orx_command_var_get_vector" (t @-> returning T.Vector.t)
+    let get_string = c "ml_orx_command_var_get_string" (t @-> returning string)
+    let get_int = c "ml_orx_command_var_get_int" (t @-> returning int)
+    let get_float = c "ml_orx_command_var_get_float" (t @-> returning float)
+    let get_bool = c "ml_orx_command_var_get_bool" (t @-> returning bool)
+
+    let set_vector =
+      c "ml_orx_command_var_set_vector" (t @-> T.Vector.t @-> returning void)
+    let set_string =
+      c "ml_orx_command_var_set_string" (t @-> string @-> returning void)
+    let set_int = c "ml_orx_command_var_set_int" (t @-> int @-> returning void)
+    let set_float =
+      c "ml_orx_command_var_set_float" (t @-> float @-> returning void)
+    let set_bool =
+      c "ml_orx_command_var_set_bool" (t @-> bool @-> returning void)
+  end
+
+  module Command = struct
+    let unregister = c "orxCommand_Unregister" (string @-> returning Status.t)
+
+    let is_registered = c "orxCommand_IsRegistered" (string @-> returning bool)
+
+    let evaluate =
+      c "orxCommand_Evaluate"
+        (string @-> Command_var.t @-> returning Command_var.t)
+  end
+
   module Obox = struct
     type t = T.Obox.t structure ptr
 

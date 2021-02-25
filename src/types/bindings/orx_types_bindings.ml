@@ -803,4 +803,53 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* Unsealed structure because the type is anonymous *)
     let t : t structure = F.structure "__orxVIEWPORT_t"
   end
+
+  module Command_var_type = struct
+    type t =
+      | String
+      | Float
+      | Int
+      | Bool
+      | Vector
+
+    let equal (a : t) (b : t) = a = b
+
+    let make tag = F.constant ("orxCOMMAND_VAR_TYPE_" ^ tag) F.int64_t
+    let string = make "STRING"
+    let float = make "FLOAT"
+    let int = make "S64"
+    let bool = make "BOOL"
+    let vector = make "VECTOR"
+
+    let map_to_constant =
+      [
+        (String, string);
+        (Float, float);
+        (Int, int);
+        (Bool, bool);
+        (Vector, vector);
+      ]
+    let map_from_constant = swap_tuple_list map_to_constant
+
+    let t =
+      F.enum "__orxCOMMAND_VAR_TYPE_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported comand variable type enum: %Ld" i
+      )
+  end
+
+  module Command_var_def = struct
+    type t
+
+    let t : t structure = F.structure "__orxCOMMAND_VAR_DEF_t"
+    let field name typ = F.field t name typ
+    let name = field "zName" F.string
+    let type_ = field "eType" Command_var_type.t
+    let () = F.seal t
+  end
+
+  module Command_var = struct
+    type t
+
+    let t : t structure = F.structure "__orxCOMMAND_VAR_t"
+  end
 end

@@ -898,6 +898,127 @@ module Config = struct
     with_section section get_current_section_keys
 end
 
+module Command = struct
+  include Orx_gen.Command
+
+  module Var_type = struct
+    type _ t =
+      | String : string t
+      | Float : float t
+      | Int : int t
+      | Bool : bool t
+      | Vector : Vector.t t
+
+    let to_ctype (type s) (v : s t) : Orx_types.Command_var_type.t =
+      match v with
+      | String -> String
+      | Float -> Float
+      | Int -> Int
+      | Bool -> Bool
+      | Vector -> Vector
+  end
+
+  module Var_def = struct
+    include Orx_gen.Command_var_def
+
+    let set_name (v : t) name =
+      Ctypes.setf !@v Orx_types.Command_var_def.name name
+    let set_type (v : t) type_ =
+      Ctypes.setf !@v Orx_types.Command_var_def.type_ (Var_type.to_ctype type_)
+
+    let make name type_ =
+      let v : t = allocate_raw () in
+      set_name v name;
+      set_type v type_;
+      v
+  end
+
+  module Var = struct
+    include Orx_gen.Command_var
+
+    let set (type s) (var : t) (var_type : s Var_type.t) (v : s) =
+      set_type var (Var_type.to_ctype var_type);
+      match var_type with
+      | String -> set_string var v
+      | Float -> set_float var v
+      | Int -> set_int var v
+      | Bool -> set_bool var v
+      | Vector -> set_vector var !@v
+
+    let make var_type v =
+      let var = allocate_raw () in
+      set var var_type v;
+      var
+
+    let get (type s) (var : t) (var_type : s Var_type.t) : s =
+      (let actual_var_type = get_type var in
+       let requested_var_type = Var_type.to_ctype var_type in
+       let correct_type =
+         Orx_types.Command_var_type.equal actual_var_type requested_var_type
+       in
+       if not correct_type then
+         Log.log "Incorrect variable type when reading from command variable"
+      );
+      match var_type with
+      | String -> get_string var
+      | Float -> get_float var
+      | Int -> get_int var
+      | Bool -> get_bool var
+      | Vector ->
+        let vec = get_vector var in
+        Vector.make
+          ~x:(Ctypes.getf vec Orx_types.Vector.x)
+          ~y:(Ctypes.getf vec Orx_types.Vector.y)
+          ~z:(Ctypes.getf vec Orx_types.Vector.z)
+  end
+
+  let unregister_exn name =
+    match unregister name with
+    | Ok () -> ()
+    | Error `Orx -> Fmt.invalid_arg "Unable to unregister command %s" name
+
+  let command_handler = Ctypes.(Var.t @-> Var.t @-> returning void)
+
+  let c_register =
+    Ctypes.(
+      Foreign.foreign ~release_runtime_lock:false "orxCommand_Register"
+        (string
+        @-> Foreign.funptr ~runtime_lock:false command_handler
+        @-> int
+        @-> int
+        @-> Var_def.t
+        @-> Var_def.t
+        @-> returning Status.t
+        )
+    )
+
+  let register name (f : Var.t list -> Var.t -> unit) param_defs return_def =
+    let n_args = List.length param_defs in
+    let f_wrapper (c_args : Var.t) (c_return : Var.t) =
+      let args = List.init n_args Ctypes.(fun i -> c_args +@ i) in
+      f args c_return
+    in
+    let c_param_defs =
+      List.map Ctypes.( !@ ) param_defs
+      |> Var_def.of_list
+      |> Ctypes.CArray.start
+    in
+    c_register name f_wrapper n_args 0 c_param_defs return_def
+
+  let register_exn name f param_defs return_def =
+    match register name f param_defs return_def with
+    | Ok () -> ()
+    | Error `Orx -> Fmt.invalid_arg "Unable to register command %s" name
+
+  let evaluate command =
+    let return = Var.allocate_raw () in
+    let result : Var.t = evaluate command return in
+    if Ctypes.is_null result then
+      None
+    else
+      Some return
+end
+
 module Orx_thread = struct
   let set_ocaml_callbacks =
     Ctypes.(

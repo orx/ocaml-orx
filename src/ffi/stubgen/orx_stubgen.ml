@@ -4,15 +4,49 @@ let prologue =
   {|
 #include <orx.h>
 
-inline void ml_orx_shader_param_set_float(orxSHADER_EVENT_PAYLOAD *payload, orxFLOAT v) {
+/* Commands */
+
+static orxINLINE orxCOMMAND_VAR_TYPE ml_orx_command_var_get_type(orxCOMMAND_VAR *v) {
+  return v->eType;
+}
+
+static orxINLINE void ml_orx_command_var_set_type(orxCOMMAND_VAR *v, orxCOMMAND_VAR_TYPE t) {
+  v->eType = t;
+}
+
+#define ML_ORX_COMMAND_VAR_GET(FIELD_TYPE, NAME, FIELD) \
+static orxINLINE FIELD_TYPE ml_orx_command_var_get_##NAME(orxCOMMAND_VAR *v) { \
+  return v->FIELD; \
+}
+ML_ORX_COMMAND_VAR_GET(orxVECTOR, vector, vValue)
+ML_ORX_COMMAND_VAR_GET(orxSTRING, string, zValue)
+ML_ORX_COMMAND_VAR_GET(orxS64, int, s64Value)
+ML_ORX_COMMAND_VAR_GET(orxFLOAT, float, fValue)
+ML_ORX_COMMAND_VAR_GET(orxBOOL, bool, bValue)
+
+#define ML_ORX_COMMAND_VAR_SET(FIELD_TYPE, NAME, FIELD) \
+static orxINLINE void ml_orx_command_var_set_##NAME(orxCOMMAND_VAR *v, FIELD_TYPE vv) { \
+  v->FIELD = vv; \
+}
+ML_ORX_COMMAND_VAR_SET(orxVECTOR, vector, vValue)
+ML_ORX_COMMAND_VAR_SET(orxSTRING, string, zValue)
+ML_ORX_COMMAND_VAR_SET(orxS64, int, s64Value)
+ML_ORX_COMMAND_VAR_SET(orxFLOAT, float, fValue)
+ML_ORX_COMMAND_VAR_SET(orxBOOL, bool, bValue)
+
+/* Shader events */
+
+static orxINLINE void ml_orx_shader_param_set_float(orxSHADER_EVENT_PAYLOAD *payload, orxFLOAT v) {
   orxASSERT(payload->eParamType == orxSHADER_PARAM_TYPE_FLOAT);
   payload->fValue = v;
 }
 
-inline void ml_orx_shader_param_set_vector(orxSHADER_EVENT_PAYLOAD *payload, orxVECTOR *v) {
+static orxINLINE void ml_orx_shader_param_set_vector(orxSHADER_EVENT_PAYLOAD *payload, orxVECTOR *v) {
   orxASSERT(payload->eParamType == orxSHADER_PARAM_TYPE_VECTOR);
   orxVector_Copy(&(payload->vValue), v);
 }
+
+/* Event handlers */
 
 orxSTATUS ml_orx_event_add_handler(orxEVENT_TYPE event_type, orxEVENT_HANDLER event_handler, orxU32 add_id_flags, orxU32 remove_id_flags) {
   orxSTATUS result = orxSTATUS_SUCCESS;
@@ -22,6 +56,8 @@ orxSTATUS ml_orx_event_add_handler(orxEVENT_TYPE event_type, orxEVENT_HANDLER ev
   }
   return result;
 }
+
+/* Threads */
 
 orxSTATUS ml_orx_thread_start(void *_context) {
   caml_c_thread_register();
@@ -37,6 +73,8 @@ void ml_orx_thread_set_callbacks() {
   orxThread_SetCallbacks(&ml_orx_thread_start, &ml_orx_thread_stop, NULL);
   return;
 }
+
+/* Main engine entrypoint */
 
 void ml_orx_execute(int argc, char **argv,
                     orxMODULE_INIT_FUNCTION init,
