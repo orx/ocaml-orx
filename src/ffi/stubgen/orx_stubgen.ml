@@ -28,7 +28,7 @@ orxSTATUS ml_orx_thread_start(void *_context) {
   return orxSTATUS_SUCCESS;
 }
 
-void ml_orx_thread_stop(void *_context) {
+orxSTATUS ml_orx_thread_stop(void *_context) {
   caml_c_thread_unregister();
   return orxSTATUS_SUCCESS;
 }
