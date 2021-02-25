@@ -207,16 +207,6 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "ml_orx_command_var_set_bool" (t @-> bool @-> returning void)
   end
 
-  module Command = struct
-    let unregister = c "orxCommand_Unregister" (string @-> returning Status.t)
-
-    let is_registered = c "orxCommand_IsRegistered" (string @-> returning bool)
-
-    let evaluate =
-      c "orxCommand_Evaluate"
-        (string @-> Command_var.t @-> returning Command_var.t)
-  end
-
   module Obox = struct
     type t = T.Obox.t structure ptr
 
@@ -276,6 +266,24 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_guid = c "orxStructure_GetGUID" (t @-> returning Guid.t)
 
     let get = c "orxStructure_Get" (Guid.t @-> returning t_opt)
+  end
+
+  module Command = struct
+    let unregister = c "orxCommand_Unregister" (string @-> returning Status.t)
+
+    let is_registered = c "orxCommand_IsRegistered" (string @-> returning bool)
+
+    let evaluate =
+      c "orxCommand_Evaluate"
+        (string @-> Command_var.t @-> returning Command_var.t)
+
+    let evaluate_with_guid =
+      c "orxCommand_EvaluateWithGUID"
+        (string
+        @-> Structure.Guid.t
+        @-> Command_var.t
+        @-> returning Command_var.t
+        )
   end
 
   module Body_part = struct

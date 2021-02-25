@@ -1017,6 +1017,14 @@ module Command = struct
       None
     else
       Some return
+
+  let evaluate_with_guid command guid =
+    let return = Var.allocate_raw () in
+    let result : Var.t = evaluate_with_guid command guid return in
+    if Ctypes.is_null result then
+      None
+    else
+      Some return
 end
 
 module Orx_thread = struct

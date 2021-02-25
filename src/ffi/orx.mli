@@ -1053,6 +1053,8 @@ module Command : sig
   val is_registered : string -> bool
 
   val evaluate : string -> Var.t option
+
+  val evaluate_with_guid : string -> Structure.Guid.t -> Var.t option
 end
 
 module Orx_thread : sig
