@@ -162,6 +162,30 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let rotate_2d = c "orxVector_2DRotate" (t @-> t @-> float @-> returning t)
   end
 
+  module Structure = struct
+    type t = T.Structure.t structure ptr
+
+    module Guid = struct
+      type t = Unsigned.uint64
+
+      let t = uint64_t
+
+      let (compare, equal, pp) = Unsigned.UInt64.(compare, equal, pp)
+    end
+
+    let t = ptr T.Structure.t
+
+    let t_opt = ptr_opt T.Structure.t
+
+    let of_void_pointer = c "orxSTRUCTURE" (ptr void @-> returning t_opt)
+
+    let to_void_pointer (s : t) = to_voidp s
+
+    let get_guid = c "orxStructure_GetGUID" (t @-> returning Guid.t)
+
+    let get = c "orxStructure_Get" (Guid.t @-> returning t_opt)
+  end
+
   module Command_var_def = struct
     type t = T.Command_var_def.t structure ptr
 
@@ -192,9 +216,11 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_vector =
       c "ml_orx_command_var_get_vector" (t @-> returning T.Vector.t)
     let get_string = c "ml_orx_command_var_get_string" (t @-> returning string)
-    let get_int = c "ml_orx_command_var_get_int" (t @-> returning int)
+    let get_int = c "ml_orx_command_var_get_int" (t @-> returning int64_t)
     let get_float = c "ml_orx_command_var_get_float" (t @-> returning float)
     let get_bool = c "ml_orx_command_var_get_bool" (t @-> returning bool)
+    let get_guid =
+      c "ml_orx_command_var_get_guid" (t @-> returning Structure.Guid.t)
 
     let set_vector =
       c "ml_orx_command_var_set_vector" (t @-> T.Vector.t @-> returning void)
@@ -205,6 +231,26 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "ml_orx_command_var_set_float" (t @-> float @-> returning void)
     let set_bool =
       c "ml_orx_command_var_set_bool" (t @-> bool @-> returning void)
+    let set_guid =
+      c "ml_orx_command_var_set_guid" (t @-> Structure.Guid.t @-> returning void)
+  end
+
+  module Command = struct
+    let unregister = c "orxCommand_Unregister" (string @-> returning Status.t)
+
+    let is_registered = c "orxCommand_IsRegistered" (string @-> returning bool)
+
+    let evaluate =
+      c "orxCommand_Evaluate"
+        (string @-> Command_var.t @-> returning Command_var.t)
+
+    let evaluate_with_guid =
+      c "orxCommand_EvaluateWithGUID"
+        (string
+        @-> Structure.Guid.t
+        @-> Command_var.t
+        @-> returning Command_var.t
+        )
   end
 
   module Obox = struct
@@ -242,48 +288,6 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let t_opt = ptr_opt T.Color.t
 
     let allocate_raw () : t = allocate_n T.Color.t ~count:1
-  end
-
-  module Structure = struct
-    type t = T.Structure.t structure ptr
-
-    module Guid = struct
-      type t = Unsigned.uint64
-
-      let t = uint64_t
-
-      let (compare, equal, pp) = Unsigned.UInt64.(compare, equal, pp)
-    end
-
-    let t = ptr T.Structure.t
-
-    let t_opt = ptr_opt T.Structure.t
-
-    let of_void_pointer = c "orxSTRUCTURE" (ptr void @-> returning t_opt)
-
-    let to_void_pointer (s : t) = to_voidp s
-
-    let get_guid = c "orxStructure_GetGUID" (t @-> returning Guid.t)
-
-    let get = c "orxStructure_Get" (Guid.t @-> returning t_opt)
-  end
-
-  module Command = struct
-    let unregister = c "orxCommand_Unregister" (string @-> returning Status.t)
-
-    let is_registered = c "orxCommand_IsRegistered" (string @-> returning bool)
-
-    let evaluate =
-      c "orxCommand_Evaluate"
-        (string @-> Command_var.t @-> returning Command_var.t)
-
-    let evaluate_with_guid =
-      c "orxCommand_EvaluateWithGUID"
-        (string
-        @-> Structure.Guid.t
-        @-> Command_var.t
-        @-> returning Command_var.t
-        )
   end
 
   module Body_part = struct

@@ -688,6 +688,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* | Texture : (Texture_event.t, unit) t *)
     (* | Timeline : ([ `Unbound ], [ `Unbound ]) t *)
     (* | Viewport : ([ `Unbound ], [ `Unbuund ]) t *)
+    (* | User_defined : (User_defined_event.t, User_defined_event.Payload.t) t*)
 
     type any = Any : (_, _) t -> any
 
@@ -714,6 +715,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* let texture = F.constant "orxEVENT_TYPE_TEXTURE" F.int64_t *)
     (* let timeline = F.constant "orxEVENT_TYPE_TIMELINE" F.int64_t *)
     (* let viewport = F.constant "orxEVENT_TYPE_VIEWPORT" F.int64_t *)
+    (* let user_defined = F.constant "orxEVENT_TYPE_USER_DEFINED" F.int64_t *)
 
     let map_to_constant =
       [
@@ -735,6 +737,7 @@ module Bindings (F : Ctypes.TYPE) = struct
         (* (Any Texture, texture); *)
         (* (Any Timeline, timeline); *)
         (* (Any Viewport, viewport); *)
+        (* (Any User_defined, user_defined); *)
       ]
 
     let map_from_constant = swap_tuple_list map_to_constant
@@ -811,6 +814,7 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Int
       | Bool
       | Vector
+      | Guid
 
     let equal (a : t) (b : t) = a = b
 
@@ -820,6 +824,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     let int = make "S64"
     let bool = make "BOOL"
     let vector = make "VECTOR"
+    let guid = make "U64"
 
     let map_to_constant =
       [
@@ -828,6 +833,7 @@ module Bindings (F : Ctypes.TYPE) = struct
         (Int, int);
         (Bool, bool);
         (Vector, vector);
+        (Guid, guid);
       ]
     let map_from_constant = swap_tuple_list map_to_constant
 
@@ -851,5 +857,10 @@ module Bindings (F : Ctypes.TYPE) = struct
     type t
 
     let t : t structure = F.structure "__orxCOMMAND_VAR_t"
+
+    (* TODO: This is a hack to allow lookup of other fields in the structure *)
+    let _value = F.field t "vValue" Vector.t
+    let _type = F.field t "eType" Command_var_type.t
+    let () = F.seal t
   end
 end

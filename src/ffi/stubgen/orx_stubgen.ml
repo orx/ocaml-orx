@@ -23,6 +23,7 @@ ML_ORX_COMMAND_VAR_GET(orxSTRING, string, zValue)
 ML_ORX_COMMAND_VAR_GET(orxS64, int, s64Value)
 ML_ORX_COMMAND_VAR_GET(orxFLOAT, float, fValue)
 ML_ORX_COMMAND_VAR_GET(orxBOOL, bool, bValue)
+ML_ORX_COMMAND_VAR_GET(orxU64, guid, u64Value)
 
 #define ML_ORX_COMMAND_VAR_SET(FIELD_TYPE, NAME, FIELD) \
 static orxINLINE void ml_orx_command_var_set_##NAME(orxCOMMAND_VAR *v, FIELD_TYPE vv) { \
@@ -33,6 +34,7 @@ ML_ORX_COMMAND_VAR_SET(orxSTRING, string, zValue)
 ML_ORX_COMMAND_VAR_SET(orxS64, int, s64Value)
 ML_ORX_COMMAND_VAR_SET(orxFLOAT, float, fValue)
 ML_ORX_COMMAND_VAR_SET(orxBOOL, bool, bValue)
+ML_ORX_COMMAND_VAR_SET(orxU64, guid, u64Value)
 
 /* Shader events */
 

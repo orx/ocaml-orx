@@ -908,6 +908,7 @@ module Command = struct
       | Int : int t
       | Bool : bool t
       | Vector : Vector.t t
+      | Guid : Structure.Guid.t t
 
     let to_ctype (type s) (v : s t) : Orx_types.Command_var_type.t =
       match v with
@@ -916,6 +917,7 @@ module Command = struct
       | Int -> Int
       | Bool -> Bool
       | Vector -> Vector
+      | Guid -> Guid
   end
 
   module Var_def = struct
@@ -944,6 +946,7 @@ module Command = struct
       | Int -> set_int var v
       | Bool -> set_bool var v
       | Vector -> set_vector var !@v
+      | Guid -> set_guid var v
 
     let make var_type v =
       let var = allocate_raw () in
@@ -962,7 +965,7 @@ module Command = struct
       match var_type with
       | String -> get_string var
       | Float -> get_float var
-      | Int -> get_int var
+      | Int -> get_int var |> Int64.to_int
       | Bool -> get_bool var
       | Vector ->
         let vec = get_vector var in
@@ -970,6 +973,7 @@ module Command = struct
           ~x:(Ctypes.getf vec Orx_types.Vector.x)
           ~y:(Ctypes.getf vec Orx_types.Vector.y)
           ~z:(Ctypes.getf vec Orx_types.Vector.z)
+      | Guid -> get_guid var
   end
 
   let unregister_exn name =
@@ -977,7 +981,7 @@ module Command = struct
     | Ok () -> ()
     | Error `Orx -> Fmt.invalid_arg "Unable to unregister command %s" name
 
-  let command_handler = Ctypes.(Var.t @-> Var.t @-> returning void)
+  let command_handler = Ctypes.(uint32_t @-> Var.t @-> Var.t @-> returning void)
 
   let c_register =
     Ctypes.(
@@ -992,10 +996,15 @@ module Command = struct
         )
     )
 
-  let register name (f : Var.t list -> Var.t -> unit) param_defs return_def =
-    let n_args = List.length param_defs in
-    let f_wrapper (c_args : Var.t) (c_return : Var.t) =
-      let args = List.init n_args Ctypes.(fun i -> c_args +@ i) in
+  let register name (f : Var.t array -> Var.t -> unit) param_defs return_def =
+    let f_wrapper n_args (c_args : Var.t) (c_return : Var.t) =
+      let n_args = Unsigned.UInt32.to_int n_args in
+      let c_arg_array = Ctypes.CArray.from_ptr c_args n_args in
+      let args =
+        Array.init n_args (fun i ->
+            Ctypes.CArray.get c_arg_array i |> Ctypes.addr
+        )
+      in
       f args c_return
     in
     let c_param_defs =
@@ -1003,7 +1012,7 @@ module Command = struct
       |> Var_def.of_list
       |> Ctypes.CArray.start
     in
-    c_register name f_wrapper n_args 0 c_param_defs return_def
+    c_register name f_wrapper (List.length param_defs) 0 c_param_defs return_def
 
   let register_exn name f param_defs return_def =
     match register name f param_defs return_def with

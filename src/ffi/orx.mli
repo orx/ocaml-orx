@@ -1014,6 +1014,7 @@ module Command : sig
       | Int : int t
       | Bool : bool t
       | Vector : Vector.t t
+      | Guid : Structure.Guid.t t
   end
 
   module Var_def : sig
@@ -1034,14 +1035,14 @@ module Command : sig
 
   val register :
     string ->
-    (Var.t list -> Var.t -> unit) ->
+    (Var.t array -> Var.t -> unit) ->
     Var_def.t list ->
     Var_def.t ->
     Status.t
 
   val register_exn :
     string ->
-    (Var.t list -> Var.t -> unit) ->
+    (Var.t array -> Var.t -> unit) ->
     Var_def.t list ->
     Var_def.t ->
     unit
