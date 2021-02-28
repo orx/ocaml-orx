@@ -687,8 +687,8 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* | System : ([ `Unbound ], [ `Unbound ]) t *)
     (* | Texture : (Texture_event.t, unit) t *)
     (* | Timeline : ([ `Unbound ], [ `Unbound ]) t *)
-    (* | Viewport : ([ `Unbound ], [ `Unbuund ]) t *)
-    (* | User_defined : (User_defined_event.t, User_defined_event.Payload.t) t*)
+    (* | Viewport : ([ `Unbound ], [ `Unbound ]) t *)
+    (* | User_defined : ([ `Unbound ], [ `Unbound ]) t *)
 
     type any = Any : (_, _) t -> any
 
