@@ -429,6 +429,13 @@ module Bindings (F : Ctypes.TYPE) = struct
       )
   end
 
+  module Time_line = struct
+    type t
+
+    (* Unsealed structure because the type is anonymous *)
+    let t : t structure = F.structure "__orxTIMELINE_t"
+  end
+
   module Fx_event = struct
     type t =
       | Start
@@ -667,6 +674,52 @@ module Bindings (F : Ctypes.TYPE) = struct
       )
   end
 
+  module Time_line_event = struct
+    type t =
+      | Track_start
+      | Track_stop
+      | Track_add
+      | Track_remove
+      | Loop
+      | Trigger
+
+    let make tag = F.constant ("orxTIMELINE_EVENT_" ^ tag) F.int64_t
+    let start = make "TRACK_START"
+    let stop = make "TRACK_STOP"
+    let add = make "TRACK_ADD"
+    let remove = make "TRACK_REMOVE"
+    let loop = make "LOOP"
+    let trigger = make "TRIGGER"
+
+    let map_to_constant =
+      [
+        (Track_start, start);
+        (Track_stop, stop);
+        (Track_add, add);
+        (Track_remove, remove);
+        (Loop, loop);
+        (Trigger, trigger);
+      ]
+
+    let map_from_constant = swap_tuple_list map_to_constant
+
+    let t =
+      F.enum "__orxTIMELINE_EVENT_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported time line event type enum: %Ld" i
+      )
+
+    module Payload = struct
+      type t
+
+      let t : t structure = F.structure "__orxTIMELINE_EVENT_PAYLOAD_t"
+      let time_line = F.field t "pstTimeLine" (F.ptr Time_line.t)
+      let track_name = F.field t "zTrackName" F.string
+      let event = F.field t "zEvent" F.string
+      let time_stamp = F.field t "fTimeStamp" F.float
+      let () = F.seal t
+    end
+  end
+
   module Event_type = struct
     type ('event, 'payload) t =
       (* | Anim : ([ `Unbound ], [ `Unbound ]) t *)
@@ -682,11 +735,11 @@ module Bindings (F : Ctypes.TYPE) = struct
       (* | Resource : ([ `Unbound ], [ `Unbound ]) t *)
       | Shader : (Shader_event.t, Shader_event.Payload.t) t
       | Sound : (Sound_event.t, Sound_event.Payload.t) t
+      (* | Spawner : ([ `Unbound ], [ `Unbound ]) t *)
+      (* | System : ([ `Unbound ], [ `Unbound ]) t *)
+      (* | Texture : (Texture_event.t, unit) t *)
+      | Time_line : (Time_line_event.t, Time_line_event.Payload.t) t
 
-    (* | Spawner : ([ `Unbound ], [ `Unbound ]) t *)
-    (* | System : ([ `Unbound ], [ `Unbound ]) t *)
-    (* | Texture : (Texture_event.t, unit) t *)
-    (* | Timeline : ([ `Unbound ], [ `Unbound ]) t *)
     (* | Viewport : ([ `Unbound ], [ `Unbound ]) t *)
     (* | User_defined : ([ `Unbound ], [ `Unbound ]) t *)
 
@@ -713,7 +766,8 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* let spawner = F.constant "orxEVENT_TYPE_SPAWNER" F.int64_t *)
     (* let system = F.constant "orxEVENT_TYPE_SYSTEM" F.int64_t *)
     (* let texture = F.constant "orxEVENT_TYPE_TEXTURE" F.int64_t *)
-    (* let timeline = F.constant "orxEVENT_TYPE_TIMELINE" F.int64_t *)
+    let time_line = F.constant "orxEVENT_TYPE_TIMELINE" F.int64_t
+
     (* let viewport = F.constant "orxEVENT_TYPE_VIEWPORT" F.int64_t *)
     (* let user_defined = F.constant "orxEVENT_TYPE_USER_DEFINED" F.int64_t *)
 
@@ -735,7 +789,7 @@ module Bindings (F : Ctypes.TYPE) = struct
         (* (Any Spawner, spawner); *)
         (* (Any System, system); *)
         (* (Any Texture, texture); *)
-        (* (Any Timeline, timeline); *)
+        (Any Time_line, time_line);
         (* (Any Viewport, viewport); *)
         (* (Any User_defined, user_defined); *)
       ]

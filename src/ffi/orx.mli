@@ -629,6 +629,10 @@ module Shader_pointer : sig
   val get_shader : t -> int -> Shader.t option
 end
 
+module Time_line : sig
+  type t
+end
+
 module Config_event : sig
   type t =
     | Reload_start
@@ -713,6 +717,17 @@ module Sound_event : sig
   val get_sound : payload -> Sound.t
 end
 
+module Time_line_event : sig
+  type t
+
+  type payload
+
+  val get_time_line : payload -> Time_line.t
+  val get_track_name : payload -> string
+  val get_event : payload -> string
+  val get_time_stamp : payload -> float
+end
+
 module Event : sig
   type t
 
@@ -724,6 +739,7 @@ module Event : sig
       | Physics : (Physics_event.t, Physics_event.payload) t
       | Shader : (Shader_event.t, Shader_event.payload) t
       | Sound : (Sound_event.t, Sound_event.payload) t
+      | Time_line : (Time_line_event.t, Time_line_event.payload) t
 
     type any = Any : (_, _) t -> any
   end
