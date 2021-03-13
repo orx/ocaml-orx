@@ -654,6 +654,10 @@ module Object = struct
     set_target_anim o name
     |> Status.raise "Unable to set target animation %s" name
 
+  let set_current_anim_exn o name =
+    set_current_anim o name
+    |> Status.raise "Unable to set target animation %s" name
+
   let add_sound_exn o name =
     add_sound o name |> Status.raise "Unable to add sound %s" name
   let remove_sound_exn o name =

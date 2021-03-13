@@ -541,6 +541,18 @@ module Object : sig
 
   val set_target_anim_exn : t -> string -> unit
 
+  val set_target_anim_recursive : t -> string -> unit
+
+  val get_target_anim : t -> string
+
+  val set_current_anim : t -> string -> Status.t
+
+  val set_current_anim_exn : t -> string -> unit
+
+  val set_current_anim_recursive : t -> string -> unit
+
+  val get_current_anim : t -> string
+
   (** {2 Sound} *)
 
   val add_sound : t -> string -> Status.t

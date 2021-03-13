@@ -958,6 +958,25 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let set_target_anim =
       c "orxObject_SetTargetAnim" (t @-> string @-> returning Status.t)
 
+    let set_target_anim_recursive =
+      c "orxObject_SetTargetAnimRecursive" (t @-> string @-> returning void)
+
+    let get_target_anim = c "orxObject_GetTargetAnim" (t @-> returning string)
+
+    let set_current_anim =
+      c "orxObject_SetCurrentAnim" (t @-> string @-> returning Status.t)
+
+    let set_current_anim_recursive =
+      c "orxObject_SetCurrentAnimRecursive" (t @-> string @-> returning void)
+
+    let get_current_anim = c "orxObject_GetCurrentAnim" (t @-> returning string)
+
+    let is_target_anim =
+      c "orxObject_IsTargetAnim" (t @-> string @-> returning bool)
+
+    let is_current_anim =
+      c "orxObject_IsCurrentAnim" (t @-> string @-> returning bool)
+
     (* Sound *)
     let add_sound = c "orxObject_AddSound" (t @-> string @-> returning Status.t)
 
