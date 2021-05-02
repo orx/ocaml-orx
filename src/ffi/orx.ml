@@ -422,6 +422,9 @@ module Physics = struct
   include Orx_gen.Physics
 
   let get_gravity = get_vector_exn (fun () v -> get_gravity v)
+
+  let check_collision_flag ~mask ~flag =
+    Unsigned.UInt32.equal (Unsigned.UInt32.logand mask flag) flag
 end
 
 module Body_part = struct
@@ -429,6 +432,13 @@ module Body_part = struct
 
   let set_self_flags part flags =
     set_self_flags part (Unsigned.UInt16.of_int flags)
+
+  let get_self_flags part = get_self_flags part |> Unsigned.UInt16.to_int
+
+  let set_check_mask part mask =
+    set_check_mask part (Unsigned.UInt16.of_int mask)
+
+  let get_check_mask part = get_check_mask part |> Unsigned.UInt16.to_int
 end
 
 module Body = struct
@@ -907,19 +917,58 @@ module Config = struct
 
   let get_section_keys (section : string) =
     with_section section get_current_section_keys
+
+  module Value = struct
+    type _ t =
+      | String : string t
+      | Int : int t
+      | Float : float t
+      | Bool : bool t
+      | Vector : Vector.t t
+      | Guid : Structure.Guid.t t
+
+    let to_proper_string (type v) (typ : v t) : string =
+      match typ with
+      | String -> "String"
+      | Int -> "Int"
+      | Float -> "Float"
+      | Bool -> "Bool"
+      | Vector -> "Vector"
+      | Guid -> "GUID"
+
+    let to_string typ = String.lowercase_ascii (to_proper_string typ)
+
+    let get (type v) (typ : v t) ~section ~key : v =
+      let getter : string -> v =
+        match typ with
+        | String -> get_string
+        | Int -> get_int
+        | Float -> get_float
+        | Bool -> get_bool
+        | Vector -> get_vector
+        | Guid -> get_guid
+      in
+      get getter ~section ~key
+
+    let set (type v) (typ : v t) (x : v) ~section ~key : unit =
+      let setter : string -> v -> unit =
+        match typ with
+        | String -> set_string
+        | Int -> set_int
+        | Float -> set_float
+        | Bool -> set_bool
+        | Vector -> set_vector
+        | Guid -> set_guid
+      in
+      set setter x ~section ~key
+  end
 end
 
 module Command = struct
   include Orx_gen.Command
 
   module Var_type = struct
-    type _ t =
-      | String : string t
-      | Float : float t
-      | Int : int t
-      | Bool : bool t
-      | Vector : Vector.t t
-      | Guid : Structure.Guid.t t
+    type 'a t = 'a Config.Value.t
 
     let to_ctype (type s) (v : s t) : Orx_types.Command_var_type.t =
       match v with
@@ -1007,7 +1056,11 @@ module Command = struct
         )
     )
 
-  let register name (f : Var.t array -> Var.t -> unit) param_defs return_def =
+  let register
+      name
+      (f : Var.t array -> Var.t -> unit)
+      (required_param_defs, optional_param_defs)
+      return_def =
     let f_wrapper n_args (c_args : Var.t) (c_return : Var.t) =
       let n_args = Unsigned.UInt32.to_int n_args in
       let c_arg_array = Ctypes.CArray.from_ptr c_args n_args in
@@ -1018,12 +1071,17 @@ module Command = struct
       in
       f args c_return
     in
+    let param_defs = List.append required_param_defs optional_param_defs in
     let c_param_defs =
       List.map Ctypes.( !@ ) param_defs
       |> Var_def.of_list
       |> Ctypes.CArray.start
     in
-    c_register name f_wrapper (List.length param_defs) 0 c_param_defs return_def
+    Store.retain_permanently f_wrapper;
+    c_register name f_wrapper
+      (List.length required_param_defs)
+      (List.length optional_param_defs)
+      c_param_defs return_def
 
   let register_exn name f param_defs return_def =
     match register name f param_defs return_def with

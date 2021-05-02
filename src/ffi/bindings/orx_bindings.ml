@@ -298,8 +298,17 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t_opt = ptr_opt T.Body_part.t
 
+    let get_name = c "orxBody_GetPartName" (t @-> returning string)
+
     let set_self_flags =
       c "orxBody_SetPartSelfFlags" (t @-> uint16_t @-> returning Status.as_exn)
+
+    let get_self_flags = c "orxBody_GetPartSelfFlags" (t @-> returning uint16_t)
+
+    let set_check_mask =
+      c "orxBody_SetPartCheckMask" (t @-> uint16_t @-> returning Status.as_exn)
+
+    let get_check_mask = c "orxBody_GetPartCheckMask" (t @-> returning uint16_t)
   end
 
   module Body = struct
@@ -1113,6 +1122,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let has_been_activated =
       c "orxInput_HasBeenActivated" (string @-> returning bool)
 
+    let has_been_deactivated =
+      c "orxInput_HasBeenDeactivated" (string @-> returning bool)
+
     let get_binding =
       c "orxInput_GetBinding"
         (string
@@ -1343,11 +1355,22 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   end
 
   module Physics = struct
+    let collision_flag = uint32_t
+
     let get_gravity =
       c "orxPhysics_GetGravity" (Vector.t @-> returning Vector.t_opt)
 
     let set_gravity =
       c "orxPhysics_SetGravity" (Vector.t @-> returning Status.as_exn)
+
+    let get_collision_flag_name =
+      c "orxPhysics_GetCollisionFlagName" (collision_flag @-> returning string)
+
+    let get_collision_flag_value =
+      c "orxPhysics_GetCollisionFlagValue" (string @-> returning collision_flag)
+
+    let enable_simulation =
+      c "orxPhysics_EnableSimulation" (bool @-> returning void)
   end
 
   module Display = struct

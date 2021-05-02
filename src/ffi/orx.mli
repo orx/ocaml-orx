@@ -323,6 +323,8 @@ module Input : sig
 
   val has_been_activated : string -> bool
 
+  val has_been_deactivated : string -> bool
+
   val get_binding :
     string -> int -> (Input_type.t * int * Input_mode.t) Status.result
 
@@ -330,15 +332,32 @@ module Input : sig
 end
 
 module Physics : sig
+  val get_collision_flag_name : Unsigned.UInt32.t -> string
+
+  val get_collision_flag_value : string -> Unsigned.UInt32.t
+
+  val check_collision_flag :
+    mask:Unsigned.UInt32.t -> flag:Unsigned.UInt32.t -> bool
+
   val get_gravity : unit -> Vector.t
 
   val set_gravity : Vector.t -> unit
+
+  val enable_simulation : bool -> unit
 end
 
 module Body_part : sig
   type t
 
+  val get_name : t -> string
+
   val set_self_flags : t -> int -> unit
+
+  val get_self_flags : t -> int
+
+  val set_check_mask : t -> int -> unit
+
+  val get_check_mask : t -> int
 end
 
 module Body : sig
@@ -924,6 +943,23 @@ module Render : sig
 end
 
 module Config : sig
+  module Value : sig
+    type _ t =
+      | String : string t
+      | Int : int t
+      | Float : float t
+      | Bool : bool t
+      | Vector : Vector.t t
+      | Guid : Structure.Guid.t t
+
+    val to_string : _ t -> string
+    val to_proper_string : _ t -> string
+
+    val set : 'a t -> 'a -> section:string -> key:string -> unit
+
+    val get : 'a t -> section:string -> key:string -> 'a
+  end
+
   val set_basename : string -> unit
 
   val load : string -> Status.t
@@ -1036,43 +1072,33 @@ end
 module Command : sig
   (** {1 Define and run custom engine commands} *)
 
-  module Var_type : sig
-    type _ t =
-      | String : string t
-      | Float : float t
-      | Int : int t
-      | Bool : bool t
-      | Vector : Vector.t t
-      | Guid : Structure.Guid.t t
-  end
-
   module Var_def : sig
     type t
 
-    val make : string -> _ Var_type.t -> t
+    val make : string -> _ Config.Value.t -> t
   end
 
   module Var : sig
     type t
 
-    val make : 'a Var_type.t -> 'a -> t
+    val make : 'a Config.Value.t -> 'a -> t
 
-    val set : t -> 'a Var_type.t -> 'a -> unit
+    val set : t -> 'a Config.Value.t -> 'a -> unit
 
-    val get : t -> 'a Var_type.t -> 'a
+    val get : t -> 'a Config.Value.t -> 'a
   end
 
   val register :
     string ->
     (Var.t array -> Var.t -> unit) ->
-    Var_def.t list ->
+    Var_def.t list * Var_def.t list ->
     Var_def.t ->
     Status.t
 
   val register_exn :
     string ->
     (Var.t array -> Var.t -> unit) ->
-    Var_def.t list ->
+    Var_def.t list * Var_def.t list ->
     Var_def.t ->
     unit
 
