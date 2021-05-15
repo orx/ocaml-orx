@@ -43,7 +43,7 @@ let input_update (_clock_info : Orx.Clock.Info.t) =
     else if Orx.Input.is_active "Slower" then
       Orx.Clock.set_modifier clock Multiply 0.25
     else if Orx.Input.is_active "Normal" then
-      Orx.Clock.set_modifier clock None 0.0
+      Orx.Clock.set_modifier clock Multiply 0.0
 
 let init () =
   let get_name (binding : string) : string =

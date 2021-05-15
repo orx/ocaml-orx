@@ -50,7 +50,6 @@ module Status = Orx_gen.Status
 module Clock_modifier = Orx_types.Clock_modifier
 module Clock_priority = Orx_types.Clock_priority
 module Clock_info = Orx_types.Clock_info
-module Clock_type = Orx_types.Clock_type
 module Module_id = Orx_types.Module_id
 module Shader_param_type = Orx_gen.Shader_param_type
 module Config_event = Orx_types.Config_event
@@ -786,6 +785,17 @@ end
 module Clock = struct
   include Orx_gen.Clock
 
+  let () =
+    if
+      Clock_info.assumed_clock_modifier_number
+      <> Unsigned.Size_t.to_int Clock_info.clock_modifier_number
+    then
+      Fmt.failwith
+        "orxCLOCK_MODIFIER_NUMBER is %d but the OCaml bindings expect it to be \
+         %d - fix and recompile the bindings"
+        (Unsigned.Size_t.to_int Clock_info.clock_modifier_number)
+        Clock_info.assumed_clock_modifier_number
+
   let callback = Ctypes.(Info.t @-> ptr void @-> returning void)
 
   let c_register =
@@ -819,8 +829,10 @@ module Clock = struct
     | Some clock -> clock
     | None -> invalid_arg "Unable to get core clock"
 
-  let find_first ?(tick_size = ~-.1.0) clock_type =
-    find_first tick_size clock_type
+  let create tick_size =
+    match create tick_size with
+    | Some clock -> clock
+    | None -> failwith "Unable to allocate clock"
 
   let create_from_config_exn = create_exn create_from_config "clock"
 end

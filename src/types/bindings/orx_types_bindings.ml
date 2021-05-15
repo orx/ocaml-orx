@@ -20,9 +20,9 @@ module Bindings (F : Ctypes.TYPE) = struct
   end
 
   module String_id = struct
-    type t = Unsigned.UInt32.t
+    type t = Unsigned.UInt64.t
 
-    let undefined = F.constant "orxSTRINGID_UNDEFINED" F.uint32_t
+    let undefined = F.constant "orxSTRINGID_UNDEFINED" F.uint64_t
   end
 
   module Rgba = struct
@@ -77,50 +77,32 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Fixed
       | Multiply
       | Maxed
-      | None
 
-    let fixed = F.constant "orxCLOCK_MOD_TYPE_FIXED" F.int64_t
-    let multiply = F.constant "orxCLOCK_MOD_TYPE_MULTIPLY" F.int64_t
-    let maxed = F.constant "orxCLOCK_MOD_TYPE_MAXED" F.int64_t
-    let none = F.constant "orxCLOCK_MOD_TYPE_NONE" F.int64_t
+    let fixed = F.constant "orxCLOCK_MODIFIER_FIXED" F.int64_t
+    let multiply = F.constant "orxCLOCK_MODIFIER_MULTIPLY" F.int64_t
+    let maxed = F.constant "orxCLOCK_MODIFIER_MAXED" F.int64_t
 
     let map_to_constant =
-      [ (Fixed, fixed); (Multiply, multiply); (Maxed, maxed); (None, none) ]
+      [ (Fixed, fixed); (Multiply, multiply); (Maxed, maxed) ]
 
     let t =
-      F.enum "__orxCLOCK_MOD_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported clock mod type enum: %Ld" i
-      )
-  end
-
-  module Clock_type = struct
-    type t =
-      | Core
-      | User
-      | Second
-
-    let core = F.constant "orxCLOCK_TYPE_CORE" F.int64_t
-    let user = F.constant "orxCLOCK_TYPE_USER" F.int64_t
-    let second = F.constant "orxCLOCK_TYPE_SECOND" F.int64_t
-
-    let map_to_constant = [ (Core, core); (User, user); (Second, second) ]
-
-    let t =
-      F.enum "__orxCLOCK_TYPE_t" map_to_constant ~unexpected:(fun i ->
-          Fmt.invalid_arg "unsupported clock mod type enum: %Ld" i
+      F.enum "__orxCLOCK_MODIFIER_t" map_to_constant ~unexpected:(fun i ->
+          Fmt.invalid_arg "unsupported clock modifier type enum: %Ld" i
       )
   end
 
   module Clock_info = struct
     type t
 
+    let clock_modifier_number = F.constant "orxCLOCK_MODIFIER_NUMBER" F.size_t
+    let assumed_clock_modifier_number = 4
+
     let t : t structure = F.structure "__orxCLOCK_INFO_t"
-    let clock_type = F.field t "eType" Clock_type.t
     let tick_size = F.field t "fTickSize" F.float
-    let modifier = F.field t "eModType" Clock_modifier.t
-    let modifier_value = F.field t "fModValue" F.float
     let dt = F.field t "fDT" F.float
     let time = F.field t "fTime" F.float
+    let modifier_list =
+      F.field t "afModifierList" (F.array assumed_clock_modifier_number F.float)
     let () = F.seal t
   end
 
@@ -721,6 +703,11 @@ module Bindings (F : Ctypes.TYPE) = struct
   end
 
   module Event_type = struct
+    (* type 'event simple = *)
+    (* | Config : Config_event.t simple *)
+    (* | Texture : Texture_event.t simple *)
+    (* | User_defined : User_defined_event.t simple *)
+
     type ('event, 'payload) t =
       (* | Anim : ([ `Unbound ], [ `Unbound ]) t *)
       (* | Clock : ([ `Unbound ], [ `Unbound ]) t *)

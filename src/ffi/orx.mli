@@ -776,8 +776,6 @@ module Event : sig
     type any = Any : (_, _) t -> any
   end
 
-  val get_flag : String_id.t -> String_id.t
-
   val to_type : t -> Event_type.any
 
   val to_event : t -> ('event, _) Event_type.t -> 'event
@@ -798,19 +796,11 @@ module Module_id : sig
     | Main
 end
 
-module Clock_type : sig
-  type t =
-    | Core
-    | User
-    | Second
-end
-
 module Clock_modifier : sig
   type t =
     | Fixed
     | Multiply
     | Maxed
-    | None
 end
 
 module Clock_priority : sig
@@ -834,13 +824,7 @@ module Clock : sig
 
     type t
 
-    val get_type : t -> Clock_type.t
-
     val get_tick_size : t -> float
-
-    val get_modifier : t -> Clock_modifier.t
-
-    val get_modifier_value : t -> float
 
     val get_dt : t -> float
 
@@ -857,18 +841,18 @@ module Clock : sig
 
   val create_from_config_exn : string -> t
 
-  val create : float -> Clock_type.t -> t option
+  val create : float -> t
 
   val get : string -> t option
 
   val get_core : unit -> t
   (** [get_core ()] returns the core engine clock. *)
 
-  val find_first : ?tick_size:float -> Clock_type.t -> t option
-
   val get_name : t -> string
 
   val get_info : t -> Info.t
+
+  val get_modifier : t -> Clock_modifier.t -> float
 
   val set_modifier : t -> Clock_modifier.t -> float -> unit
 

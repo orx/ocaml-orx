@@ -97,7 +97,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module String_id = struct
     type t = T.String_id.t
 
-    let t = uint32_t
+    let t = uint64_t
 
     let undefined = T.String_id.undefined
 
@@ -609,16 +609,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
       let get (info : t) field = Ctypes.getf !@info field
 
-      let get_type (info : t) : T.Clock_type.t =
-        get info T.Clock_info.clock_type
-
       let get_tick_size (info : t) : float = get info T.Clock_info.tick_size
-
-      let get_modifier (info : t) : T.Clock_modifier.t =
-        get info T.Clock_info.modifier
-
-      let get_modifier_value (info : t) : float =
-        get info T.Clock_info.modifier_value
 
       let get_dt (info : t) : float = get info T.Clock_info.dt
 
@@ -636,19 +627,18 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let create_from_config =
       c "orxClock_CreateFromConfig" (string @-> returning t_opt)
 
-    let create =
-      c "orxClock_Create" (float @-> T.Clock_type.t @-> returning t_opt)
+    let create = c "orxClock_Create" (float @-> returning t_opt)
 
     (* Get a clock in various ways *)
     let get = c "orxClock_Get" (string @-> returning t_opt)
-
-    let find_first =
-      c "orxClock_FindFirst" (float @-> T.Clock_type.t @-> returning t_opt)
 
     (* Get clock properties *)
     let get_name = c "orxClock_GetName" (t @-> returning string)
 
     let get_info = c "orxClock_GetInfo" (t @-> returning Info.t)
+
+    let get_modifier =
+      c "orxClock_GetModifier" (t @-> T.Clock_modifier.t @-> returning float)
 
     (* Change a clock *)
     let set_modifier =
