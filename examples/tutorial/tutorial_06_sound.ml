@@ -18,7 +18,7 @@ let event_message
     kind =
   let sound = Orx.Sound_event.get_sound sound_event_payload in
   let recipient = Orx.Event.get_recipient_object event |> Option.get in
-  Fmt.pr "Sound [%s]@@[%s] has %s@." (Orx.Sound.get_name sound)
+  Orx.Log.log "Sound [%s]@@[%s] has %s" (Orx.Sound.get_name sound)
     (Orx.Object.get_name recipient)
     kind
 
@@ -96,13 +96,13 @@ let init () =
     let (type_, id, mode) = Orx.Input.get_binding binding 0 |> Result.get_ok in
     Orx.Input.get_binding_name type_ id mode
   in
-  Fmt.pr
+  Orx.Log.log
     ("@.- '%s' & '%s' will change the music volume (+ soldier size)@."
     ^^ "- '%s' & '%s' will change the music pitch (+ soldier rotation)@."
     ^^ "- '%s' will toggle music (+ soldier display)@."
     ^^ "- '%s' will play a random SFX on the soldier (+ change its color)@."
     ^^ "- '%s' will the default SFX on the soldier (+ restore its color)@."
-    ^^ "! The sound effect will be played only if the soldier is active@."
+    ^^ "! The sound effect will be played only if the soldier is active"
     )
     (get_name "VolumeUp") (get_name "VolumeDown") (get_name "PitchUp")
     (get_name "PitchDown") (get_name "ToggleMusic") (get_name "RandomSFX")
@@ -129,13 +129,5 @@ let run () =
   else
     Orx.Status.ok
 
-let exit () = ()
-
-let bootstrap () =
-  (* Tell Orx where to look for our configuration file(s) *)
-  Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
-
 let () =
-  Orx.Config.set_bootstrap bootstrap;
-  Orx.Config.set_basename "06_Sound";
-  Orx.Main.execute ~init ~run ~exit ()
+  Orx.Main.start ~config_dir:"examples/tutorial/data" ~init ~run "06_Sound"

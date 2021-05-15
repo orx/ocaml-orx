@@ -29,13 +29,13 @@ let fx_event_handler
   let recipient = Orx.Event.get_recipient_object event |> Option.get in
   ( match fx_event with
   | Start ->
-    Fmt.pr "FX <%s>@<%s> has started!@."
+    Orx.Log.log "FX <%s>@<%s> has started!"
       (Orx.Fx_event.get_name payload)
       (Orx.Object.get_name recipient);
     if Orx.Object.equal recipient state.soldier then
       state.soldier_fx_lock <- true
   | Stop ->
-    Fmt.pr "FX <%s>@<%s> has stopped!@."
+    Orx.Log.log "FX <%s>@<%s> has stopped!"
       (Orx.Fx_event.get_name payload)
       (Orx.Object.get_name recipient);
     if Orx.Object.equal recipient state.soldier then
@@ -79,7 +79,7 @@ let init () =
     let (type_, id, mode) = Orx.Input.get_binding binding 0 |> Result.get_ok in
     Orx.Input.get_binding_name type_ id mode
   in
-  Fmt.pr
+  Orx.Log.log
     ("@.- To select the FX to apply:@."
     ^^ " . '%s' => Wobble@."
     ^^ " . '%s' => Circle@."
@@ -92,7 +92,7 @@ let init () =
     ^^ "* Only once FX will be applied at a time in this tutorial@."
     ^^ "* However an object can support up to 8 FXs at the same time@."
     ^^ "* Box has a looping rotating FX applied directly from config, \
-        requiring no code@."
+        requiring no code"
     )
     (get_name "SelectWobble") (get_name "SelectCircle") (get_name "SelectFade")
     (get_name "SelectFlash") (get_name "SelectMove") (get_name "SelectFlip")
@@ -121,13 +121,4 @@ let run () =
   else
     Orx.Status.ok
 
-let exit () = ()
-
-let bootstrap () =
-  (* Tell Orx where to look for our configuration file(s) *)
-  Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
-
-let () =
-  Orx.Config.set_bootstrap bootstrap;
-  Orx.Config.set_basename "07_FX";
-  Orx.Main.execute ~init ~run ~exit ()
+let () = Orx.Main.start ~config_dir:"examples/tutorial/data" ~init ~run "07_FX"

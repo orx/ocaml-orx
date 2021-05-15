@@ -18,7 +18,7 @@ let update (clock_info : Orx.Clock.Info.t) =
   Orx.Config.push_section "Main";
 
   if Orx.Config.get_bool "DisplayLog" then
-    Fmt.pr "<%s>: Time = %.3f / DT = %.3f@."
+    Orx.Log.log "<%s>: Time = %.3f / DT = %.3f"
       (Orx.Clock.get_name (Orx.Clock.Info.get_clock clock_info |> Option.get))
       (Orx.Clock.Info.get_time clock_info)
       (Orx.Clock.Info.get_dt clock_info);
@@ -50,12 +50,12 @@ let init () =
     let (type_, id, mode) = Orx.Input.get_binding binding 0 |> Result.get_ok in
     Orx.Input.get_binding_name type_ id mode
   in
-  Fmt.pr
-    ("- Press '%s' to toggle log display@."
+  Orx.Log.log
+    ("@.- Press '%s' to toggle log display@."
     ^^ "- To stretch time for the first clock (updating the box):@."
     ^^ " . Press numpad '%s' to set it 4 times faster@."
     ^^ " . Press numpad '%s' to set it 4 times slower@."
-    ^^ " . Press numpad '%s' to set it back to normal@."
+    ^^ " . Press numpad '%s' to set it back to normal"
     )
     (get_name "Log") (get_name "Faster") (get_name "Slower") (get_name "Normal");
 
@@ -86,13 +86,5 @@ let run () =
   else
     Orx.Status.ok
 
-let exit () = ()
-
-let bootstrap () =
-  (* Tell Orx where to look for our configuration file(s) *)
-  Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
-
 let () =
-  Orx.Config.set_bootstrap bootstrap;
-  Orx.Config.set_basename "02_Clock";
-  Orx.Main.execute ~init ~run ~exit ()
+  Orx.Main.start ~config_dir:"examples/tutorial/data" ~init ~run "02_Clock"

@@ -56,17 +56,16 @@ let init () =
     Orx.Input.get_binding_name type_ id mode
   in
 
-  Fmt.pr
-    ("- '%s', '%s', '%s' & '%s' will move the camera@."
+  Orx.Log.log
+    ("@.- '%s', '%s', '%s' & '%s' will move the camera@."
     ^^ "- '%s' & '%s' will zoom in/out@."
     ^^ "* The scrolling and auto-scaling of objects is data-driven, no code \
         required@."
     ^^ "* The sky background will follow the camera (parent/child frame \
-        relation)@."
+        relation)"
     )
     (get_name "CameraUp") (get_name "CameraLeft") (get_name "CameraDown")
-    (get_name "CameraRight") (get_name "CameraZoomIn")
-    (get_name "CameraZoomOut");
+    (get_name "CameraRight") (get_name "CameraZoomIn") (get_name "CameraZoomOut");
 
   let viewport = Orx.Viewport.create_from_config_exn "Viewport" in
   let camera = Orx.Viewport.get_camera viewport |> Option.get in
@@ -85,13 +84,5 @@ let run () =
   else
     Orx.Status.ok
 
-let exit () = ()
-
-let bootstrap () =
-  (* Tell Orx where to look for our configuration file(s) *)
-  Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
-
 let () =
-  Orx.Config.set_bootstrap bootstrap;
-  Orx.Config.set_basename "09_Scrolling";
-  Orx.Main.execute ~init ~run ~exit ()
+  Orx.Main.start ~config_dir:"examples/tutorial/data" ~init ~run "09_Scrolling"

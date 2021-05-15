@@ -56,10 +56,12 @@ let init () =
   in
   let input_rotate_right = Orx.Input.get_binding_name type_ id mode in
 
-  Fmt.pr "- '%s' & '%s' will rotate the camera@." input_rotate_left
-    input_rotate_right;
-  Fmt.pr "* Gravity will follow the camera@.";
-  Fmt.pr "* a bump visual FX is played on objects that collide@.";
+  Orx.Log.log
+    ("@.- '%s' & '%s' will rotate the camera@."
+    ^^ "* Gravity will follow the camera@."
+    ^^ "* a bump visual FX is played on objects that collide"
+    )
+    input_rotate_left input_rotate_right;
 
   let viewport = Orx.Viewport.create_from_config_exn "Viewport" in
   let camera = Orx.Viewport.get_camera viewport |> Option.get in
@@ -81,13 +83,5 @@ let run () =
   else
     Orx.Status.ok
 
-let exit () = ()
-
-let bootstrap () =
-  (* Tell Orx where to look for our configuration file(s) *)
-  Orx.Resource.add_storage Orx.Resource.Config "examples/tutorial/data" false
-
 let () =
-  Orx.Config.set_bootstrap bootstrap;
-  Orx.Config.set_basename "08_Physics";
-  Orx.Main.execute ~init ~run ~exit ()
+  Orx.Main.start ~config_dir:"examples/tutorial/data" ~init ~run "08_Physics"
