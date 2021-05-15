@@ -655,6 +655,14 @@ module Object = struct
     add_fx_exn_wrapper (fun o name -> add_delayed_fx o name delay) o name
   let remove_fx_exn o name =
     remove_fx o name |> Status.raise "Unable to remove FX %s" name
+  let remove_all_fxs_exn o =
+    remove_all_fxs o
+    |> Status.raise "Unable to remove all FXs from %s" (get_name o)
+
+  let add_shader_exn o name =
+    add_shader o name |> Status.raise "Unable to add shader %s" name
+  let remove_shader_exn o name =
+    remove_shader o name |> Status.raise "Unable to remove shader %s" name
 
   let add_time_line_track_exn o name =
     add_time_line_track o name

@@ -446,6 +446,26 @@ module Object : sig
 
   val remove_fx_exn : t -> string -> unit
 
+  val remove_fx_recursive : t -> string -> unit
+
+  val remove_all_fxs : t -> Status.t
+
+  val remove_all_fxs_exn : t -> unit
+
+  (*** {2 Shaders} *)
+
+  val add_shader : t -> string -> Status.t
+
+  val add_shader_exn : t -> string -> unit
+
+  val add_shader_recursive : t -> string -> unit
+
+  val remove_shader : t -> string -> Status.t
+
+  val remove_shader_exn : t -> string -> unit
+
+  val remove_shader_recursive : t -> string -> unit
+
   (** {2 Placement and dimensions} *)
 
   val get_rotation : t -> float
@@ -495,6 +515,8 @@ module Object : sig
   val remove_time_line_track : t -> string -> Status.t
 
   val remove_time_line_track_exn : t -> string -> unit
+
+  val remove_time_line_track_recursive : t -> string -> unit
 
   val enable_time_line : t -> bool -> unit
 

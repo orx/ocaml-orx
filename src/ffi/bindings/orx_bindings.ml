@@ -831,6 +831,24 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let remove_fx = c "orxObject_RemoveFX" (t @-> string @-> returning Status.t)
 
+    let remove_fx_recursive =
+      c "orxObject_RemoveFXRecursive" (t @-> string @-> returning void)
+
+    let remove_all_fxs = c "orxObject_RemoveAllFXs" (t @-> returning Status.t)
+
+    (* Shaders *)
+    let add_shader =
+      c "orxObject_AddShader" (t @-> string @-> returning Status.t)
+
+    let add_shader_recursive =
+      c "orxObject_AddShaderRecursive" (t @-> string @-> returning void)
+
+    let remove_shader =
+      c "orxObject_RemoveShader" (t @-> string @-> returning Status.t)
+
+    let remove_shader_recursive =
+      c "orxObject_RemoveShaderRecursive" (t @-> string @-> returning void)
+
     (* Position and orientation *)
     let get_rotation = c "orxObject_GetRotation" (t @-> returning float)
 
@@ -878,6 +896,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let remove_time_line_track =
       c "orxObject_RemoveTimeLineTrack" (t @-> string @-> returning Status.t)
+
+    let remove_time_line_track_recursive =
+      c "orxObject_RemoveTimeLineTrackRecursive"
+        (t @-> string @-> returning void)
 
     let enable_time_line =
       c "orxObject_EnableTimeLine" (t @-> bool @-> returning void)
