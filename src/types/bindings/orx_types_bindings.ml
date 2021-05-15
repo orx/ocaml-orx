@@ -77,13 +77,17 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Fixed
       | Multiply
       | Maxed
+      | Average
 
     let fixed = F.constant "orxCLOCK_MODIFIER_FIXED" F.int64_t
     let multiply = F.constant "orxCLOCK_MODIFIER_MULTIPLY" F.int64_t
     let maxed = F.constant "orxCLOCK_MODIFIER_MAXED" F.int64_t
+    let average = F.constant "orxCLOCK_MODIFIER_AVERAGE" F.int64_t
 
     let map_to_constant =
-      [ (Fixed, fixed); (Multiply, multiply); (Maxed, maxed) ]
+      [
+        (Fixed, fixed); (Multiply, multiply); (Maxed, maxed); (Average, average);
+      ]
 
     let t =
       F.enum "__orxCLOCK_MODIFIER_t" map_to_constant ~unexpected:(fun i ->

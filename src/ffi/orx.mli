@@ -801,6 +801,7 @@ module Clock_modifier : sig
     | Fixed
     | Multiply
     | Maxed
+    | Average
 end
 
 module Clock_priority : sig
