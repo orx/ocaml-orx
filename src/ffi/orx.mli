@@ -614,6 +614,8 @@ module Object : sig
 
   val get_group : group -> t Seq.t
 
+  val get_enabled : group -> t Seq.t
+
   val pick : Vector.t -> group -> t option
 
   val box_pick : Obox.t -> group -> t option

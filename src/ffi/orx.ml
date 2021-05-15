@@ -582,6 +582,10 @@ module Object = struct
     let group_id = group_id group in
     get_seq (fun o -> get_next o group_id)
 
+  let get_enabled (group : group) : t Seq.t =
+    let group_id = group_id group in
+    get_seq (fun o -> get_next o group_id)
+
   type _ child =
     | Child_object : t child
     | Owned_object : t child

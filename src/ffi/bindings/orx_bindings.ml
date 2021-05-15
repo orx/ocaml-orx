@@ -1031,6 +1031,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_next =
       c "orxObject_GetNext" (t_opt @-> String_id.t @-> returning t_opt)
+
+    let get_next_enabled =
+      c "orxObject_GetNextEnabled" (t_opt @-> String_id.t @-> returning t_opt)
   end
 
   module Shader_param_type = struct
