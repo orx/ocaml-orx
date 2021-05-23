@@ -809,9 +809,14 @@ module Event : sig
   val get_recipient_object : t -> Object.t option
 
   val add_handler :
+    ?events:'event list ->
     ('event, 'payload) Event_type.t ->
     (t -> 'event -> 'payload -> Status.t) ->
     unit
+  (** [add_handler ?events event_type handler_callback] associates
+      [handler_callback] with [events] from [event_type].
+
+      @param events defaults to all events matching [event_type]. *)
 end
 
 module Module_id : sig

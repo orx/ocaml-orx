@@ -743,8 +743,10 @@ module Event = struct
     )
 
   let add_handler :
-      type e p. (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> unit =
-   fun event_type callback ->
+      type e p.
+      ?events:e list -> (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> unit
+      =
+   fun ?events event_type callback ->
     let callback event =
       let f =
         match event_type with
@@ -779,9 +781,11 @@ module Event = struct
     in
     Store.retain_permanently callback;
     let add_flags =
-      match event_type with
-      | Sound -> make_flags Sound [ Start; Stop; Add; Remove ]
-      | _ -> Unsigned.UInt32.max_int
+      match (event_type, events) with
+      | ((Sound as et), None) -> make_flags et [ Start; Stop; Add; Remove ]
+      | ((Sound as et), Some es) -> make_flags et es
+      | (et, Some es) -> make_flags et es
+      | (_, None) -> Unsigned.UInt32.max_int
     in
     let remove_flags = Unsigned.UInt32.max_int in
     let result =
