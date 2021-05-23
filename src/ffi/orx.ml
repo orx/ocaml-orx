@@ -723,6 +723,19 @@ module Event = struct
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
     | Time_line -> to_flags event_ids Orx_types.Time_line_event.map_to_constant
 
+  let all_events
+      (type event payload)
+      (event_type : (event, payload) Event_type.t) : event list =
+    let firsts l = List.map fst l in
+    match event_type with
+    | Fx -> firsts Orx_types.Fx_event.map_to_constant
+    | Input -> firsts Orx_types.Input_event.map_to_constant
+    | Object -> firsts Orx_types.Object_event.map_to_constant
+    | Physics -> firsts Orx_types.Physics_event.map_to_constant
+    | Shader -> firsts Orx_types.Shader_event.map_to_constant
+    | Sound -> firsts Orx_types.Sound_event.map_to_constant
+    | Time_line -> firsts Orx_types.Time_line_event.map_to_constant
+
   let get_sender_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.sender)
 
@@ -783,9 +796,8 @@ module Event = struct
     let add_flags =
       match (event_type, events) with
       | ((Sound as et), None) -> make_flags et [ Start; Stop; Add; Remove ]
-      | ((Sound as et), Some es) -> make_flags et es
       | (et, Some es) -> make_flags et es
-      | (_, None) -> Unsigned.UInt32.max_int
+      | (et, None) -> make_flags et (all_events et)
     in
     let remove_flags = Unsigned.UInt32.max_int in
     let result =
