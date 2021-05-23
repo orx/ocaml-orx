@@ -733,9 +733,9 @@ module Event = struct
 
   let c_add_handler =
     Ctypes.(
-      Foreign.foreign ~release_runtime_lock:false "ml_orx_event_add_handler"
+      Foreign.foreign "ml_orx_event_add_handler"
         (Orx_types.Event_type.t
-        @-> Foreign.funptr ~runtime_lock:false event_handler
+        @-> Foreign.funptr event_handler
         @-> uint32_t
         @-> uint32_t
         @-> returning Orx_gen.Status.t
@@ -812,9 +812,9 @@ module Clock = struct
 
   let c_register =
     Ctypes.(
-      Foreign.foreign ~release_runtime_lock:false "orxClock_Register"
+      Foreign.foreign "orxClock_Register"
         (t
-        @-> Foreign.funptr ~runtime_lock:false callback
+        @-> Foreign.funptr callback
         @-> ptr void
         @-> Orx_types.Module_id.t
         @-> Orx_types.Clock_priority.t
@@ -859,7 +859,7 @@ module Config = struct
 
   let set_bootstrap =
     Ctypes.(
-      Foreign.foreign ~release_runtime_lock:false "orxConfig_SetBootstrap"
+      Foreign.foreign "orxConfig_SetBootstrap"
         (Foreign.funptr bootstrap_function @-> returning Orx_gen.Status.t)
     )
 
@@ -1069,9 +1069,9 @@ module Command = struct
 
   let c_register =
     Ctypes.(
-      Foreign.foreign ~release_runtime_lock:false "orxCommand_Register"
+      Foreign.foreign "orxCommand_Register"
         (string
-        @-> Foreign.funptr ~runtime_lock:false command_handler
+        @-> Foreign.funptr command_handler
         @-> int
         @-> int
         @-> Var_def.t
@@ -1132,8 +1132,7 @@ end
 module Orx_thread = struct
   let set_ocaml_callbacks =
     Ctypes.(
-      Foreign.foreign ~release_runtime_lock:false "ml_orx_thread_set_callbacks"
-        (void @-> returning void)
+      Foreign.foreign "ml_orx_thread_set_callbacks" (void @-> returning void)
     )
 end
 
@@ -1148,12 +1147,12 @@ module Main = struct
   (* inlined in orx.h *)
   let execute_c =
     Ctypes.(
-      Foreign.foreign ~release_runtime_lock:false "ml_orx_execute"
+      Foreign.foreign "ml_orx_execute"
         (int
         @-> ptr string
-        @-> Foreign.funptr ~runtime_lock:false init_function
-        @-> Foreign.funptr ~runtime_lock:false run_function
-        @-> Foreign.funptr ~runtime_lock:false exit_function
+        @-> Foreign.funptr init_function
+        @-> Foreign.funptr run_function
+        @-> Foreign.funptr exit_function
         @-> returning void
         )
     )
