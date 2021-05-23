@@ -601,28 +601,24 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Add
       | Remove
 
-    (* TODO: If someone finds a way to safely handle these from OCaml, add
-       support back in. | Packet | Recording_start | Recording_stop |
-       Recording_packet | None; *)
     let make tag = F.constant ("orxSOUND_EVENT_" ^ tag) F.int64_t
+
+    (* These events are safe to handle without extra care *)
     let start = make "START"
     let stop = make "STOP"
     let add = make "ADD"
     let remove = make "REMOVE"
+    let _recording_start = make "RECORDING_START"
+    let _recording_stop = make "RECORDING_STOP"
+    let _recording_packet = make "RECORDING_PACKET"
 
-    (* let packet = make("PACKET"); let recording_start =
-       make("RECORDING_START"); let recording_stop = make("RECORDING_STOP"); let
-       recording_packet = make("RECORDING_PACKET"); let none = make("NONE"); *)
+    (* These events require extra care - they're sent from another thread, so
+       the callback will be invoked from that thread. It's not safe to call any
+       orx functions from inside of the callback for these events. *)
+    let _packet = make "PACKET"
+
     let map_to_constant =
-      [
-        (Start, start);
-        (Stop, stop);
-        (Add, add);
-        (Remove, remove);
-        (* (Packet, packet), (Recording_start, recording_start),
-           (Recording_stop, recording_stop), (Recording_packet,
-           recording_packet), (None, none), *)
-      ]
+      [ (Start, start); (Stop, stop); (Add, add); (Remove, remove) ]
 
     let map_from_constant = swap_tuple_list map_to_constant
 

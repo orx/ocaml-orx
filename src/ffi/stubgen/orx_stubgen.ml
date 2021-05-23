@@ -62,13 +62,15 @@ orxSTATUS ml_orx_event_add_handler(orxEVENT_TYPE event_type, orxEVENT_HANDLER ev
 /* Threads */
 
 orxSTATUS ml_orx_thread_start(void *_context) {
-  caml_c_thread_register();
-  return orxSTATUS_SUCCESS;
+  int status = 0;
+  status = caml_c_thread_register();
+  return (status ? orxSTATUS_SUCCESS : orxSTATUS_FAILURE);
 }
 
 orxSTATUS ml_orx_thread_stop(void *_context) {
-  caml_c_thread_unregister();
-  return orxSTATUS_SUCCESS;
+  int status = 0;
+  status = caml_c_thread_unregister();
+  return (status ? orxSTATUS_SUCCESS : orxSTATUS_FAILURE);
 }
 
 void ml_orx_thread_set_callbacks() {
