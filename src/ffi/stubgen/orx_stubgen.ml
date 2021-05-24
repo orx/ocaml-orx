@@ -106,14 +106,11 @@ let () =
   );
 
   (* OCaml/C concurrency model to use in the generated stubs *)
-  let concurrency = Cstubs.sequential in
   match (!generate_ml, !generate_c) with
   | (false, false) | (true, true) ->
     failwith "Exactly one of -ml, -c must be specified"
   | (true, false) ->
-    Cstubs.write_ml ~concurrency Format.std_formatter ~prefix
-      (module Orx_bindings.Bindings)
+    Cstubs.write_ml Format.std_formatter ~prefix (module Orx_bindings.Bindings)
   | (false, true) ->
     print_endline prologue;
-    Cstubs.write_c ~concurrency Format.std_formatter ~prefix
-      (module Orx_bindings.Bindings)
+    Cstubs.write_c Format.std_formatter ~prefix (module Orx_bindings.Bindings)

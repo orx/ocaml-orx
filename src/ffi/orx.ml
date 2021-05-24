@@ -744,11 +744,13 @@ module Event = struct
 
   let event_handler = Ctypes.(t @-> returning Orx_gen.Status.t)
 
+  module Event_handler = (val Foreign.dynamic_funptr event_handler)
+
   let c_add_handler =
     Ctypes.(
       Foreign.foreign "ml_orx_event_add_handler"
         (Orx_types.Event_type.t
-        @-> Foreign.funptr event_handler
+        @-> Event_handler.t
         @-> uint32_t
         @-> uint32_t
         @-> returning Orx_gen.Status.t
@@ -792,7 +794,8 @@ module Event = struct
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
-    Store.retain_permanently callback;
+    let callback_ptr = Event_handler.of_fun callback in
+    Store.retain_permanently callback_ptr;
     let add_flags =
       match (event_type, events) with
       | ((Sound as et), None) -> make_flags et [ Start; Stop; Add; Remove ]
@@ -803,7 +806,7 @@ module Event = struct
     let result =
       c_add_handler
         (Event_type.to_c_any event_type)
-        callback add_flags remove_flags
+        callback_ptr add_flags remove_flags
     in
     match result with
     | Ok () -> ()
@@ -826,11 +829,13 @@ module Clock = struct
 
   let callback = Ctypes.(Info.t @-> ptr void @-> returning void)
 
+  module Clock_callback = (val Foreign.dynamic_funptr callback)
+
   let c_register =
     Ctypes.(
       Foreign.foreign "orxClock_Register"
         (t
-        @-> Foreign.funptr callback
+        @-> Clock_callback.t
         @-> ptr void
         @-> Orx_types.Module_id.t
         @-> Orx_types.Clock_priority.t
@@ -848,8 +853,9 @@ module Clock = struct
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
-    Store.retain_permanently callback_wrapper;
-    match c_register clock callback_wrapper Ctypes.null module_ priority with
+    let callback_ptr = Clock_callback.of_fun callback_wrapper in
+    Store.retain_permanently callback_ptr;
+    match c_register clock callback_ptr Ctypes.null module_ priority with
     | Ok () -> ()
     | Error `Orx -> fail "Failed to set clock callback"
 
@@ -869,7 +875,7 @@ module Clock = struct
     Ctypes.(
       Foreign.foreign "orxClock_AddTimer"
         (t
-        @-> Foreign.funptr callback
+        @-> Clock_callback.t
         @-> float
         @-> int32_t
         @-> ptr void
@@ -887,7 +893,9 @@ module Clock = struct
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
-    c_add_timer clock callback_wrapper delay repetition Ctypes.null
+    let callback_ptr = Clock_callback.of_fun callback_wrapper in
+    Store.retain_permanently callback_ptr;
+    c_add_timer clock callback_ptr delay (Int32.of_int repetition) Ctypes.null
 
   let add_timer_exn clock callback delay repetition =
     match add_timer clock callback delay repetition with
@@ -899,15 +907,28 @@ module Clock = struct
     Ctypes.(
       Foreign.foreign "orxClock_RemoveTimer"
         (t
-        @-> ptr void (* Foreign.funptr callback *)
+        @-> Clock_callback.t_opt
         @-> float
         @-> ptr void
         @-> returning Orx_gen.Status.t
         )
     )
 
+  let remove_timer clock callback delay =
+    let callback_wrapper info _ctx =
+      match callback info with
+      | () -> ()
+      | exception exn ->
+        Log.log "Unhandled exception in clock timer callback for clock %s: %a"
+          (get_name clock) Fmt.exn_backtrace
+          (exn, Printexc.get_raw_backtrace ());
+        raise exn
+    in
+    let callback_ptr = Clock_callback.of_fun callback_wrapper in
+    c_remove_timer clock (Some callback_ptr) delay Ctypes.null
+
   let remove_all_timers clock delay =
-    c_remove_timer clock Ctypes.null delay Ctypes.null
+    c_remove_timer clock None delay Ctypes.null
 
   let remove_all_timers_exn clock delay =
     match remove_all_timers clock delay with
@@ -925,11 +946,18 @@ module Config = struct
 
   let bootstrap_function = Ctypes.(void @-> returning Orx_gen.Status.t)
 
-  let set_bootstrap =
+  module Bootstrap_function = (val Foreign.dynamic_funptr bootstrap_function)
+
+  let c_set_bootstrap =
     Ctypes.(
       Foreign.foreign "orxConfig_SetBootstrap"
-        (Foreign.funptr bootstrap_function @-> returning Orx_gen.Status.t)
+        (Bootstrap_function.t @-> returning Orx_gen.Status.t)
     )
+
+  let set_bootstrap f =
+    let f_ptr = Bootstrap_function.of_fun f in
+    Store.retain_permanently f_ptr;
+    c_set_bootstrap f_ptr
 
   let set_bootstrap f =
     match set_bootstrap f with
@@ -1135,11 +1163,13 @@ module Command = struct
 
   let command_handler = Ctypes.(uint32_t @-> Var.t @-> Var.t @-> returning void)
 
+  module Command_handler = (val Foreign.dynamic_funptr command_handler)
+
   let c_register =
     Ctypes.(
       Foreign.foreign "orxCommand_Register"
         (string
-        @-> Foreign.funptr command_handler
+        @-> Command_handler.t
         @-> int
         @-> int
         @-> Var_def.t
@@ -1169,8 +1199,9 @@ module Command = struct
       |> Var_def.of_list
       |> Ctypes.CArray.start
     in
-    Store.retain_permanently f_wrapper;
-    c_register name f_wrapper
+    let f_ptr = Command_handler.of_fun f_wrapper in
+    Store.retain_permanently f_ptr;
+    c_register name f_ptr
       (List.length required_param_defs)
       (List.length optional_param_defs)
       c_param_defs return_def
@@ -1206,10 +1237,13 @@ end
 
 module Main = struct
   let init_function = Ctypes.(void @-> returning Orx_gen.Status.t)
+  module Init_function = (val Foreign.dynamic_funptr init_function)
 
   let run_function = Ctypes.(void @-> returning Orx_gen.Status.t)
+  module Run_function = (val Foreign.dynamic_funptr run_function)
 
   let exit_function = Ctypes.(void @-> returning void)
+  module Exit_function = (val Foreign.dynamic_funptr exit_function)
 
   (* This is wrapped differently because the underlying orx function is *)
   (* inlined in orx.h *)
@@ -1218,9 +1252,9 @@ module Main = struct
       Foreign.foreign "ml_orx_execute"
         (int
         @-> ptr string
-        @-> Foreign.funptr init_function
-        @-> Foreign.funptr run_function
-        @-> Foreign.funptr exit_function
+        @-> Init_function.t
+        @-> Run_function.t
+        @-> Exit_function.t
         @-> returning void
         )
     )
@@ -1228,21 +1262,22 @@ module Main = struct
   let execute ~init ~run ~exit () =
     (* Start the orx main loop *)
     let empty_argv = Ctypes.from_voidp Ctypes.string Ctypes.null in
-    execute_c 0 empty_argv (Sys.opaque_identity init) (Sys.opaque_identity run)
-      (Sys.opaque_identity exit)
+    let init_ptr = Init_function.of_fun init in
+    let run_ptr = Run_function.of_fun run in
+    let exit_ptr = Exit_function.of_fun exit in
+    Store.retain_permanently init_ptr;
+    Store.retain_permanently run_ptr;
+    Store.retain_permanently exit_ptr;
+    execute_c 0 empty_argv init_ptr run_ptr exit_ptr
 
   let start ?config_dir ?exit ~init ~run name =
     ( match config_dir with
     | None -> ()
     | Some dir ->
       let bootstrap () = Resource.add_storage Config dir false in
-      Store.retain_permanently bootstrap;
       Config.set_bootstrap bootstrap
     );
     Config.set_basename name;
     let exit = Option.value exit ~default:(fun () -> ()) in
-    Store.retain_permanently init;
-    Store.retain_permanently run;
-    Store.retain_permanently exit;
     execute ~init ~run ~exit ()
 end

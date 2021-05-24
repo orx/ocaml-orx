@@ -898,6 +898,18 @@ module Clock : sig
 
   val register :
     t -> (Info.t -> unit) -> Module_id.t -> Clock_priority.t -> unit
+
+  (** {2 Timers} *)
+
+  val add_timer : t -> (Info.t -> unit) -> float -> int -> Status.t
+
+  val add_timer_exn : t -> (Info.t -> unit) -> float -> int -> unit
+
+  val remove_timer : t -> (Info.t -> unit) -> float -> Status.t
+
+  val remove_all_timers : t -> float -> Status.t
+
+  val remove_all_timers_exn : t -> float -> unit
 end
 
 module Camera : sig
