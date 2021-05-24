@@ -843,7 +843,8 @@ module Clock = struct
       match callback info with
       | () -> ()
       | exception exn ->
-        Fmt.epr "Unhandled exception in clock callback: %a@." Fmt.exn_backtrace
+        Log.log "Unhandled exception in clock callback for clock %s: %a"
+          (get_name clock) Fmt.exn_backtrace
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
@@ -863,6 +864,57 @@ module Clock = struct
     | None -> failwith "Unable to allocate clock"
 
   let create_from_config_exn = create_exn create_from_config "clock"
+
+  let c_add_timer =
+    Ctypes.(
+      Foreign.foreign "orxClock_AddTimer"
+        (t
+        @-> Foreign.funptr callback
+        @-> float
+        @-> int32_t
+        @-> ptr void
+        @-> returning Orx_gen.Status.t
+        )
+    )
+
+  let add_timer clock callback delay repetition =
+    let callback_wrapper info _ctx =
+      match callback info with
+      | () -> ()
+      | exception exn ->
+        Log.log "Unhandled exception in clock timer callback for clock %s: %a"
+          (get_name clock) Fmt.exn_backtrace
+          (exn, Printexc.get_raw_backtrace ());
+        raise exn
+    in
+    c_add_timer clock callback_wrapper delay repetition Ctypes.null
+
+  let add_timer_exn clock callback delay repetition =
+    match add_timer clock callback delay repetition with
+    | Ok () -> ()
+    | Error `Orx ->
+      Fmt.failwith "Failed to add timer to clock %s" (get_name clock)
+
+  let c_remove_timer =
+    Ctypes.(
+      Foreign.foreign "orxClock_RemoveTimer"
+        (t
+        @-> ptr void (* Foreign.funptr callback *)
+        @-> float
+        @-> ptr void
+        @-> returning Orx_gen.Status.t
+        )
+    )
+
+  let remove_all_timers clock delay =
+    c_remove_timer clock Ctypes.null delay Ctypes.null
+
+  let remove_all_timers_exn clock delay =
+    match remove_all_timers clock delay with
+    | Ok () -> ()
+    | Error `Orx ->
+      Fmt.failwith "Failed to remove all timers with delay %f from clock %s"
+        delay (get_name clock)
 end
 
 module Config = struct
