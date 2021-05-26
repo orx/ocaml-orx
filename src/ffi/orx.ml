@@ -1,3 +1,23 @@
+module Orx_gen = Orx_bindings.Bindings (Generated)
+
+module Make_store (Ptr : Foreign.Funptr) : sig
+  val retain : Ptr.t -> unit
+  val release_all : (Ptr.t -> Orx_gen.Status.t) -> Orx_gen.Status.t
+end = struct
+  let store : Ptr.t list ref = ref []
+  let retain v = store := v :: !store
+  let rec release_all (release : Ptr.t -> Orx_gen.Status.t) =
+    match !store with
+    | [] -> Ok ()
+    | hd :: tl ->
+      ( match release hd with
+      | Ok () ->
+        store := tl;
+        release_all release
+      | Error _ as e -> e
+      )
+end
+
 let ( !@ ) = Ctypes.( !@ )
 
 let fail fmt = Fmt.kstr failwith ("Orx: " ^^ fmt)
@@ -6,35 +26,6 @@ let create_exn create_from_config what name =
   match create_from_config name with
   | Some o -> o
   | None -> Fmt.invalid_arg "Unable to create %s %s" what name
-
-(* Protect OCaml values from GC collection so they can be safely passed to Orx.
-   Code from
-   https://discuss.ocaml.org/t/ctypes-whats-the-most-idiomatic-way-to-anchor-an-ocaml-value-so-that-its-not-garbage-collected/6258/2 *)
-module Store : sig
-  (* type ticket *)
-  val retain_permanently : 'a -> unit
-
-  (* val retain : 'a -> ticket *)
-  (* val is_live : ticket -> bool *)
-  (* val release : ticket -> unit *)
-end = struct
-  type ticket = int
-  type element = E : _ -> element
-  let counter = ref 0
-  let store = Hashtbl.create 10
-  let retain v =
-    let ticket = !counter in
-    incr counter;
-    Hashtbl.add store ticket (E v);
-    ticket
-  let retain_permanently v =
-    let (_ : ticket) = retain v in
-    ()
-  let _is_live = Hashtbl.mem store
-  let _release = Hashtbl.remove store
-end
-
-module Orx_gen = Orx_bindings.Bindings (Generated)
 
 type camera = Orx_gen.Camera.t
 type obj = Orx_gen.Object.t
@@ -745,6 +736,7 @@ module Event = struct
   let event_handler = Ctypes.(t @-> returning Orx_gen.Status.t)
 
   module Event_handler = (val Foreign.dynamic_funptr event_handler)
+  module Event_handler_store = Make_store (Event_handler)
 
   let c_add_handler =
     Ctypes.(
@@ -790,12 +782,11 @@ module Event = struct
       match f () with
       | result -> result
       | exception exn ->
-        Fmt.epr "Unhandled exception in event callback: %a@." Fmt.exn_backtrace
+        Log.log "Unhandled exception in event callback: %a" Fmt.exn_backtrace
           (exn, Printexc.get_raw_backtrace ());
         raise exn
     in
     let callback_ptr = Event_handler.of_fun callback in
-    Store.retain_permanently callback_ptr;
     let add_flags =
       match (event_type, events) with
       | ((Sound as et), None) -> make_flags et [ Start; Stop; Add; Remove ]
@@ -809,8 +800,31 @@ module Event = struct
         callback_ptr add_flags remove_flags
     in
     match result with
+    | Ok () -> Event_handler_store.retain callback_ptr
+    | Error `Orx ->
+      Event_handler.free callback_ptr;
+      fail "Failed to set event callback"
+
+  let c_remove_handler =
+    Ctypes.(
+      Foreign.foreign "orxEvent_RemoveHandler"
+        (Orx_types.Event_type.t @-> Event_handler.t @-> returning Status.t)
+    )
+
+  let remove_handler event_type callback_ptr =
+    let result =
+      c_remove_handler (Event_type.to_c_any event_type) callback_ptr
+    in
+    Event_handler.free callback_ptr;
+    result
+
+  let remove_handlers event_type =
+    Event_handler_store.release_all (fun ptr -> remove_handler event_type ptr)
+
+  let remove_handlers_exn event_type =
+    match remove_handlers event_type with
     | Ok () -> ()
-    | Error `Orx -> fail "Failed to set event callback"
+    | Error `Orx -> invalid_arg "Unable to remove event handlers"
 end
 
 module Clock = struct
@@ -830,6 +844,7 @@ module Clock = struct
   let callback = Ctypes.(Info.t @-> ptr void @-> returning void)
 
   module Clock_callback = (val Foreign.dynamic_funptr callback)
+  module Clock_callback_store = Make_store (Clock_callback)
 
   let c_register =
     Ctypes.(
@@ -854,10 +869,32 @@ module Clock = struct
         raise exn
     in
     let callback_ptr = Clock_callback.of_fun callback_wrapper in
-    Store.retain_permanently callback_ptr;
     match c_register clock callback_ptr Ctypes.null module_ priority with
+    | Ok () -> Clock_callback_store.retain callback_ptr
+    | Error `Orx ->
+      Clock_callback.free callback_ptr;
+      fail "Failed to set clock callback"
+
+  let c_unregister =
+    Ctypes.(
+      Foreign.foreign "orxClock_Unregister"
+        (t @-> Clock_callback.t @-> returning Status.t)
+    )
+
+  let unregister clock callback_ptr =
+    let result = c_unregister clock callback_ptr in
+    Clock_callback.free callback_ptr;
+    result
+
+  let unregister_all clock =
+    Clock_callback_store.release_all (fun ptr -> unregister clock ptr)
+
+  let unregister_all_exn clock =
+    match unregister_all clock with
     | Ok () -> ()
-    | Error `Orx -> fail "Failed to set clock callback"
+    | Error `Orx ->
+      Fmt.invalid_arg "Failed to unregister clock callbacks for %s"
+        (get_name clock)
 
   let get_core () =
     match get "core" with
@@ -879,7 +916,7 @@ module Clock = struct
         @-> float
         @-> int32_t
         @-> ptr void
-        @-> returning Orx_gen.Status.t
+        @-> returning Status.t
         )
     )
 
@@ -894,8 +931,15 @@ module Clock = struct
         raise exn
     in
     let callback_ptr = Clock_callback.of_fun callback_wrapper in
-    Store.retain_permanently callback_ptr;
-    c_add_timer clock callback_ptr delay (Int32.of_int repetition) Ctypes.null
+    match
+      c_add_timer clock callback_ptr delay (Int32.of_int repetition) Ctypes.null
+    with
+    | Ok () ->
+      Clock_callback_store.retain callback_ptr;
+      Ok ()
+    | Error _ as e ->
+      Clock_callback.free callback_ptr;
+      e
 
   let add_timer_exn clock callback delay repetition =
     match add_timer clock callback delay repetition with
@@ -914,27 +958,21 @@ module Clock = struct
         )
     )
 
-  let remove_timer clock callback delay =
-    let callback_wrapper info _ctx =
-      match callback info with
-      | () -> ()
-      | exception exn ->
-        Log.log "Unhandled exception in clock timer callback for clock %s: %a"
-          (get_name clock) Fmt.exn_backtrace
-          (exn, Printexc.get_raw_backtrace ());
-        raise exn
-    in
-    let callback_ptr = Clock_callback.of_fun callback_wrapper in
-    c_remove_timer clock (Some callback_ptr) delay Ctypes.null
+  let remove_timer clock callback_ptr delay =
+    let result = c_remove_timer clock callback_ptr delay Ctypes.null in
+    Option.iter Clock_callback.free callback_ptr;
+    result
 
-  let remove_all_timers clock delay =
-    c_remove_timer clock None delay Ctypes.null
+  let remove_timers clock delay =
+    Clock_callback_store.release_all (fun ptr ->
+        remove_timer clock (Some ptr) delay
+    )
 
-  let remove_all_timers_exn clock delay =
-    match remove_all_timers clock delay with
+  let remove_timers_exn clock delay =
+    match remove_timers clock delay with
     | Ok () -> ()
     | Error `Orx ->
-      Fmt.failwith "Failed to remove all timers with delay %f from clock %s"
+      Fmt.invalid_arg "Failed to remove timers with delay %f from clock %s"
         delay (get_name clock)
 end
 
@@ -947,6 +985,7 @@ module Config = struct
   let bootstrap_function = Ctypes.(void @-> returning Orx_gen.Status.t)
 
   module Bootstrap_function = (val Foreign.dynamic_funptr bootstrap_function)
+  module Bootstrap_function_store = Make_store (Bootstrap_function)
 
   let c_set_bootstrap =
     Ctypes.(
@@ -956,13 +995,24 @@ module Config = struct
 
   let set_bootstrap f =
     let f_ptr = Bootstrap_function.of_fun f in
-    Store.retain_permanently f_ptr;
-    c_set_bootstrap f_ptr
+    match c_set_bootstrap f_ptr with
+    | Ok () ->
+      Bootstrap_function_store.retain f_ptr;
+      Ok ()
+    | Error _ as e ->
+      Bootstrap_function.free f_ptr;
+      e
 
   let set_bootstrap f =
     match set_bootstrap f with
     | Ok () -> ()
     | Error `Orx -> fail "Unable to set config bootstrap function"
+
+  let free_bootstrap () =
+    Bootstrap_function_store.release_all (fun ptr ->
+        Bootstrap_function.free ptr;
+        Ok ()
+    )
 
   let set_list_string (key : string) (values : string list) =
     let length = List.length values in
@@ -1156,14 +1206,19 @@ module Command = struct
       | Guid -> get_guid var
   end
 
-  let unregister_exn name =
-    match unregister name with
-    | Ok () -> ()
-    | Error `Orx -> Fmt.invalid_arg "Unable to unregister command %s" name
-
   let command_handler = Ctypes.(uint32_t @-> Var.t @-> Var.t @-> returning void)
 
   module Command_handler = (val Foreign.dynamic_funptr command_handler)
+
+  let registered_command_handlers : (string, Command_handler.t) Hashtbl.t =
+    Hashtbl.create 16
+
+  let free_registered_handler name =
+    match Hashtbl.find_opt registered_command_handlers name with
+    | None -> ()
+    | Some old_ptr ->
+      Hashtbl.remove registered_command_handlers name;
+      Command_handler.free old_ptr
 
   let c_register =
     Ctypes.(
@@ -1200,16 +1255,37 @@ module Command = struct
       |> Ctypes.CArray.start
     in
     let f_ptr = Command_handler.of_fun f_wrapper in
-    Store.retain_permanently f_ptr;
-    c_register name f_ptr
-      (List.length required_param_defs)
-      (List.length optional_param_defs)
-      c_param_defs return_def
+    let result =
+      c_register name f_ptr
+        (List.length required_param_defs)
+        (List.length optional_param_defs)
+        c_param_defs return_def
+    in
+    match result with
+    | Ok () ->
+      free_registered_handler name;
+      Hashtbl.add registered_command_handlers name f_ptr;
+      Ok ()
+    | Error _ as e ->
+      Command_handler.free f_ptr;
+      e
 
   let register_exn name f param_defs return_def =
     match register name f param_defs return_def with
     | Ok () -> ()
     | Error `Orx -> Fmt.invalid_arg "Unable to register command %s" name
+
+  let unregister name =
+    match unregister name with
+    | Ok _ as o ->
+      free_registered_handler name;
+      o
+    | Error _ as e -> e
+
+  let unregister_exn name =
+    match unregister name with
+    | Ok () -> ()
+    | Error `Orx -> Fmt.invalid_arg "Unable to unregister command %s" name
 
   let evaluate command =
     let return = Var.allocate_raw () in
@@ -1262,22 +1338,25 @@ module Main = struct
   let execute ~init ~run ~exit () =
     (* Start the orx main loop *)
     let empty_argv = Ctypes.from_voidp Ctypes.string Ctypes.null in
-    let init_ptr = Init_function.of_fun init in
-    let run_ptr = Run_function.of_fun run in
-    let exit_ptr = Exit_function.of_fun exit in
-    Store.retain_permanently init_ptr;
-    Store.retain_permanently run_ptr;
-    Store.retain_permanently exit_ptr;
-    execute_c 0 empty_argv init_ptr run_ptr exit_ptr
+    Init_function.with_fun init @@ fun init_ptr ->
+    Run_function.with_fun run @@ fun run_ptr ->
+    Exit_function.with_fun exit @@ fun exit_ptr ->
+    Fun.protect
+      ~finally:(fun () -> Config.free_bootstrap () |> Status.get_ok)
+      (fun () -> execute_c 0 empty_argv init_ptr run_ptr exit_ptr)
 
   let start ?config_dir ?exit ~init ~run name =
-    ( match config_dir with
-    | None -> ()
-    | Some dir ->
-      let bootstrap () = Resource.add_storage Config dir false in
-      Config.set_bootstrap bootstrap
-    );
-    Config.set_basename name;
-    let exit = Option.value exit ~default:(fun () -> ()) in
-    execute ~init ~run ~exit ()
+    let bootstrap () =
+      match config_dir with
+      | None -> Status.ok
+      | Some dir -> Resource.add_storage Config dir false
+    in
+    Config.set_bootstrap bootstrap;
+    Fun.protect
+      ~finally:(fun () -> Config.free_bootstrap () |> Status.get_ok)
+      (fun () ->
+        Config.set_basename name;
+        let exit = Option.value exit ~default:(fun () -> ()) in
+        execute ~init ~run ~exit ()
+        )
 end

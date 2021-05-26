@@ -817,6 +817,10 @@ module Event : sig
       [handler_callback] with [events] from [event_type].
 
       @param events defaults to all events matching [event_type]. *)
+
+  val remove_handlers : (_, _) Event_type.t -> Status.t
+
+  val remove_handlers_exn : (_, _) Event_type.t -> unit
 end
 
 module Module_id : sig
@@ -899,17 +903,19 @@ module Clock : sig
   val register :
     t -> (Info.t -> unit) -> Module_id.t -> Clock_priority.t -> unit
 
+  val unregister_all : t -> Status.t
+
+  val unregister_all_exn : t -> unit
+
   (** {2 Timers} *)
 
   val add_timer : t -> (Info.t -> unit) -> float -> int -> Status.t
 
   val add_timer_exn : t -> (Info.t -> unit) -> float -> int -> unit
 
-  val remove_timer : t -> (Info.t -> unit) -> float -> Status.t
+  val remove_timers : t -> float -> Status.t
 
-  val remove_all_timers : t -> float -> Status.t
-
-  val remove_all_timers_exn : t -> float -> unit
+  val remove_timers_exn : t -> float -> unit
 end
 
 module Camera : sig
@@ -991,8 +997,6 @@ module Config : sig
   val load : string -> Status.t
 
   val load_from_memory : string -> Status.t
-
-  val set_bootstrap : (unit -> Status.t) -> unit
 
   val push_section : string -> unit
 
@@ -1093,6 +1097,8 @@ module Config : sig
   val set_guid : string -> Structure.Guid.t -> unit
 
   val with_section : string -> (unit -> 'a) -> 'a
+
+  val set_bootstrap : (unit -> Status.t) -> unit
 end
 
 module Command : sig
