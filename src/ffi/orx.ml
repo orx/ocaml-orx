@@ -1,21 +1,37 @@
 module Orx_gen = Orx_bindings.Bindings (Generated)
 
 module Make_store (Ptr : Foreign.Funptr) : sig
-  val retain : Ptr.t -> unit
-  val release_all : (Ptr.t -> Orx_gen.Status.t) -> Orx_gen.Status.t
+  type handle
+  val default_handle : handle
+  val make_handle : unit -> handle
+  val retain : handle -> Ptr.t -> unit
+  val release : handle -> (Ptr.t -> Orx_gen.Status.t) -> unit
+  val release_all : (Ptr.t -> Orx_gen.Status.t) -> unit
 end = struct
-  let store : Ptr.t list ref = ref []
-  let retain v = store := v :: !store
-  let rec release_all (release : Ptr.t -> Orx_gen.Status.t) =
-    match !store with
-    | [] -> Ok ()
-    | hd :: tl ->
-      ( match release hd with
-      | Ok () ->
-        store := tl;
-        release_all release
-      | Error _ as e -> e
+  type handle = int
+  let next_handle : handle ref = ref 0
+  let make_handle () =
+    let v = !next_handle in
+    incr next_handle;
+    v
+  let default_handle = make_handle ()
+  let store : (handle, Ptr.t) Hashtbl.t = Hashtbl.create 16
+  let retain handle v = Hashtbl.add store handle v
+  let rec release handle (free : Ptr.t -> Orx_gen.Status.t) =
+    match Hashtbl.find_opt store handle with
+    | None -> ()
+    | Some ptr ->
+      Hashtbl.remove store handle;
+      ( match free ptr with
+      | Error `Orx | Ok () -> release handle free
       )
+  let rec release_all (free : Ptr.t -> Orx_gen.Status.t) =
+    let handles = Hashtbl.to_seq_keys store in
+    match handles () with
+    | Nil -> ()
+    | Cons (handle, _next) ->
+      release handle free;
+      release_all free
 end
 
 let ( !@ ) = Ctypes.( !@ )
@@ -32,7 +48,6 @@ type obj = Orx_gen.Object.t
 
 module Color = Orx_gen.Color
 module Display = Orx_gen.Display
-module Resource = Orx_gen.Resource
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
@@ -66,6 +81,18 @@ module Log = struct
   let terminal fmt = Fmt.kstr Orx_gen.Log.terminal fmt
   let file fmt = Fmt.kstr Orx_gen.Log.file fmt
   let console fmt = Fmt.kstr Orx_gen.Log.console fmt
+end
+
+module Resource = struct
+  include Orx_gen.Resource
+
+  let add_storage group storage first =
+    add_storage (string_of_group group) storage first
+
+  let remove_storage group storage =
+    remove_storage (Option.map string_of_group group) storage
+
+  let sync group = sync (Option.map string_of_group group)
 end
 
 module Texture = struct
@@ -624,10 +651,25 @@ module Object = struct
       |> Option.map Camera.of_void_pointer
       |> Option.join
 
+  let rec get_children_recursive o kind =
+    let children = get_children o kind in
+    Seq.flat_map
+      (fun child -> Seq.cons child (get_children_recursive child kind))
+      children
+
+  let iter_children_recursive f o kind =
+    Seq.iter f (get_children_recursive o kind)
+
+  let iter_recursive f o kind =
+    f o;
+    iter_children_recursive f o kind
+
   let to_guid (o : t) : Structure.Guid.t =
     match to_void_pointer o |> Structure.of_void_pointer with
     | Some s -> Structure.get_guid s
     | None -> assert false
+
+  let get_guid = to_guid
 
   let of_guid (guid : Structure.Guid.t) : t option =
     let ( let* ) = Option.bind in
@@ -751,9 +793,13 @@ module Event = struct
 
   let add_handler :
       type e p.
-      ?events:e list -> (e, p) Event_type.t -> (t -> e -> p -> Status.t) -> unit
-      =
-   fun ?events event_type callback ->
+      ?handle:Event_handler_store.handle ->
+      ?events:e list ->
+      (e, p) Event_type.t ->
+      (t -> e -> p -> Status.t) ->
+      unit =
+   fun ?(handle = Event_handler_store.default_handle) ?events event_type
+       callback ->
     let callback event =
       let f =
         match event_type with
@@ -800,7 +846,7 @@ module Event = struct
         callback_ptr add_flags remove_flags
     in
     match result with
-    | Ok () -> Event_handler_store.retain callback_ptr
+    | Ok () -> Event_handler_store.retain handle callback_ptr
     | Error `Orx ->
       Event_handler.free callback_ptr;
       fail "Failed to set event callback"
@@ -811,20 +857,27 @@ module Event = struct
         (Orx_types.Event_type.t @-> Event_handler.t @-> returning Status.t)
     )
 
-  let remove_handler event_type callback_ptr =
+  let remove_handler_ptr event_type callback_ptr =
     let result =
       c_remove_handler (Event_type.to_c_any event_type) callback_ptr
     in
     Event_handler.free callback_ptr;
     result
 
-  let remove_handlers event_type =
-    Event_handler_store.release_all (fun ptr -> remove_handler event_type ptr)
+  let remove_handler event_type handle =
+    Event_handler_store.release handle (fun ptr ->
+        remove_handler_ptr event_type ptr
+    )
+  let remove_all_handlers event_type =
+    Event_handler_store.release_all (fun ptr ->
+        remove_handler_ptr event_type ptr
+    )
 
-  let remove_handlers_exn event_type =
-    match remove_handlers event_type with
-    | Ok () -> ()
-    | Error `Orx -> invalid_arg "Unable to remove event handlers"
+  module Handle = struct
+    type t = Event_handler_store.handle
+    let default = Event_handler_store.default_handle
+    let make = Event_handler_store.make_handle
+  end
 end
 
 module Clock = struct
@@ -845,6 +898,7 @@ module Clock = struct
 
   module Clock_callback = (val Foreign.dynamic_funptr callback)
   module Clock_callback_store = Make_store (Clock_callback)
+  module Clock_timer_callback_store = Make_store (Clock_callback)
 
   let c_register =
     Ctypes.(
@@ -858,7 +912,12 @@ module Clock = struct
         )
     )
 
-  let register (clock : t) callback module_ priority =
+  let register
+      ?(handle = Clock_callback_store.default_handle)
+      (clock : t)
+      callback
+      module_
+      priority =
     let callback_wrapper info _ctx =
       match callback info with
       | () -> ()
@@ -870,7 +929,7 @@ module Clock = struct
     in
     let callback_ptr = Clock_callback.of_fun callback_wrapper in
     match c_register clock callback_ptr Ctypes.null module_ priority with
-    | Ok () -> Clock_callback_store.retain callback_ptr
+    | Ok () -> Clock_callback_store.retain handle callback_ptr
     | Error `Orx ->
       Clock_callback.free callback_ptr;
       fail "Failed to set clock callback"
@@ -881,25 +940,29 @@ module Clock = struct
         (t @-> Clock_callback.t @-> returning Status.t)
     )
 
-  let unregister clock callback_ptr =
+  let unregister_ptr clock callback_ptr =
     let result = c_unregister clock callback_ptr in
     Clock_callback.free callback_ptr;
     result
 
+  let unregister clock handle =
+    Clock_callback_store.release handle (fun ptr -> unregister_ptr clock ptr)
+
   let unregister_all clock =
-    Clock_callback_store.release_all (fun ptr -> unregister clock ptr)
+    Clock_callback_store.release_all (fun ptr -> unregister_ptr clock ptr)
 
-  let unregister_all_exn clock =
-    match unregister_all clock with
-    | Ok () -> ()
-    | Error `Orx ->
-      Fmt.invalid_arg "Failed to unregister clock callbacks for %s"
-        (get_name clock)
+  module Callback_handle = struct
+    type t = Clock_callback_store.handle
+    let default = Clock_callback_store.default_handle
+    let make = Clock_callback_store.make_handle
+  end
 
-  let get_core () =
-    match get "core" with
+  let get_exn name =
+    match get name with
     | Some clock -> clock
-    | None -> invalid_arg "Unable to get core clock"
+    | None -> Fmt.invalid_arg "Unable to get %s clock" name
+
+  let get_core () = get_exn "core"
 
   let create tick_size =
     match create tick_size with
@@ -907,6 +970,8 @@ module Clock = struct
     | None -> failwith "Unable to allocate clock"
 
   let create_from_config_exn = create_exn create_from_config "clock"
+
+  let all_timers_delay = -1.0
 
   let c_add_timer =
     Ctypes.(
@@ -920,7 +985,12 @@ module Clock = struct
         )
     )
 
-  let add_timer clock callback delay repetition =
+  let add_timer
+      ?(handle = Clock_timer_callback_store.default_handle)
+      clock
+      callback
+      delay
+      repetition =
     let callback_wrapper info _ctx =
       match callback info with
       | () -> ()
@@ -935,14 +1005,14 @@ module Clock = struct
       c_add_timer clock callback_ptr delay (Int32.of_int repetition) Ctypes.null
     with
     | Ok () ->
-      Clock_callback_store.retain callback_ptr;
+      Clock_timer_callback_store.retain handle callback_ptr;
       Ok ()
     | Error _ as e ->
       Clock_callback.free callback_ptr;
       e
 
-  let add_timer_exn clock callback delay repetition =
-    match add_timer clock callback delay repetition with
+  let add_timer ?handle clock callback delay repetition =
+    match add_timer ?handle clock callback delay repetition with
     | Ok () -> ()
     | Error `Orx ->
       Fmt.failwith "Failed to add timer to clock %s" (get_name clock)
@@ -958,22 +1028,27 @@ module Clock = struct
         )
     )
 
-  let remove_timer clock callback_ptr delay =
+  let remove_timer_ptr clock callback_ptr =
+    let delay = all_timers_delay in
     let result = c_remove_timer clock callback_ptr delay Ctypes.null in
     Option.iter Clock_callback.free callback_ptr;
     result
 
-  let remove_timers clock delay =
-    Clock_callback_store.release_all (fun ptr ->
-        remove_timer clock (Some ptr) delay
+  let remove_timer clock handle =
+    Clock_timer_callback_store.release handle (fun ptr ->
+        remove_timer_ptr clock (Some ptr)
     )
 
-  let remove_timers_exn clock delay =
-    match remove_timers clock delay with
-    | Ok () -> ()
-    | Error `Orx ->
-      Fmt.invalid_arg "Failed to remove timers with delay %f from clock %s"
-        delay (get_name clock)
+  let remove_all_timers clock =
+    Clock_timer_callback_store.release_all (fun ptr ->
+        remove_timer_ptr clock (Some ptr)
+    )
+
+  module Timer_handle = struct
+    type t = Clock_timer_callback_store.handle
+    let default = Clock_timer_callback_store.default_handle
+    let make = Clock_timer_callback_store.make_handle
+  end
 end
 
 module Config = struct
@@ -997,7 +1072,8 @@ module Config = struct
     let f_ptr = Bootstrap_function.of_fun f in
     match c_set_bootstrap f_ptr with
     | Ok () ->
-      Bootstrap_function_store.retain f_ptr;
+      Bootstrap_function_store.retain Bootstrap_function_store.default_handle
+        f_ptr;
       Ok ()
     | Error _ as e ->
       Bootstrap_function.free f_ptr;
@@ -1108,29 +1184,59 @@ module Config = struct
 
     let to_string typ = String.lowercase_ascii (to_proper_string typ)
 
+    let getter (type v) (typ : v t) : string -> v =
+      match typ with
+      | String -> get_string
+      | Int -> get_int
+      | Float -> get_float
+      | Bool -> get_bool
+      | Vector -> get_vector
+      | Guid -> get_guid
+
+    let setter (type v) (typ : v t) : string -> v -> unit =
+      match typ with
+      | String -> set_string
+      | Int -> set_int
+      | Float -> set_float
+      | Bool -> set_bool
+      | Vector -> set_vector
+      | Guid -> set_guid
+
     let get (type v) (typ : v t) ~section ~key : v =
-      let getter : string -> v =
-        match typ with
-        | String -> get_string
-        | Int -> get_int
-        | Float -> get_float
-        | Bool -> get_bool
-        | Vector -> get_vector
-        | Guid -> get_guid
-      in
-      get getter ~section ~key
+      get (getter typ) ~section ~key
+
+    let find typ ~section ~key =
+      if has_section section then
+        with_section section (fun () ->
+            if has_value key then
+              Some ((getter typ) key)
+            else
+              None
+        )
+      else
+        None
 
     let set (type v) (typ : v t) (x : v) ~section ~key : unit =
-      let setter : string -> v -> unit =
-        match typ with
-        | String -> set_string
-        | Int -> set_int
-        | Float -> set_float
-        | Bool -> set_bool
-        | Vector -> set_vector
-        | Guid -> set_guid
-      in
-      set setter x ~section ~key
+      set (setter typ) x ~section ~key
+
+    let clear ~section ~key : unit =
+      with_section section (fun () -> clear_value key |> Status.ignore)
+
+    let update (type v) (typ : v t) (f : v option -> v option) ~section ~key :
+        unit =
+      with_section section (fun () ->
+          let set = setter typ in
+          let get = getter typ in
+          let current =
+            if has_value key then
+              Some (get key)
+            else
+              None
+          in
+          match f current with
+          | None -> clear_value key |> Status.ignore
+          | Some updated -> set key updated
+      )
   end
 end
 
@@ -1287,6 +1393,11 @@ module Command = struct
     | Ok () -> ()
     | Error `Orx -> Fmt.invalid_arg "Unable to unregister command %s" name
 
+  let unregister_all () =
+    Hashtbl.iter
+      (fun name _ptr -> unregister_exn name)
+      registered_command_handlers
+
   let evaluate command =
     let return = Var.allocate_raw () in
     let result : Var.t = evaluate command return in
@@ -1342,7 +1453,7 @@ module Main = struct
     Run_function.with_fun run @@ fun run_ptr ->
     Exit_function.with_fun exit @@ fun exit_ptr ->
     Fun.protect
-      ~finally:(fun () -> Config.free_bootstrap () |> Status.get_ok)
+      ~finally:(fun () -> Config.free_bootstrap ())
       (fun () -> execute_c 0 empty_argv init_ptr run_ptr exit_ptr)
 
   let start ?config_dir ?exit ~init ~run name =
@@ -1353,7 +1464,7 @@ module Main = struct
     in
     Config.set_bootstrap bootstrap;
     Fun.protect
-      ~finally:(fun () -> Config.free_bootstrap () |> Status.get_ok)
+      ~finally:(fun () -> Config.free_bootstrap ())
       (fun () ->
         Config.set_basename name;
         let exit = Option.value exit ~default:(fun () -> ()) in

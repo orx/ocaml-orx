@@ -135,12 +135,12 @@ let run () =
   let state = State.get () in
 
   (* Movement vectors *)
-  let left_speed = Orx.Vector.make ~x:(-10.0) ~y:0.0 ~z:0.0 in
-  let right_speed = Orx.Vector.make ~x:10.0 ~y:0.0 ~z:0.0 in
+  let left_speed = Orx.Vector.make ~x:(-0.5) ~y:0.0 ~z:0.0 in
+  let right_speed = Orx.Vector.make ~x:0.5 ~y:0.0 ~z:0.0 in
   let flip_left = Orx.Vector.make ~x:(-2.0) ~y:2.0 ~z:1.0 in
   let flip_right = Orx.Vector.make ~x:2.0 ~y:2.0 ~z:1.0 in
 
-  let jump_speed = Orx.Vector.make ~x:0.0 ~y:(-600.0) ~z:0.0 in
+  let jump_speed = Orx.Vector.make ~x:0.0 ~y:(-10.0) ~z:0.0 in
 
   if Orx.Input.is_active "Quit" then
     (* Return an error to indicate that it's time to quit the engine *)

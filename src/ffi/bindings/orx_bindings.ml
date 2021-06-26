@@ -659,26 +659,41 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   end
 
   module Resource = struct
-    type group = Config
+    type group =
+      | Config
+      | Sound
+      | Texture
+      | Custom of string
 
     let pp : group Fmt.t =
      fun ppf (g : group) ->
       match g with
-      | Config -> Fmt.pf ppf "Config"
+      | Config -> Fmt.string ppf "Config"
+      | Sound -> Fmt.string ppf "Sound"
+      | Texture -> Fmt.string ppf "Texture"
+      | Custom s -> Fmt.string ppf s
 
     let group_of_string s : group =
       match String.lowercase_ascii s with
       | "config" -> Config
-      | _ -> Fmt.invalid_arg "Unsupported ORX resource %s" s
+      | "sound" -> Sound
+      | "texture" -> Texture
+      | _ -> Custom s
 
-    let string_of_group (Config : group) : string = "Config"
-
-    let group =
-      view ~format:pp ~read:group_of_string ~write:string_of_group string
+    let string_of_group (g : group) : string = Fmt.to_to_string pp g
 
     let add_storage =
       c "orxResource_AddStorage"
-        (group @-> string @-> bool @-> returning Status.t)
+        (string @-> string @-> bool @-> returning Status.t)
+
+    let remove_storage =
+      c "orxResource_RemoveStorage"
+        (string_opt @-> string_opt @-> returning Status.t)
+
+    let reload_storage =
+      c "orxResource_ReloadStorage" (void @-> returning Status.t)
+
+    let sync = c "orxResource_Sync" (string_opt @-> returning Status.t)
   end
 
   module Camera = struct

@@ -271,15 +271,19 @@ module Sound : sig
 end
 
 module Resource : sig
-  type group = Config
-
-  val pp : group Fmt.t
+  type group =
+    | Config
+    | Sound
+    | Texture
+    | Custom of string
 
   val group_of_string : string -> group
-
   val string_of_group : group -> string
 
   val add_storage : group -> string -> bool -> Status.t
+  val remove_storage : group option -> string option -> Status.t
+  val reload_storage : unit -> Status.t
+  val sync : group option -> Status.t
 end
 
 module Mouse_button : sig
@@ -415,6 +419,12 @@ module Object : sig
   val get_children : t -> 'a child -> 'a Seq.t
 
   val get_first_child : t -> 'a child -> 'a option
+
+  val get_children_recursive : t -> t child -> t Seq.t
+
+  val iter_children_recursive : (t -> unit) -> t -> t child -> unit
+
+  val iter_recursive : (t -> unit) -> t -> t child -> unit
 
   (** {2 Basic object properties} *)
 
@@ -656,6 +666,8 @@ module Object : sig
 
   val to_guid : t -> Structure.Guid.t
 
+  val get_guid : t -> Structure.Guid.t
+
   val of_guid : Structure.Guid.t -> t option
 
   val of_guid_exn : Structure.Guid.t -> t
@@ -808,7 +820,15 @@ module Event : sig
 
   val get_recipient_object : t -> Object.t option
 
+  module Handle : sig
+    type t
+
+    val default : t
+    val make : unit -> t
+  end
+
   val add_handler :
+    ?handle:Handle.t ->
     ?events:'event list ->
     ('event, 'payload) Event_type.t ->
     (t -> 'event -> 'payload -> Status.t) ->
@@ -818,9 +838,9 @@ module Event : sig
 
       @param events defaults to all events matching [event_type]. *)
 
-  val remove_handlers : (_, _) Event_type.t -> Status.t
+  val remove_handler : (_, _) Event_type.t -> Handle.t -> unit
 
-  val remove_handlers_exn : (_, _) Event_type.t -> unit
+  val remove_all_handlers : (_, _) Event_type.t -> unit
 end
 
 module Module_id : sig
@@ -879,6 +899,8 @@ module Clock : sig
 
   val get : string -> t option
 
+  val get_exn : string -> t
+
   val get_core : unit -> t
   (** [get_core ()] returns the core engine clock. *)
 
@@ -900,22 +922,52 @@ module Clock : sig
 
   val is_paused : t -> bool
 
+  (** {2 Callbacks}
+
+      Clock callbacks fire on each tick of a clock. *)
+
+  module Callback_handle : sig
+    (** {1 Callback handles}
+
+        Callbacks are associated with handles. These handles may be used to
+        unregister callbacks associated with them. *)
+
+    type t
+
+    val default : t
+
+    val make : unit -> t
+  end
+
   val register :
-    t -> (Info.t -> unit) -> Module_id.t -> Clock_priority.t -> unit
+    ?handle:Callback_handle.t ->
+    t ->
+    (Info.t -> unit) ->
+    Module_id.t ->
+    Clock_priority.t ->
+    unit
 
-  val unregister_all : t -> Status.t
+  val unregister : t -> Callback_handle.t -> unit
 
-  val unregister_all_exn : t -> unit
+  val unregister_all : t -> unit
 
-  (** {2 Timers} *)
+  (** {2 Timers}
 
-  val add_timer : t -> (Info.t -> unit) -> float -> int -> Status.t
+      Timers fire one or more times, after a specified delay. *)
 
-  val add_timer_exn : t -> (Info.t -> unit) -> float -> int -> unit
+  module Timer_handle : sig
+    type t
 
-  val remove_timers : t -> float -> Status.t
+    val default : t
+    val make : unit -> t
+  end
 
-  val remove_timers_exn : t -> float -> unit
+  val add_timer :
+    ?handle:Timer_handle.t -> t -> (Info.t -> unit) -> float -> int -> unit
+
+  val remove_timer : t -> Timer_handle.t -> unit
+
+  val remove_all_timers : t -> unit
 end
 
 module Camera : sig
@@ -990,6 +1042,13 @@ module Config : sig
     val set : 'a t -> 'a -> section:string -> key:string -> unit
 
     val get : 'a t -> section:string -> key:string -> 'a
+
+    val find : 'a t -> section:string -> key:string -> 'a option
+
+    val clear : section:string -> key:string -> unit
+
+    val update :
+      'a t -> ('a option -> 'a option) -> section:string -> key:string -> unit
   end
 
   val set_basename : string -> unit
@@ -1137,6 +1196,10 @@ module Command : sig
   val unregister : string -> Status.t
 
   val unregister_exn : string -> unit
+
+  val unregister_all : unit -> unit
+  (** [unregister_all ()] will unregister all custom orx commands registered
+      from OCaml. *)
 
   val is_registered : string -> bool
 
