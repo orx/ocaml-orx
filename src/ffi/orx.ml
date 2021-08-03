@@ -571,7 +571,7 @@ module Object = struct
           (fun p ->
             let ptr_ptr_void = Ctypes.from_voidp (Ctypes.ptr Ctypes.void) p in
             of_void_pointer !@ptr_ptr_void |> Option.get
-            )
+          )
           ptrs
       in
       delete_neighbor_list bank;
@@ -684,13 +684,14 @@ module Object = struct
     add o name |> Status.raise "Unable to add FX %s" name
   let add_fx_exn = add_fx_exn_wrapper add_fx
   let add_unique_fx_exn = add_fx_exn_wrapper add_unique_fx
-  let add_delayed_fx_exn o name delay =
-    add_fx_exn_wrapper (fun o name -> add_delayed_fx o name delay) o name
   let remove_fx_exn o name =
     remove_fx o name |> Status.raise "Unable to remove FX %s" name
   let remove_all_fxs_exn o =
     remove_all_fxs o
     |> Status.raise "Unable to remove all FXs from %s" (get_name o)
+  let remove_all_fxs_recursive_exn o =
+    remove_all_fxs_recursive o
+    |> Status.raise "Unable to recursively remove all FXs from %s" (get_name o)
 
   let add_shader_exn o name =
     add_shader o name |> Status.raise "Unable to add shader %s" name
@@ -1469,5 +1470,5 @@ module Main = struct
         Config.set_basename name;
         let exit = Option.value exit ~default:(fun () -> ()) in
         execute ~init ~run ~exit ()
-        )
+      )
 end

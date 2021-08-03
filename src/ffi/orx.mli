@@ -192,6 +192,133 @@ module Obox : sig
   val is_inside_2d : t -> Vector.t -> bool
 end
 
+module Module_id : sig
+  type t =
+    | Clock
+    | Main
+end
+
+module Clock_modifier : sig
+  type t =
+    | Fixed
+    | Multiply
+    | Maxed
+    | Average
+end
+
+module Clock_priority : sig
+  type t =
+    | Lowest
+    | Lower
+    | Low
+    | Normal
+    | High
+    | Higher
+    | Highest
+end
+
+module Clock : sig
+  (** {1 Engine clocks} *)
+
+  type t
+
+  module Info : sig
+    type clock = t
+
+    type t
+
+    val get_tick_size : t -> float
+
+    val get_dt : t -> float
+
+    val get_time : t -> float
+
+    val get_clock : t -> clock option
+  end
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val create_from_config : string -> t option
+
+  val create_from_config_exn : string -> t
+
+  val create : float -> t
+
+  val get : string -> t option
+
+  val get_exn : string -> t
+
+  val get_core : unit -> t
+  (** [get_core ()] returns the core engine clock. *)
+
+  val get_name : t -> string
+
+  val get_info : t -> Info.t
+
+  val get_modifier : t -> Clock_modifier.t -> float
+
+  val set_modifier : t -> Clock_modifier.t -> float -> unit
+
+  val set_tick_size : t -> float -> unit
+
+  val restart : t -> Status.t
+
+  val pause : t -> unit
+
+  val unpause : t -> unit
+
+  val is_paused : t -> bool
+
+  (** {2 Callbacks}
+
+      Clock callbacks fire on each tick of a clock. *)
+
+  module Callback_handle : sig
+    (** {1 Callback handles}
+
+        Callbacks are associated with handles. These handles may be used to
+        unregister callbacks associated with them. *)
+
+    type t
+
+    val default : t
+
+    val make : unit -> t
+  end
+
+  val register :
+    ?handle:Callback_handle.t ->
+    t ->
+    (Info.t -> unit) ->
+    Module_id.t ->
+    Clock_priority.t ->
+    unit
+
+  val unregister : t -> Callback_handle.t -> unit
+
+  val unregister_all : t -> unit
+
+  (** {2 Timers}
+
+      Timers fire one or more times, after a specified delay. *)
+
+  module Timer_handle : sig
+    type t
+
+    val default : t
+    val make : unit -> t
+  end
+
+  val add_timer :
+    ?handle:Timer_handle.t -> t -> (Info.t -> unit) -> float -> int -> unit
+
+  val remove_timer : t -> Timer_handle.t -> unit
+
+  val remove_all_timers : t -> unit
+end
+
 module Texture : sig
   type t
 
@@ -432,6 +559,12 @@ module Object : sig
 
   val get_bounding_box : t -> Obox.t
 
+  (** {2 Clock association} *)
+
+  val set_clock : t -> Clock.t option -> Status.t
+
+  val set_clock_recursive : t -> Clock.t option -> unit
+
   (** {2 FX} *)
 
   val add_fx : t -> string -> Status.t
@@ -442,15 +575,9 @@ module Object : sig
 
   val add_unique_fx_exn : t -> string -> unit
 
-  val add_delayed_fx : t -> string -> float -> Status.t
+  val add_fx_recursive : t -> string -> float -> unit
 
-  val add_delayed_fx_exn : t -> string -> float -> unit
-
-  val add_fx_recursive : t -> string -> unit
-
-  val add_unique_fx_recursive : t -> string -> unit
-
-  val add_delayed_fx_recursive : t -> string -> float -> bool -> unit
+  val add_unique_fx_recursive : t -> string -> float -> unit
 
   val remove_fx : t -> string -> Status.t
 
@@ -461,6 +588,10 @@ module Object : sig
   val remove_all_fxs : t -> Status.t
 
   val remove_all_fxs_exn : t -> unit
+
+  val remove_all_fxs_recursive : t -> Status.t
+
+  val remove_all_fxs_recursive_exn : t -> unit
 
   (*** {2 Shaders} *)
 
@@ -843,133 +974,6 @@ module Event : sig
   val remove_all_handlers : (_, _) Event_type.t -> unit
 end
 
-module Module_id : sig
-  type t =
-    | Clock
-    | Main
-end
-
-module Clock_modifier : sig
-  type t =
-    | Fixed
-    | Multiply
-    | Maxed
-    | Average
-end
-
-module Clock_priority : sig
-  type t =
-    | Lowest
-    | Lower
-    | Low
-    | Normal
-    | High
-    | Higher
-    | Highest
-end
-
-module Clock : sig
-  (** {1 Engine clocks} *)
-
-  type t
-
-  module Info : sig
-    type clock = t
-
-    type t
-
-    val get_tick_size : t -> float
-
-    val get_dt : t -> float
-
-    val get_time : t -> float
-
-    val get_clock : t -> clock option
-  end
-
-  val compare : t -> t -> int
-
-  val equal : t -> t -> bool
-
-  val create_from_config : string -> t option
-
-  val create_from_config_exn : string -> t
-
-  val create : float -> t
-
-  val get : string -> t option
-
-  val get_exn : string -> t
-
-  val get_core : unit -> t
-  (** [get_core ()] returns the core engine clock. *)
-
-  val get_name : t -> string
-
-  val get_info : t -> Info.t
-
-  val get_modifier : t -> Clock_modifier.t -> float
-
-  val set_modifier : t -> Clock_modifier.t -> float -> unit
-
-  val set_tick_size : t -> float -> unit
-
-  val restart : t -> Status.t
-
-  val pause : t -> unit
-
-  val unpause : t -> unit
-
-  val is_paused : t -> bool
-
-  (** {2 Callbacks}
-
-      Clock callbacks fire on each tick of a clock. *)
-
-  module Callback_handle : sig
-    (** {1 Callback handles}
-
-        Callbacks are associated with handles. These handles may be used to
-        unregister callbacks associated with them. *)
-
-    type t
-
-    val default : t
-
-    val make : unit -> t
-  end
-
-  val register :
-    ?handle:Callback_handle.t ->
-    t ->
-    (Info.t -> unit) ->
-    Module_id.t ->
-    Clock_priority.t ->
-    unit
-
-  val unregister : t -> Callback_handle.t -> unit
-
-  val unregister_all : t -> unit
-
-  (** {2 Timers}
-
-      Timers fire one or more times, after a specified delay. *)
-
-  module Timer_handle : sig
-    type t
-
-    val default : t
-    val make : unit -> t
-  end
-
-  val add_timer :
-    ?handle:Timer_handle.t -> t -> (Info.t -> unit) -> float -> int -> unit
-
-  val remove_timer : t -> Timer_handle.t -> unit
-
-  val remove_all_timers : t -> unit
-end
-
 module Camera : sig
   type t = camera
 
@@ -1239,14 +1243,17 @@ module Main : sig
       {!Config.set_basename} with [name] to define the root configuration file
       for a game.
 
-      @param config_dir specifies the directory holding engine configuration
-      files. The current working directory will be used if this is not provided.
-      @param exit specifies a function to be run when the engine loop exits. It
-      can be used to clean up game data which is not managed by or within the
-      game engine.
-      @param init specifies a function to run after the engine has initialized
-      and before the game loop begins.
+      @param config_dir
+        specifies the directory holding engine configuration files. The current
+        working directory will be used if this is not provided.
+      @param exit
+        specifies a function to be run when the engine loop exits. It can be
+        used to clean up game data which is not managed by or within the game
+        engine.
+      @param init
+        specifies a function to run after the engine has initialized and before
+        the game loop begins.
       @param run specifies a function that will be run once per frame.
-      @param name species the name of the root configuration file without an
-      extension. *)
+      @param name
+        species the name of the root configuration file without an extension. *)
 end

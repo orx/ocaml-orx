@@ -79,7 +79,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
           match result with
           | Ok v -> v
           | Error `Orx -> invalid_arg error_message
-          )
+        )
         fmt
   end
 
@@ -813,6 +813,13 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let log_parents = c "orxObject_LogParents" (t @-> returning Status.t)
 
+    (* Clocks *)
+    let set_clock =
+      c "orxObject_SetClock" (t @-> Clock.t_opt @-> returning Status.t)
+
+    let set_clock_recursive =
+      c "orxObject_SetClockRecursive" (t @-> Clock.t_opt @-> returning void)
+
     (* Bounding box *)
     let get_bounding_box =
       c "orxObject_GetBoundingBox" (t @-> Obox.t @-> returning Obox.t_opt)
@@ -823,26 +830,12 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let add_unique_fx =
       c "orxObject_AddUniqueFX" (t @-> string @-> returning Status.t)
 
-    let add_delayed_fx =
-      c "orxObject_AddDelayedFX" (t @-> string @-> float @-> returning Status.t)
-
-    let add_unique_delayed_fx =
-      c "orxObject_AddUniqueDelayedFX"
-        (t @-> string @-> float @-> returning Status.t)
-
     let add_fx_recursive =
-      c "orxObject_AddFXRecursive" (t @-> string @-> returning void)
+      c "orxObject_AddFXRecursive" (t @-> string @-> float @-> returning void)
 
     let add_unique_fx_recursive =
-      c "orxObject_AddUniqueFXRecursive" (t @-> string @-> returning void)
-
-    let add_delayed_fx_recursive =
-      c "orxObject_AddDelayedFXRecursive"
-        (t @-> string @-> float @-> bool @-> returning void)
-
-    let add_unique_delayed_fx_recursive =
-      c "orxObject_AddUniqueDelayedFXRecursive"
-        (t @-> string @-> float @-> bool @-> returning void)
+      c "orxObject_AddUniqueFXRecursive"
+        (t @-> string @-> float @-> returning void)
 
     let remove_fx = c "orxObject_RemoveFX" (t @-> string @-> returning Status.t)
 
@@ -850,6 +843,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       c "orxObject_RemoveFXRecursive" (t @-> string @-> returning void)
 
     let remove_all_fxs = c "orxObject_RemoveAllFXs" (t @-> returning Status.t)
+
+    let remove_all_fxs_recursive =
+      c "orxObject_RemoveAllFXsRecursive" (t @-> returning Status.t)
 
     (* Shaders *)
     let add_shader =
