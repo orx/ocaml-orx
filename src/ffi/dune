@@ -23,7 +23,7 @@
   (:include ../orx-ocaml-link-flags.sexp))
  (foreign_stubs
   (language c)
-  (names orx_stubs)
+  (names orx_stubs orx_manual_stubs)
   (flags
    (:include ../orx-c-include-flags.sexp)))
  (c_library_flags

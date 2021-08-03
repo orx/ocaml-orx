@@ -1417,10 +1417,7 @@ module Command = struct
 end
 
 module Orx_thread = struct
-  let set_ocaml_callbacks =
-    Ctypes.(
-      Foreign.foreign "ml_orx_thread_set_callbacks" (void @-> returning void)
-    )
+  external set_ocaml_callbacks : unit -> unit = "ml_orx_thread_set_callbacks"
 end
 
 module Main = struct
