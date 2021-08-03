@@ -105,7 +105,6 @@ let () =
       "stubgen [-ml|-c]"
   );
 
-  (* OCaml/C concurrency model to use in the generated stubs *)
   match (!generate_ml, !generate_c) with
   | (false, false) | (true, true) ->
     failwith "Exactly one of -ml, -c must be specified"
