@@ -22,16 +22,18 @@ end = struct
     | None -> ()
     | Some ptr ->
       Hashtbl.remove store handle;
-      ( match free ptr with
-      | Error `Orx | Ok () -> release handle free
+      free ptr |> Orx_gen.Status.ignore;
+      Ptr.free ptr;
+      release handle free
+  let release_all (free : Ptr.t -> Orx_gen.Status.t) =
+    let ptrs = Hashtbl.to_seq_values store in
+    Seq.iter
+      (fun ptr ->
+        free ptr |> Orx_gen.Status.ignore;
+        Ptr.free ptr
       )
-  let rec release_all (free : Ptr.t -> Orx_gen.Status.t) =
-    let handles = Hashtbl.to_seq_keys store in
-    match handles () with
-    | Nil -> ()
-    | Cons (handle, _next) ->
-      release handle free;
-      release_all free
+      ptrs;
+    Hashtbl.reset store
 end
 
 let ( !@ ) = Ctypes.( !@ )
@@ -58,7 +60,7 @@ module Clock_priority = Orx_types.Clock_priority
 module Clock_info = Orx_types.Clock_info
 module Module_id = Orx_types.Module_id
 module Shader_param_type = Orx_gen.Shader_param_type
-module Config_event = Orx_types.Config_event
+module Config_event = Orx_gen.Config_event
 module Fx_event = Orx_gen.Fx_event
 module Input_event = Orx_gen.Input_event
 module Object_event = Orx_gen.Object_event
@@ -305,6 +307,9 @@ end
 
 module Viewport = struct
   include Orx_gen.Viewport
+
+  let of_structure (s : Structure.t) : t option =
+    of_void_pointer (Structure.to_void_pointer s)
 
   let create_from_config_exn = create_exn create_from_config "viewport"
 
@@ -604,6 +609,19 @@ module Object = struct
     let group_id = group_id group in
     get_seq (fun o -> get_next o group_id)
 
+  let of_structure (s : Structure.t) : t option =
+    of_void_pointer (Structure.to_void_pointer s)
+
+  let get_owner (o : t) : Parent.t option =
+    match get_owner o with
+    | None -> None
+    | Some s -> Parent.of_void_pointer (Structure.to_void_pointer s)
+
+  let get_parent (o : t) : Parent.t option =
+    match get_parent o with
+    | None -> None
+    | Some s -> Parent.of_void_pointer (Structure.to_void_pointer s)
+
   type _ child =
     | Child_object : t child
     | Owned_object : t child
@@ -773,8 +791,14 @@ module Event = struct
   let get_sender_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.sender)
 
+  let get_sender_structure (event : t) : Structure.t option =
+    Structure.of_void_pointer (Ctypes.getf !@event Orx_types.Event.sender)
+
   let get_recipient_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.recipient)
+
+  let get_recipient_structure (event : t) : Structure.t option =
+    Structure.of_void_pointer (Ctypes.getf !@event Orx_types.Event.recipient)
 
   let event_handler = Ctypes.(t @-> returning Orx_gen.Status.t)
 
@@ -859,11 +883,7 @@ module Event = struct
     )
 
   let remove_handler_ptr event_type callback_ptr =
-    let result =
-      c_remove_handler (Event_type.to_c_any event_type) callback_ptr
-    in
-    Event_handler.free callback_ptr;
-    result
+    c_remove_handler (Event_type.to_c_any event_type) callback_ptr
 
   let remove_handler event_type handle =
     Event_handler_store.release handle (fun ptr ->
@@ -935,16 +955,11 @@ module Clock = struct
       Clock_callback.free callback_ptr;
       fail "Failed to set clock callback"
 
-  let c_unregister =
+  let unregister_ptr =
     Ctypes.(
       Foreign.foreign "orxClock_Unregister"
         (t @-> Clock_callback.t @-> returning Status.t)
     )
-
-  let unregister_ptr clock callback_ptr =
-    let result = c_unregister clock callback_ptr in
-    Clock_callback.free callback_ptr;
-    result
 
   let unregister clock handle =
     Clock_callback_store.release handle (fun ptr -> unregister_ptr clock ptr)
@@ -1031,9 +1046,7 @@ module Clock = struct
 
   let remove_timer_ptr clock callback_ptr =
     let delay = all_timers_delay in
-    let result = c_remove_timer clock callback_ptr delay Ctypes.null in
-    Option.iter Clock_callback.free callback_ptr;
-    result
+    c_remove_timer clock callback_ptr delay Ctypes.null
 
   let remove_timer clock handle =
     Clock_timer_callback_store.release handle (fun ptr ->
@@ -1086,10 +1099,7 @@ module Config = struct
     | Error `Orx -> fail "Unable to set config bootstrap function"
 
   let free_bootstrap () =
-    Bootstrap_function_store.release_all (fun ptr ->
-        Bootstrap_function.free ptr;
-        Ok ()
-    )
+    Bootstrap_function_store.release_all (fun _ptr -> Ok ())
 
   let set_list_string (key : string) (values : string list) =
     let length = List.length values in

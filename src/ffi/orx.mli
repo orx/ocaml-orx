@@ -532,11 +532,11 @@ module Object : sig
 
   val set_owner : t -> Parent.t option -> unit
 
-  val get_owner : t -> Structure.t option
+  val get_owner : t -> Parent.t option
 
   val set_parent : t -> Parent.t option -> unit
 
-  val get_parent : t -> Structure.t option
+  val get_parent : t -> Parent.t option
 
   type _ child =
     | Child_object : t child
@@ -802,6 +802,10 @@ module Object : sig
   val of_guid : Structure.Guid.t -> t option
 
   val of_guid_exn : Structure.Guid.t -> t
+
+  (** {2 Structure conversion} *)
+
+  val of_structure : Structure.t -> t option
 end
 
 module Shader_param_type : sig
@@ -836,6 +840,8 @@ module Config_event : sig
   type t =
     | Reload_start
     | Reload_stop
+
+  val compare : t -> t -> int
 end
 
 module Fx_event : sig
@@ -845,6 +851,8 @@ module Fx_event : sig
     | Add
     | Remove
     | Loop
+
+  val compare : t -> t -> int
 
   type payload
 
@@ -856,6 +864,8 @@ module Input_event : sig
     | On
     | Off
     | Select_set
+
+  val compare : t -> t -> int
 
   type payload
 
@@ -874,6 +884,8 @@ module Object_event : sig
     | Pause
     | Unpause
 
+  val compare : t -> t -> int
+
   type payload
 end
 
@@ -881,6 +893,8 @@ module Physics_event : sig
   type t =
     | Contact_add
     | Contact_remove
+
+  val compare : t -> t -> int
 
   type payload
 
@@ -892,6 +906,8 @@ end
 
 module Shader_event : sig
   type t = Set_param
+
+  val compare : t -> t -> int
 
   type payload
 
@@ -911,13 +927,23 @@ module Sound_event : sig
     | Add
     | Remove
 
+  val compare : t -> t -> int
+
   type payload
 
   val get_sound : payload -> Sound.t
 end
 
 module Time_line_event : sig
-  type t
+  type t =
+    | Track_start
+    | Track_stop
+    | Track_add
+    | Track_remove
+    | Loop
+    | Trigger
+
+  val compare : t -> t -> int
 
   type payload
 
@@ -950,6 +976,10 @@ module Event : sig
   val get_sender_object : t -> Object.t option
 
   val get_recipient_object : t -> Object.t option
+
+  val get_sender_structure : t -> Structure.t option
+
+  val get_recipient_structure : t -> Structure.t option
 
   module Handle : sig
     type t
@@ -1022,6 +1052,8 @@ module Viewport : sig
   val get : string -> t option
 
   val get_exn : string -> t
+
+  val of_structure : Structure.t -> t option
 end
 
 module Render : sig

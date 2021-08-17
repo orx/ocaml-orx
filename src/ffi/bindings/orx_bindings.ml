@@ -1117,6 +1117,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let t_opt = ptr_opt T.Viewport.t
 
+    let of_void_pointer = c "orxVIEWPORT" (ptr void @-> returning t_opt)
+
     let create_from_config =
       c "orxViewport_CreateFromConfig" (string @-> returning t_opt)
 
@@ -1166,9 +1168,17 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (T.Input_type.t @-> int @-> T.Input_mode.t @-> returning string)
   end
 
+  module Config_event = struct
+    include T.Config_event
+
+    let compare (a : t) (b : t) = compare a b
+  end
+
   module Fx_event = struct
     include T.Fx_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
 
     let get_name (payload : payload) : string =
       Ctypes.getf !@payload Payload.name
@@ -1177,6 +1187,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module Input_event = struct
     include T.Input_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
 
     let get_set_name (payload : payload) : string =
       Ctypes.getf !@payload T.Input_event.Payload.set_name
@@ -1188,11 +1200,15 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module Object_event = struct
     include T.Object_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
   end
 
   module Physics_event = struct
     include T.Physics_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
 
     let get_position (payload : payload) : Vector.t =
       !@payload @. T.Physics_event.Payload.position
@@ -1212,6 +1228,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     type payload = Payload.t Ctypes.structure Ctypes.ptr
 
     let payload = ptr T.Shader_event.Payload.t
+
+    let compare (a : t) (b : t) = compare a b
 
     let get_shader (payload : payload) : Shader.t =
       Ctypes.getf !@payload T.Shader_event.Payload.shader
@@ -1240,6 +1258,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     include T.Sound_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
 
+    let compare (a : t) (b : t) = compare a b
+
     let get_sound (payload : payload) : Sound.t =
       Ctypes.getf !@payload T.Sound_event.Payload.sound
   end
@@ -1247,6 +1267,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   module Time_line_event = struct
     include T.Time_line_event
     type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
 
     let get_time_line (payload : payload) : Time_line.t =
       Ctypes.getf !@payload T.Time_line_event.Payload.time_line
