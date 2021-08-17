@@ -34,7 +34,7 @@ The [beginner's guide][guide] project has been ported to OCaml in
 
 Some of the [tutorials][tutorials] have been ported [as well](examples/tutorial/).
 
-You run run [run.sh](run.sh) to compile and execute the beginner's guide port
+You run [run.sh](run.sh) to compile and execute the beginner's guide port
 (only tested on Linux so far).
 
 ## About the bindings
