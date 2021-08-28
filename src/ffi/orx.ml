@@ -1040,7 +1040,7 @@ module Clock = struct
         @-> Clock_callback.t_opt
         @-> float
         @-> ptr void
-        @-> returning Orx_gen.Status.t
+        @-> returning Status.t
         )
     )
 
