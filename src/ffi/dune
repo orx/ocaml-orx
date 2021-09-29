@@ -1,6 +1,6 @@
 (rule
  (targets generated.ml)
- (deps stubgen/orx_stubgen.exe)
+ (deps stubgen/orx_stubgen.run.exe)
  (action
   (with-stdout-to
    %{targets}
@@ -8,7 +8,7 @@
 
 (rule
  (targets orx_stubs.c)
- (deps stubgen/orx_stubgen.exe)
+ (deps stubgen/orx_stubgen.run.exe)
  (action
   (with-stdout-to
    %{targets}
@@ -25,6 +25,8 @@
   (language c)
   (names orx_stubs orx_manual_stubs)
   (flags
+   :standard
    (:include ../orx-c-include-flags.sexp)))
  (c_library_flags
+  :standard
   (:include ../orx-c-link-flags.sexp)))

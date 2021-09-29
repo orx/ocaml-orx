@@ -1,3 +1,26 @@
 (executable
  (name orx_stubgen)
  (libraries ctypes.stubs orx_bindings))
+
+(rule
+ (enabled_if
+  (<> %{ocaml-config:system} macosx))
+ (deps orx_stubgen.exe)
+ (targets orx_stubgen.run.exe)
+ (action
+  (copy %{deps} %{targets})))
+
+(rule
+ (enabled_if
+  (= %{ocaml-config:system} macosx))
+ (deps orx_stubgen.exe)
+ (targets orx_stubgen.run.exe)
+ (action
+  (progn
+   (copy %{deps} %{targets})
+   (run
+    install_name_tool
+    -change
+    @executable_path/liborxd.dylib
+    %{read-lines:../../orx-c-library-location.txt}
+    %{targets}))))

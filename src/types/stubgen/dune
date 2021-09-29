@@ -11,10 +11,46 @@
    (run %{deps}))))
 
 (rule
+ (enabled_if
+  (<> %{ocaml-config:system} macosx))
  (targets orx_ml_types_stubgen.exe)
  (deps
   (:c ./orx_ml_types_stubgen.c))
  (action
-  (run %{cc} %{c} %{read-lines:../../orx-c-include-flags.txt}
-    %{read-lines:../../orx-c-link-flags.txt} -I %{ocaml_where}/../ctypes -I
-    %{ocaml_where} -o %{targets})))
+  (run
+   %{cc}
+   %{c}
+   %{read-lines:../../orx-c-include-flags.txt}
+   %{read-lines:../../orx-c-link-flags.txt}
+   -I
+   %{ocaml_where}/../ctypes
+   -I
+   %{ocaml_where}
+   -o
+   %{targets})))
+
+(rule
+ (enabled_if
+  (= %{ocaml-config:system} macosx))
+ (targets orx_ml_types_stubgen.exe)
+ (deps
+  (:c ./orx_ml_types_stubgen.c))
+ (action
+  (progn
+   (run
+    %{cc}
+    %{c}
+    %{read-lines:../../orx-c-include-flags.txt}
+    %{read-lines:../../orx-c-link-flags.txt}
+    -I
+    %{ocaml_where}/../ctypes
+    -I
+    %{ocaml_where}
+    -o
+    %{targets})
+   (run
+    install_name_tool
+    -change
+    @executable_path/liborxd.dylib
+    %{read-lines:../../orx-c-library-location.txt}
+    %{targets}))))

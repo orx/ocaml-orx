@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 2.9)
 
 (name orx)
 
@@ -20,8 +20,8 @@
   (ctypes (>= 0.18.0))
   ctypes-foreign
   (dune
-   (>= 2.8.2))
+   (>= 2.9.1))
   dune-configurator
   fmt
   (ocaml
-   (>= 4.08.0))))
+   (>= 4.12.0))))

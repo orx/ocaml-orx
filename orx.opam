@@ -9,13 +9,14 @@ bug-reports: "https://github.com/orx/ocaml-orx/issues"
 depends: [
   "ctypes" {>= "0.18.0"}
   "ctypes-foreign"
-  "dune" {>= "2.8.2"}
+  "dune" {>= "2.9" & >= "2.9.1"}
   "dune-configurator"
   "fmt"
-  "ocaml" {>= "4.08.0"}
+  "ocaml" {>= "4.12.0"}
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
@@ -23,9 +24,11 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/orx/ocaml-orx.git"

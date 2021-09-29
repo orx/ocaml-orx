@@ -3,7 +3,13 @@
  (libraries dune.configurator))
 
 (rule
- (targets orx-c-include-flags.txt orx-c-link-flags.txt
-   orx-c-include-flags.sexp orx-c-link-flags.sexp orx-ocaml-link-flags.sexp)
+ (targets
+  orx-c-include-flags.txt
+  orx-c-link-flags.txt
+  orx-c-library.txt
+  orx-c-library-location.txt
+  orx-c-include-flags.sexp
+  orx-c-link-flags.sexp
+  orx-ocaml-link-flags.sexp)
  (action
   (run ./discover.exe)))

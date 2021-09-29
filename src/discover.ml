@@ -52,6 +52,16 @@ let () =
       let orx_dir = orx_env () in
       let platform = Platform.detect c in
       let orx_c_link_dir = orx_dir /+ "lib" /+ "dynamic" in
+      let orx_c_library =
+        let extension =
+          match platform with
+          | Linux -> "so"
+          | Macos -> "dylib"
+          | Windows -> "dll"
+        in
+        "liborxd." ^ extension
+      in
+      let orx_c_library_location = orx_c_link_dir /+ orx_c_library in
       let orx_c_link_libs =
         match platform with
         | Linux -> [ "-lorxd"; "-ldl"; "-lm"; "-lrt" ]
@@ -68,6 +78,9 @@ let () =
       in
       C.Flags.write_lines "orx-c-include-flags.txt" [ orx_c_include_dir ];
       C.Flags.write_lines "orx-c-link-flags.txt" orx_c_link_flags;
+      C.Flags.write_lines "orx-c-library.txt" [ orx_c_library ];
+      C.Flags.write_lines "orx-c-library-location.txt"
+        [ orx_c_library_location ];
       C.Flags.write_sexp "orx-c-include-flags.sexp" [ orx_c_include_dir ];
       C.Flags.write_sexp "orx-c-link-flags.sexp" orx_c_link_flags;
       C.Flags.write_sexp "orx-ocaml-link-flags.sexp"
