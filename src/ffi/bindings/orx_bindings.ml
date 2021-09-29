@@ -170,8 +170,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
       let t = uint64_t
 
-      let (compare, equal, pp, to_string) =
-        Unsigned.UInt64.(compare, equal, pp, to_string)
+      let (compare, equal, pp, to_string, of_string) =
+        Unsigned.UInt64.(compare, equal, pp, to_string, of_string)
     end
 
     let t = ptr T.Structure.t

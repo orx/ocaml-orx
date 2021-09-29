@@ -71,6 +71,7 @@ module Structure : sig
     val equal : t -> t -> bool
     val pp : Format.formatter -> t -> unit
     val to_string : t -> string
+    val of_string : string -> t
   end
 end
 
