@@ -8,5 +8,9 @@ node_modules/
 _build/
 _opam/
 
-# Potential leftovers from testing
+# Potential leftovers from testing and build
 *.log
+*.exe
+*.so
+*.dll
+*.dylib
