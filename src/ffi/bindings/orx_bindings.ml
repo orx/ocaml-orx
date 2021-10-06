@@ -1153,6 +1153,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let has_been_deactivated =
       c "orxInput_HasBeenDeactivated" (string @-> returning bool)
 
+    let get_value = c "orxInput_GetValue" (string @-> returning float)
+
     let get_binding =
       c "orxInput_GetBinding"
         (string

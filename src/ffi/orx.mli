@@ -457,6 +457,8 @@ module Input : sig
 
   val has_been_deactivated : string -> bool
 
+  val get_value : string -> float
+
   val get_binding :
     string -> int -> (Input_type.t * int * Input_mode.t) Status.result
 
