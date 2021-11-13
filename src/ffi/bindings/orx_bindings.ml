@@ -1448,10 +1448,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
   module Locale = struct
     let select_language =
-      c "orxLocale_SelectLanguage" (string @-> returning Status.t)
+      c "orxLocale_SelectLanguage" (string @-> string @-> returning Status.t)
 
     let get_current_language =
-      c "orxLocale_GetCurrentLanguage" (void @-> returning string)
+      c "orxLocale_GetCurrentLanguage" (string @-> returning string)
 
     let has_language = c "orxLocale_HasLanguage" (string @-> returning bool)
 
@@ -1460,16 +1460,19 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_language = c "orxLocale_GetLanguage" (uint32_t @-> returning string)
 
-    let has_string = c "orxLocale_HasString" (string @-> returning bool)
+    let has_string =
+      c "orxLocale_HasString" (string @-> string @-> returning bool)
 
-    let get_string = c "orxLocale_GetString" (string @-> returning string)
+    let get_string =
+      c "orxLocale_GetString" (string @-> string @-> returning string)
 
     let set_string =
-      c "orxLocale_SetString" (string @-> string @-> returning Status.t)
+      c "orxLocale_SetString"
+        (string @-> string @-> string @-> returning Status.t)
 
-    let get_key_count = c "orxLocale_GetKeyCount" (void @-> returning uint32_t)
+    let get_key_count = c "orxLocale_GetKeyCount" (string @-> returning uint32_t)
 
-    let get_key = c "orxLocale_GetKey" (uint32_t @-> returning string)
+    let get_key = c "orxLocale_GetKey" (uint32_t @-> string @-> returning string)
   end
 
   module Log = struct
