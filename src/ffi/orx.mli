@@ -392,10 +392,6 @@ module Sound : sig
   val get_volume : t -> float
 
   val set_volume : t -> float -> unit
-
-  val get_attenuation : t -> float
-
-  val set_attenuation : t -> float -> unit
 end
 
 module Resource : sig

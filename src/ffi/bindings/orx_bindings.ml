@@ -421,11 +421,6 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let set_volume =
       c "orxSound_SetVolume" (t @-> float @-> returning status_err_no_data)
-
-    let get_attenuation = c "orxSound_GetAttenuation" (t @-> returning float)
-
-    let set_attenuation =
-      c "orxSound_SetAttenuation" (t @-> float @-> returning status_err_no_data)
   end
 
   module Mouse = struct
