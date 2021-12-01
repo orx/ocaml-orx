@@ -33,7 +33,7 @@ module State = struct
   (* Increase the score by a given amount *)
   let increase_score (state : t) (earned : int) : unit =
     state.score <- state.score + earned;
-    let formatted_score = Fmt.strf "%06d" state.score in
+    let formatted_score = Fmt.str "%06d" state.score in
     Orx.Object.set_text_string state.score_object formatted_score
 end
 
