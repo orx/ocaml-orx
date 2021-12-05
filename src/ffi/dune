@@ -20,13 +20,13 @@
  (libraries ctypes.foreign orx_bindings threads)
  (flags
   :standard
-  (:include ../orx-ocaml-link-flags.sexp))
+  (:include ../discover/orx-ocaml-link-flags.sexp))
  (foreign_stubs
   (language c)
   (names orx_stubs orx_manual_stubs)
   (flags
    :standard
-   (:include ../orx-c-include-flags.sexp)))
+   (:include ../discover/orx-c-include-flags.sexp)))
  (c_library_flags
   :standard
-  (:include ../orx-c-link-flags.sexp)))
+  (:include ../discover/orx-c-link-flags.sexp)))

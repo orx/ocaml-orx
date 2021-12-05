@@ -24,7 +24,9 @@
  (deps
   (glob_files *.exe))
  (action
-  (copy %{read-lines:../../src/orx-c-library-location.txt} %{target})))
+  (copy
+   %{read-lines:../../src/discover/orx-c-library-location.txt}
+   %{target})))
 
 (rule
  (alias tutorials)
@@ -34,4 +36,6 @@
  (deps
   (glob_files *.exe))
  (action
-  (copy %{read-lines:../../src/orx-c-library-location.txt} %{target})))
+  (copy
+   %{read-lines:../../src/discover/orx-c-library-location.txt}
+   %{target})))

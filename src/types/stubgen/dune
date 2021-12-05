@@ -20,8 +20,8 @@
   (run
    %{cc}
    %{c}
-   %{read-lines:../../orx-c-include-flags.txt}
-   %{read-lines:../../orx-c-link-flags.txt}
+   %{read-lines:../../discover/orx-c-include-flags.txt}
+   %{read-lines:../../discover/orx-c-link-flags.txt}
    -I
    %{ocaml_where}/../ctypes
    -I
@@ -40,8 +40,8 @@
    (run
     %{cc}
     %{c}
-    %{read-lines:../../orx-c-include-flags.txt}
-    %{read-lines:../../orx-c-link-flags.txt}
+    %{read-lines:../../discover/orx-c-include-flags.txt}
+    %{read-lines:../../discover/orx-c-link-flags.txt}
     -I
     %{ocaml_where}/../ctypes
     -I
@@ -52,5 +52,5 @@
     install_name_tool
     -change
     @executable_path/liborxd.dylib
-    %{read-lines:../../orx-c-library-location.txt}
+    %{read-lines:../../discover/orx-c-library-location.txt}
     %{targets}))))
