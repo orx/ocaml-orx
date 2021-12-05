@@ -72,7 +72,7 @@ let init () =
   State.state := Some camera;
 
   let clock = Orx.Clock.get_core () in
-  Orx.Clock.register clock update Main Normal;
+  Orx.Clock.register clock update;
 
   let _scene : Orx.Object.t = Orx.Object.create_from_config_exn "Scene" in
 

@@ -72,11 +72,11 @@ let init () =
   State.add clock1 object1;
   State.add clock2 object2;
 
-  Orx.Clock.register clock1 update Main Normal;
-  Orx.Clock.register clock2 update Main Normal;
+  Orx.Clock.register clock1 update;
+  Orx.Clock.register clock2 update;
 
   let main_clock = Orx.Clock.get_core () in
-  Orx.Clock.register main_clock input_update Main Normal;
+  Orx.Clock.register main_clock input_update;
 
   Ok ()
 

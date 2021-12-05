@@ -178,15 +178,12 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Play
       | Pause
       | Stop
-      | None
 
     let play = F.constant "orxSOUND_STATUS_PLAY" F.int64_t
     let pause = F.constant "orxSOUND_STATUS_PAUSE" F.int64_t
     let stop = F.constant "orxSOUND_STATUS_STOP" F.int64_t
-    let none = F.constant "orxSOUND_STATUS_NONE" F.int64_t
 
-    let map_to_constant =
-      [ (Play, play); (Pause, pause); (Stop, stop); (None, none) ]
+    let map_to_constant = [ (Play, play); (Pause, pause); (Stop, stop) ]
 
     let t =
       F.enum "__orxSOUND_STATUS_t" map_to_constant ~unexpected:(fun i ->
@@ -311,7 +308,6 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Joystick_button
       | Joystick_axis
       | External
-      | None
 
     let keyboard_key = F.constant "orxINPUT_TYPE_KEYBOARD_KEY" F.int64_t
     let mouse_button = F.constant "orxINPUT_TYPE_MOUSE_BUTTON" F.int64_t
@@ -319,7 +315,6 @@ module Bindings (F : Ctypes.TYPE) = struct
     let joystick_button = F.constant "orxINPUT_TYPE_JOYSTICK_BUTTON" F.int64_t
     let joystick_axis = F.constant "orxINPUT_TYPE_JOYSTICK_AXIS" F.int64_t
     let external_ = F.constant "orxINPUT_TYPE_EXTERNAL" F.int64_t
-    let none = F.constant "orxINPUT_TYPE_NONE" F.int64_t
 
     let map_to_constant =
       [
@@ -329,7 +324,6 @@ module Bindings (F : Ctypes.TYPE) = struct
         (Joystick_button, joystick_button);
         (Joystick_axis, joystick_axis);
         (External, external_);
-        (None, none);
       ]
 
     let t =
@@ -588,7 +582,8 @@ module Bindings (F : Ctypes.TYPE) = struct
       let param_type = F.field t "eParamType" Shader_param_type.t
       let param_index = F.field t "s32ParamIndex" F.int32_t
 
-      (* TODO: This is a hack to allow lookup of other fields in the structure *)
+      (* TODO: This is a hack to allow lookup of other fields in the
+         structure *)
       let _value_placeholder = F.field t "vValue" Vector.t
       let () = F.seal t
     end

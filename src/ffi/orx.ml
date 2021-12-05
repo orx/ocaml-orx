@@ -48,8 +48,8 @@ let create_exn create_from_config what name =
 type camera = Orx_gen.Camera.t
 type obj = Orx_gen.Object.t
 
-module Color = Orx_gen.Color
-module Display = Orx_gen.Display
+module _ = Orx_gen.Color
+module _ = Orx_gen.Display
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
@@ -73,7 +73,7 @@ module Mouse_axis = Orx_types.Mouse_axis
 module Mouse_button = Orx_types.Mouse_button
 module Sound_status = Orx_types.Sound_status
 module Shader_pointer = Orx_gen.Shader_pointer
-module Time_line = Orx_gen.Time_line
+module _ = Orx_gen.Time_line
 
 module Log = struct
   type 'a format_logger =
@@ -104,8 +104,8 @@ module Texture = struct
     let width = Ctypes.allocate_n Ctypes.float ~count:1 in
     let height = Ctypes.allocate_n Ctypes.float ~count:1 in
     match get_size texture width height with
-    | Error `Orx -> None
-    | Ok () -> Some (!@width, !@height)
+    | Error `Orx -> Fmt.invalid_arg "Unable to retrieve texture size"
+    | Ok () -> (!@width, !@height)
 end
 
 module Bank = struct
@@ -383,6 +383,8 @@ module Graphic = struct
 
   let get_origin = get_vector get_origin
 
+  let set_flip (g : t) ~x ~y = set_flip g x y
+
   let to_structure (g : t) : Structure.t =
     let g' = Ctypes.to_voidp g in
     match Structure.of_void_pointer g' with
@@ -426,6 +428,9 @@ module Camera = struct
   let get_position = get_vector get_position
 
   let create_from_config_exn = create_exn create_from_config "camera"
+
+  let set_frustum camera ~width ~height ~near ~far =
+    set_frustum camera width height near far
 end
 
 module Input = struct
@@ -935,10 +940,10 @@ module Clock = struct
 
   let register
       ?(handle = Clock_callback_store.default_handle)
+      ?(module_id = Module_id.Main)
+      ?(priority = Clock_priority.Normal)
       (clock : t)
-      callback
-      module_
-      priority =
+      callback =
     let callback_wrapper info _ctx =
       match callback info with
       | () -> ()
@@ -949,7 +954,7 @@ module Clock = struct
         raise exn
     in
     let callback_ptr = Clock_callback.of_fun callback_wrapper in
-    match c_register clock callback_ptr Ctypes.null module_ priority with
+    match c_register clock callback_ptr Ctypes.null module_id priority with
     | Ok () -> Clock_callback_store.retain handle callback_ptr
     | Error `Orx ->
       Clock_callback.free callback_ptr;
@@ -1007,6 +1012,8 @@ module Clock = struct
       callback
       delay
       repetition =
+    if delay <= 0.0 then
+      Fmt.invalid_arg "Orx.Clock.add_timer: delay must be > 0.0, is %g" delay;
     let callback_wrapper info _ctx =
       match callback info with
       | () -> ()
