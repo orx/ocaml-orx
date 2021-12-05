@@ -1420,6 +1420,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
   module Display = struct
     module Rgba = struct
+      type t = T.Rgba.t structure
+
       let make (rgba : int32) : T.Rgba.t structure =
         let rgba' = make T.Rgba.t in
         setf rgba' T.Rgba.rgba (Unsigned.UInt32.of_int32 rgba);

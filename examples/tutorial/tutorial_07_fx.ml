@@ -108,7 +108,7 @@ let init () =
     Some { soldier; box; soldier_fx_lock = false; selected_fx = "WobbleFX" };
 
   let clock = Orx.Clock.get_core () in
-  Orx.Clock.register clock update Main Normal;
+  Orx.Clock.register clock update;
 
   Orx.Event.add_handler Fx fx_event_handler;
   Orx.Event.add_handler Input input_event_handler;
