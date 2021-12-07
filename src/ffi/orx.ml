@@ -67,6 +67,7 @@ module Object_event = Orx_gen.Object_event
 module Physics_event = Orx_gen.Physics_event
 module Sound_event = Orx_gen.Sound_event
 module Time_line_event = Orx_gen.Time_line_event
+module Anim_event = Orx_gen.Anim_event
 module Input_mode = Orx_types.Input_mode
 module Input_type = Orx_types.Input_type
 module Mouse_axis = Orx_types.Mouse_axis
@@ -779,6 +780,7 @@ module Event = struct
     | Shader -> to_flags event_ids Orx_types.Shader_event.map_to_constant
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
     | Time_line -> to_flags event_ids Orx_types.Time_line_event.map_to_constant
+	| Animation -> to_flags event ids Orx_types.Anim_event.map_to_constant
 
   let all_events
       (type event payload)
@@ -792,6 +794,7 @@ module Event = struct
     | Shader -> firsts Orx_types.Shader_event.map_to_constant
     | Sound -> firsts Orx_types.Sound_event.map_to_constant
     | Time_line -> firsts Orx_types.Time_line_event.map_to_constant
+	| Animation -> firsts Orx_types.Anim_event.map_to_constant
 
   let get_sender_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.sender)
@@ -854,6 +857,10 @@ module Event = struct
           fun () ->
             callback event (to_event event Time_line)
               (to_payload event Time_line)
+		| Animation ->
+			fun () ->
+				callback event (to_event event Animation)
+				(to_payload event Animation)
       in
       match f () with
       | result -> result
