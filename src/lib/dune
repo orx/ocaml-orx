@@ -1,6 +1,6 @@
 (rule
  (targets generated.ml)
- (deps stubgen/orx_stubgen.run.exe)
+ (deps ../ffi/stubgen/orx_stubgen.run.exe)
  (action
   (with-stdout-to
    %{targets}
@@ -8,7 +8,7 @@
 
 (rule
  (targets orx_stubs.c)
- (deps stubgen/orx_stubgen.run.exe)
+ (deps ../ffi/stubgen/orx_stubgen.run.exe)
  (action
   (with-stdout-to
    %{targets}
