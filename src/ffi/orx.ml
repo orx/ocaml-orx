@@ -780,7 +780,7 @@ module Event = struct
     | Shader -> to_flags event_ids Orx_types.Shader_event.map_to_constant
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
     | Time_line -> to_flags event_ids Orx_types.Time_line_event.map_to_constant
-	| Animation -> to_flags event ids Orx_types.Anim_event.map_to_constant
+	| Animation -> to_flags event_ids Orx_types.Anim_event.map_to_constant
 
   let all_events
       (type event payload)

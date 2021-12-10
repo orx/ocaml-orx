@@ -1366,15 +1366,15 @@ module Anim_event : sig
 
 	type payload
 
-	val get_animation : payload -> Animation
+	(* val get_animation : payload -> Animation *)
 
 	val get_name : payload -> string
 
-	val get_count : payload -> int
+	(* val get_count : payload -> int *)
 
-	val get_time : payload -> float
+	(* val get_time : payload -> float *)
 
-	val get_custom_event : payload -> Custom_event
+	(* val get_custom_event : payload -> Custom_event *)
 
 end
 

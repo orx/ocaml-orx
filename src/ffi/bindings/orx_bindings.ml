@@ -1285,7 +1285,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       Ctypes.getf !@payload T.Time_line_event.Payload.time_stamp
   end
 
-  module Anim_Event = struct
+  module Anim_event = struct
 	include T.Anim_event
 	type payload = Payload.t Ctypes.structure Ctypes.ptr
 
@@ -1293,9 +1293,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
 	let get_animation (payload : payload) : Animation.t = Ctypes.getf !@payload T.Anim_event.Payload.animation
 	let get_name (payload : payload) : string = Ctypes.getf !@payload T.Anim_event.Payload.name
-	let get_count (payload : payload) : int = Ctypes.getf !@payload T.Anim_event.Payload.count
+	(* TODO *)
+	(* let get_count (payload : payload) : int = Ctypes.getf !@payload T.Anim_event.Payload.count
 	let get_time (payload : payload) : float = Ctypes.getf !@payload T.Anim_event.Payload.time
-	let get_custom_event (payload : payload) : Custom_event.t = Ctypes.getf !@payload T.Anim_event.Payload.custom_event
+	let get_custom_event (payload : payload) : Custom_event.t = Ctypes.getf !@payload T.Anim_event.Payload.custom_event *)
 end
 
 

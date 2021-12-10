@@ -416,6 +416,12 @@ module Bindings (F : Ctypes.TYPE) = struct
     let t : t structure = F.structure "__orxTIMELINE_t"
   end
 
+  module Animation = struct
+	type t
+	let t : t structure = F.structure "__orxANIM_t"
+  end
+
+
   module Fx_event = struct
     type t =
       | Start
@@ -738,9 +744,6 @@ module Bindings (F : Ctypes.TYPE) = struct
       let animation = F.field t "pstAnim" (F.ptr Animation.t)
       let name = F.field t "zAnimName" F.string
 	  (* TODO: I don't know if we have to do something special to access union members here *)
-	  (* TODO: This is a hack to allow lookup of other fields in the
-         structure *)
-      let _value_placeholder = F.field t "vValue" Vector.t
       let () = F.seal t
     end
   end
