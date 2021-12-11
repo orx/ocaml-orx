@@ -1173,6 +1173,24 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (T.Input_type.t @-> int @-> T.Input_mode.t @-> returning string)
   end
 
+  module Anim_event = struct
+    include T.Anim_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
+
+    let get_animation (payload : payload) : Anim.t =
+      Ctypes.getf !@payload T.Anim_event.Payload.animation
+    let get_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Anim_event.Payload.name
+    (* TODO *)
+    (* let get_count (payload : payload) : int = Ctypes.getf !@payload
+       T.Anim_event.Payload.count let get_time (payload : payload) : float =
+       Ctypes.getf !@payload T.Anim_event.Payload.time let get_custom_event
+       (payload : payload) : Custom_event.t = Ctypes.getf !@payload
+       T.Anim_event.Payload.custom_event *)
+  end
+
   module Config_event = struct
     include T.Config_event
 
@@ -1283,24 +1301,6 @@ module Bindings (F : Ctypes.FOREIGN) = struct
       Ctypes.getf !@payload T.Time_line_event.Payload.event
     let get_time_stamp (payload : payload) : float =
       Ctypes.getf !@payload T.Time_line_event.Payload.time_stamp
-  end
-
-  module Anim_event = struct
-    include T.Anim_event
-    type payload = Payload.t Ctypes.structure Ctypes.ptr
-
-    let compare (a : t) (b : t) = compare a b
-
-    let get_animation (payload : payload) : Anim.t =
-      Ctypes.getf !@payload T.Anim_event.Payload.animation
-    let get_name (payload : payload) : string =
-      Ctypes.getf !@payload T.Anim_event.Payload.name
-    (* TODO *)
-    (* let get_count (payload : payload) : int = Ctypes.getf !@payload
-       T.Anim_event.Payload.count let get_time (payload : payload) : float =
-       Ctypes.getf !@payload T.Anim_event.Payload.time let get_custom_event
-       (payload : payload) : Custom_event.t = Ctypes.getf !@payload
-       T.Anim_event.Payload.custom_event *)
   end
 
   module Event = struct

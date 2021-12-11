@@ -1170,6 +1170,10 @@ module Shader_pointer : sig
       [index]. *)
 end
 
+module Anim : sig
+    type t
+  end
+
 module Anim_event : sig
   type t =
     | Start
@@ -1184,7 +1188,7 @@ module Anim_event : sig
   type payload
 
   (* TODO: Update this module *)
-  (* val get_animation : payload -> Orx_gen.Anim.t *)
+  val get_animation : payload -> Anim.t
 
   val get_name : payload -> string
 
