@@ -1105,12 +1105,12 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let t_opt = ptr_opt T.Time_line.t
   end
 
-  module Animation = struct
-	type t = T.Animation.t structure ptr
+  module Anim = struct
+    type t = T.Anim.t structure ptr
 
-	let t = ptr T.Animation.t
+    let t = ptr T.Anim.t
 
-	let t_opt = ptr_opt T.Animation.t
+    let t_opt = ptr_opt T.Anim.t
   end
 
   module Viewport = struct
@@ -1286,19 +1286,22 @@ module Bindings (F : Ctypes.FOREIGN) = struct
   end
 
   module Anim_event = struct
-	include T.Anim_event
-	type payload = Payload.t Ctypes.structure Ctypes.ptr
+    include T.Anim_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
 
-	let compare (a : t) (b : t) = compare a b
+    let compare (a : t) (b : t) = compare a b
 
-	let get_animation (payload : payload) : Animation.t = Ctypes.getf !@payload T.Anim_event.Payload.animation
-	let get_name (payload : payload) : string = Ctypes.getf !@payload T.Anim_event.Payload.name
-	(* TODO *)
-	(* let get_count (payload : payload) : int = Ctypes.getf !@payload T.Anim_event.Payload.count
-	let get_time (payload : payload) : float = Ctypes.getf !@payload T.Anim_event.Payload.time
-	let get_custom_event (payload : payload) : Custom_event.t = Ctypes.getf !@payload T.Anim_event.Payload.custom_event *)
-end
-
+    let get_animation (payload : payload) : Anim.t =
+      Ctypes.getf !@payload T.Anim_event.Payload.animation
+    let get_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Anim_event.Payload.name
+    (* TODO *)
+    (* let get_count (payload : payload) : int = Ctypes.getf !@payload
+       T.Anim_event.Payload.count let get_time (payload : payload) : float =
+       Ctypes.getf !@payload T.Anim_event.Payload.time let get_custom_event
+       (payload : payload) : Custom_event.t = Ctypes.getf !@payload
+       T.Anim_event.Payload.custom_event *)
+  end
 
   module Event = struct
     type t = T.Event.t structure ptr
@@ -1307,6 +1310,7 @@ end
 
     module Event_type = struct
       type ('event, 'payload) t =
+        | Anim : (Anim_event.t, Anim_event.payload) t
         | Fx : (Fx_event.t, Fx_event.payload) t
         | Input : (Input_event.t, Input_event.payload) t
         | Object : (Object_event.t, Object_event.payload) t
@@ -1314,8 +1318,6 @@ end
         | Shader : (Shader_event.t, Shader_event.payload) t
         | Sound : (Sound_event.t, Sound_event.payload) t
         | Time_line : (Time_line_event.t, Time_line_event.payload) t
-		| Animation : (Anim_event.t, 
-		Anim_event.payload) t
 
       type any = Any : (_, _) t -> any
 
@@ -1323,6 +1325,7 @@ end
           type e p.
           (e, p) T.Event_type.t -> (e, p Ctypes.structure Ctypes.ptr) t =
         function
+        | Anim -> Anim
         | Fx -> Fx
         | Input -> Input
         | Object -> Object
@@ -1330,9 +1333,9 @@ end
         | Shader -> Shader
         | Sound -> Sound
         | Time_line -> Time_line
-		| Animation -> Animation
 
       let to_c_any : type e p. (e, p) t -> T.Event_type.any = function
+        | Anim -> Any Anim
         | Fx -> Any Fx
         | Input -> Any Input
         | Object -> Any Object
@@ -1340,7 +1343,6 @@ end
         | Shader -> Any Shader
         | Sound -> Any Sound
         | Time_line -> Any Time_line
-		| Animation -> Any Animation
 
       let of_c_any (c : T.Event_type.any) : any =
         match c with
@@ -1370,6 +1372,9 @@ end
         (payload_type : (event, payload) Event_type.t) : payload =
       (* Some dynamic type checking... *)
       match payload_type with
+      | Anim ->
+        assert_type event (Any Anim);
+        unsafe_get_payload event T.Anim_event.Payload.t
       | Fx ->
         assert_type event (Any Fx);
         unsafe_get_payload event T.Fx_event.Payload.t
@@ -1391,10 +1396,6 @@ end
       | Time_line ->
         assert_type event (Any Time_line);
         unsafe_get_payload event T.Time_line_event.Payload.t
-	  | Animation ->
-	  	assert_type event (Any Animation);
-		unsafe_get_payload event T.
-		Anim_event.Payload.t
 
     let get_event_by_id (event : t) map_from_constant =
       let event_id = to_event_id event in
@@ -1407,6 +1408,9 @@ end
         (event : t)
         (event_type : (event, payload) Event_type.t) : event =
       match event_type with
+      | Anim ->
+        assert_type event (Any Anim);
+        get_event_by_id event T.Anim_event.map_from_constant
       | Fx ->
         assert_type event (Any Fx);
         get_event_by_id event T.Fx_event.map_from_constant
@@ -1428,10 +1432,6 @@ end
       | Time_line ->
         assert_type event (Any Time_line);
         get_event_by_id event T.Time_line_event.map_from_constant
-	  | Animation ->
-	  	assert_type event (Any Animation);
-		get_event_by_id event T.Anim_event.
-		map_from_constant
   end
 
   module Physics = struct

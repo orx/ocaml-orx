@@ -50,6 +50,7 @@ type obj = Orx_gen.Object.t
 
 module _ = Orx_gen.Color
 module _ = Orx_gen.Display
+module Anim = Orx_gen.Anim
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
@@ -773,6 +774,7 @@ module Event = struct
       (event_type : (event, payload) Event_type.t)
       (event_ids : event list) : event_flag =
     match event_type with
+    | Anim -> to_flags event_ids Orx_types.Anim_event.map_to_constant
     | Fx -> to_flags event_ids Orx_types.Fx_event.map_to_constant
     | Input -> to_flags event_ids Orx_types.Input_event.map_to_constant
     | Object -> to_flags event_ids Orx_types.Object_event.map_to_constant
@@ -780,13 +782,13 @@ module Event = struct
     | Shader -> to_flags event_ids Orx_types.Shader_event.map_to_constant
     | Sound -> to_flags event_ids Orx_types.Sound_event.map_to_constant
     | Time_line -> to_flags event_ids Orx_types.Time_line_event.map_to_constant
-	| Animation -> to_flags event_ids Orx_types.Anim_event.map_to_constant
 
   let all_events
       (type event payload)
       (event_type : (event, payload) Event_type.t) : event list =
     let firsts l = List.map fst l in
     match event_type with
+    | Anim -> firsts Orx_types.Anim_event.map_to_constant
     | Fx -> firsts Orx_types.Fx_event.map_to_constant
     | Input -> firsts Orx_types.Input_event.map_to_constant
     | Object -> firsts Orx_types.Object_event.map_to_constant
@@ -794,7 +796,6 @@ module Event = struct
     | Shader -> firsts Orx_types.Shader_event.map_to_constant
     | Sound -> firsts Orx_types.Sound_event.map_to_constant
     | Time_line -> firsts Orx_types.Time_line_event.map_to_constant
-	| Animation -> firsts Orx_types.Anim_event.map_to_constant
 
   let get_sender_object (event : t) : Object.t option =
     Object.of_void_pointer (Ctypes.getf !@event Orx_types.Event.sender)
@@ -836,6 +837,8 @@ module Event = struct
     let callback event =
       let f =
         match event_type with
+        | Anim ->
+          fun () -> callback event (to_event event Anim) (to_payload event Anim)
         | Fx ->
           fun () -> callback event (to_event event Fx) (to_payload event Fx)
         | Input ->
@@ -857,10 +860,6 @@ module Event = struct
           fun () ->
             callback event (to_event event Time_line)
               (to_payload event Time_line)
-		| Animation ->
-			fun () ->
-				callback event (to_event event Animation)
-				(to_payload event Animation)
       in
       match f () with
       | result -> result

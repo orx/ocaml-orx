@@ -416,11 +416,10 @@ module Bindings (F : Ctypes.TYPE) = struct
     let t : t structure = F.structure "__orxTIMELINE_t"
   end
 
-  module Animation = struct
-	type t
-	let t : t structure = F.structure "__orxANIM_t"
+  module Anim = struct
+    type t
+    let t : t structure = F.structure "__orxANIM_t"
   end
-
 
   module Fx_event = struct
     type t =
@@ -704,15 +703,15 @@ module Bindings (F : Ctypes.TYPE) = struct
   end
 
   module Anim_event = struct
-	type t =
-		| Start
-		| Stop
-		| Cut
-		| Loop
-		| Update
-		| Custom_event
+    type t =
+      | Start
+      | Stop
+      | Cut
+      | Loop
+      | Update
+      | Custom_event
 
-	let make tag = F.constant ("orxANIM_EVENT_" ^ tag) F.int64_t
+    let make tag = F.constant ("orxANIM_EVENT_" ^ tag) F.int64_t
     let start = make "START"
     let stop = make "STOP"
     let cut = make "CUT"
@@ -720,7 +719,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     let update = make "UPDATE"
     let custom_event = make "CUSTOM_EVENT"
 
-	let map_to_constant =
+    let map_to_constant =
       [
         (Start, start);
         (Stop, stop);
@@ -730,21 +729,22 @@ module Bindings (F : Ctypes.TYPE) = struct
         (Custom_event, custom_event);
       ]
 
-	let map_from_constant = swap_tuple_list map_to_constant
+    let map_from_constant = swap_tuple_list map_to_constant
 
-	let t =
+    let t =
       F.enum "__orxANIM_EVENT_t" map_to_constant ~unexpected:(fun i ->
           Fmt.invalid_arg "unsupported time line event type enum: %Ld" i
       )
 
-	module Payload = struct
+    module Payload = struct
       type t
 
       let t : t structure = F.structure "__orxANIM_EVENT_PAYLOAD_t"
-      let animation = F.field t "pstAnim" (F.ptr Animation.t)
+      let animation = F.field t "pstAnim" (F.ptr Anim.t)
       let name = F.field t "zAnimName" F.string
-	  (* TODO: I don't know if we have to do something special to access union members here *)
-      let () = F.seal t
+      (* TODO: I don't know if we have to do something special to access union
+         members here *)
+      (* let () = F.seal t *)
     end
   end
 
@@ -755,7 +755,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     (* | User_defined : User_defined_event.t simple *)
 
     type ('event, 'payload) t =
-      | Animation : ( Anim_event.t, Anim_event.Payload.t) t
+      | Anim : (Anim_event.t, Anim_event.Payload.t) t
       (* | Clock : ([ `Unbound ], [ `Unbound ]) t *)
       (* | Config : (Config_event.t, unit) t *)
       (* | Display : ([ `Unbound ], [ `Unbound ]) t *)
@@ -779,6 +779,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     type any = Any : (_, _) t -> any
 
     let anim = F.constant "orxEVENT_TYPE_ANIM" F.int64_t
+
     (* let clock = F.constant "orxEVENT_TYPE_CLOCK" F.int64_t *)
     (* let config = F.constant "orxEVENT_TYPE_CONFIG" F.int64_t *)
 
@@ -806,7 +807,7 @@ module Bindings (F : Ctypes.TYPE) = struct
 
     let map_to_constant =
       [
-        (Any Animation, anim);
+        (Any Anim, anim);
         (* (Any Clock, clock); *)
         (* (Any Config, config); *)
         (* (Any Display, display); *)

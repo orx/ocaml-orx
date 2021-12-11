@@ -1170,6 +1170,32 @@ module Shader_pointer : sig
       [index]. *)
 end
 
+module Anim_event : sig
+  type t =
+    | Start
+    | Stop
+    | Cut
+    | Loop
+    | Update
+    | Custom_event
+
+  val compare : t -> t -> int
+
+  type payload
+
+  (* TODO: Update this module *)
+  (* val get_animation : payload -> Orx_gen.Anim.t *)
+
+  val get_name : payload -> string
+
+  (* TODO: Union values *)
+  (* val get_count : payload -> int *)
+
+  (* val get_time : payload -> float *)
+
+  (* val get_custom_event : payload -> Custom_event *)
+end
+
 module Config_event : sig
   (** {1 Configuration events} *)
 
@@ -1353,31 +1379,6 @@ module Time_line_event : sig
   (** [get_time_stamp payload] is the time associated with the event. *)
 end
 
-module Anim_event : sig
-	type t =
-		| Start
-		| Stop
-		| Cut
-		| Loop
-		| Update
-		| Custom_event
-
-	val compare : t -> t -> int
-
-	type payload
-
-	(* val get_animation : payload -> Animation *)
-
-	val get_name : payload -> string
-
-	(* val get_count : payload -> int *)
-
-	(* val get_time : payload -> float *)
-
-	(* val get_custom_event : payload -> Custom_event *)
-
-end
-
 module Event : sig
   (** {1 Events} *)
 
@@ -1386,6 +1387,7 @@ module Event : sig
 
   module Event_type : sig
     type ('event, 'payload) t =
+      | Anim : (Anim_event.t, Anim_event.payload) t
       | Fx : (Fx_event.t, Fx_event.payload) t
       | Input : (Input_event.t, Input_event.payload) t
       | Object : (Object_event.t, Object_event.payload) t
@@ -1393,8 +1395,6 @@ module Event : sig
       | Shader : (Shader_event.t, Shader_event.payload) t
       | Sound : (Sound_event.t, Sound_event.payload) t
       | Time_line : (Time_line_event.t, Time_line_event.payload) t
-	  | Animation : (Anim_event.t, 
-	  Anim_event.payload) t
 
     type any = Any : (_, _) t -> any
   end
