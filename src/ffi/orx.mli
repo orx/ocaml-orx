@@ -1171,8 +1171,8 @@ module Shader_pointer : sig
 end
 
 module Anim : sig
-    type t
-  end
+  type t
+end
 
 module Anim_event : sig
   type t =
