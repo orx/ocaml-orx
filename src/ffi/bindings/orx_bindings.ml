@@ -1105,6 +1105,14 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let t_opt = ptr_opt T.Time_line.t
   end
 
+  module Anim = struct
+    type t = T.Anim.t structure ptr
+
+    let t = ptr T.Anim.t
+
+    let t_opt = ptr_opt T.Anim.t
+  end
+
   module Viewport = struct
     type t = T.Viewport.t structure ptr
 
@@ -1163,6 +1171,24 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_binding_name =
       c "orxInput_GetBindingName"
         (T.Input_type.t @-> int @-> T.Input_mode.t @-> returning string)
+  end
+
+  module Anim_event = struct
+    include T.Anim_event
+    type payload = Payload.t Ctypes.structure Ctypes.ptr
+
+    let compare (a : t) (b : t) = compare a b
+
+    let get_animation (payload : payload) : Anim.t =
+      Ctypes.getf !@payload T.Anim_event.Payload.animation
+    let get_name (payload : payload) : string =
+      Ctypes.getf !@payload T.Anim_event.Payload.name
+    (* TODO *)
+    (* let get_count (payload : payload) : int = Ctypes.getf !@payload
+       T.Anim_event.Payload.count let get_time (payload : payload) : float =
+       Ctypes.getf !@payload T.Anim_event.Payload.time let get_custom_event
+       (payload : payload) : Custom_event.t = Ctypes.getf !@payload
+       T.Anim_event.Payload.custom_event *)
   end
 
   module Config_event = struct
@@ -1284,6 +1310,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     module Event_type = struct
       type ('event, 'payload) t =
+        | Anim : (Anim_event.t, Anim_event.payload) t
         | Fx : (Fx_event.t, Fx_event.payload) t
         | Input : (Input_event.t, Input_event.payload) t
         | Object : (Object_event.t, Object_event.payload) t
@@ -1298,6 +1325,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
           type e p.
           (e, p) T.Event_type.t -> (e, p Ctypes.structure Ctypes.ptr) t =
         function
+        | Anim -> Anim
         | Fx -> Fx
         | Input -> Input
         | Object -> Object
@@ -1307,6 +1335,7 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         | Time_line -> Time_line
 
       let to_c_any : type e p. (e, p) t -> T.Event_type.any = function
+        | Anim -> Any Anim
         | Fx -> Any Fx
         | Input -> Any Input
         | Object -> Any Object
@@ -1343,6 +1372,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (payload_type : (event, payload) Event_type.t) : payload =
       (* Some dynamic type checking... *)
       match payload_type with
+      | Anim ->
+        assert_type event (Any Anim);
+        unsafe_get_payload event T.Anim_event.Payload.t
       | Fx ->
         assert_type event (Any Fx);
         unsafe_get_payload event T.Fx_event.Payload.t
@@ -1376,6 +1408,9 @@ module Bindings (F : Ctypes.FOREIGN) = struct
         (event : t)
         (event_type : (event, payload) Event_type.t) : event =
       match event_type with
+      | Anim ->
+        assert_type event (Any Anim);
+        get_event_by_id event T.Anim_event.map_from_constant
       | Fx ->
         assert_type event (Any Fx);
         get_event_by_id event T.Fx_event.map_from_constant

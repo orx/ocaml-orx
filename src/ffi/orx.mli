@@ -1170,6 +1170,36 @@ module Shader_pointer : sig
       [index]. *)
 end
 
+module Anim : sig
+  type t
+end
+
+module Anim_event : sig
+  type t =
+    | Start
+    | Stop
+    | Cut
+    | Loop
+    | Update
+    | Custom_event
+
+  val compare : t -> t -> int
+
+  type payload
+
+  (* TODO: Update this module *)
+  val get_animation : payload -> Anim.t
+
+  val get_name : payload -> string
+
+  (* TODO: Union values *)
+  (* val get_count : payload -> int *)
+
+  (* val get_time : payload -> float *)
+
+  (* val get_custom_event : payload -> Custom_event *)
+end
+
 module Config_event : sig
   (** {1 Configuration events} *)
 
@@ -1361,6 +1391,7 @@ module Event : sig
 
   module Event_type : sig
     type ('event, 'payload) t =
+      | Anim : (Anim_event.t, Anim_event.payload) t
       | Fx : (Fx_event.t, Fx_event.payload) t
       | Input : (Input_event.t, Input_event.payload) t
       | Object : (Object_event.t, Object_event.payload) t

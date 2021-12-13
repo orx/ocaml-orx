@@ -50,6 +50,7 @@ type obj = Orx_gen.Object.t
 
 module _ = Orx_gen.Color
 module _ = Orx_gen.Display
+module Anim = Orx_gen.Anim
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
@@ -67,6 +68,7 @@ module Object_event = Orx_gen.Object_event
 module Physics_event = Orx_gen.Physics_event
 module Sound_event = Orx_gen.Sound_event
 module Time_line_event = Orx_gen.Time_line_event
+module Anim_event = Orx_gen.Anim_event
 module Input_mode = Orx_types.Input_mode
 module Input_type = Orx_types.Input_type
 module Mouse_axis = Orx_types.Mouse_axis
@@ -772,6 +774,7 @@ module Event = struct
       (event_type : (event, payload) Event_type.t)
       (event_ids : event list) : event_flag =
     match event_type with
+    | Anim -> to_flags event_ids Orx_types.Anim_event.map_to_constant
     | Fx -> to_flags event_ids Orx_types.Fx_event.map_to_constant
     | Input -> to_flags event_ids Orx_types.Input_event.map_to_constant
     | Object -> to_flags event_ids Orx_types.Object_event.map_to_constant
@@ -785,6 +788,7 @@ module Event = struct
       (event_type : (event, payload) Event_type.t) : event list =
     let firsts l = List.map fst l in
     match event_type with
+    | Anim -> firsts Orx_types.Anim_event.map_to_constant
     | Fx -> firsts Orx_types.Fx_event.map_to_constant
     | Input -> firsts Orx_types.Input_event.map_to_constant
     | Object -> firsts Orx_types.Object_event.map_to_constant
@@ -833,6 +837,8 @@ module Event = struct
     let callback event =
       let f =
         match event_type with
+        | Anim ->
+          fun () -> callback event (to_event event Anim) (to_payload event Anim)
         | Fx ->
           fun () -> callback event (to_event event Fx) (to_payload event Fx)
         | Input ->
