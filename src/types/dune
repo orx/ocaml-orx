@@ -13,5 +13,5 @@
   :standard
   -w
   -9-27
-  (:include ../orx-ocaml-link-flags.sexp))
+  (:include ../discover/orx-ocaml-link-flags.sexp))
  (libraries orx_types_bindings))
