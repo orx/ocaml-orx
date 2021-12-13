@@ -1,5 +1,6 @@
 module _ = Orx_gen.Color
 module _ = Orx_gen.Display
+module Anim = Orx_gen.Anim
 module Sound = Orx_gen.Sound
 module String_id = Orx_gen.String_id
 module Structure = Orx_gen.Structure
@@ -10,6 +11,7 @@ module Clock_priority = Orx_types.Clock_priority
 module Clock_info = Orx_types.Clock_info
 module Module_id = Orx_types.Module_id
 module Shader_param_type = Orx_gen.Shader_param_type
+module Anim_event = Orx_gen.Anim_event
 module Config_event = Orx_gen.Config_event
 module Fx_event = Orx_gen.Fx_event
 module Input_event = Orx_gen.Input_event

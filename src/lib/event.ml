@@ -23,6 +23,7 @@ let make_flags
     (event_type : (event, payload) Event_type.t)
     (event_ids : event list) : event_flag =
   match event_type with
+  | Anim -> to_flags event_ids Orx_types.Anim_event.map_to_constant
   | Fx -> to_flags event_ids Orx_types.Fx_event.map_to_constant
   | Input -> to_flags event_ids Orx_types.Input_event.map_to_constant
   | Object -> to_flags event_ids Orx_types.Object_event.map_to_constant
@@ -35,6 +36,7 @@ let all_events (type event payload) (event_type : (event, payload) Event_type.t)
     : event list =
   let firsts l = List.map fst l in
   match event_type with
+  | Anim -> firsts Orx_types.Anim_event.map_to_constant
   | Fx -> firsts Orx_types.Fx_event.map_to_constant
   | Input -> firsts Orx_types.Input_event.map_to_constant
   | Object -> firsts Orx_types.Object_event.map_to_constant
@@ -82,6 +84,8 @@ let add_handler :
   let callback event =
     let f =
       match event_type with
+      | Anim ->
+        fun () -> callback event (to_event event Anim) (to_payload event Anim)
       | Fx -> fun () -> callback event (to_event event Fx) (to_payload event Fx)
       | Input ->
         fun () -> callback event (to_event event Input) (to_payload event Input)
