@@ -21,6 +21,7 @@ module Physics = Physics
 module Body_part = Body_part
 module Body = Body
 module Object = Object
+module Input_event = Input_event
 module Event = Event
 module Clock = Clock
 module Config = Config
