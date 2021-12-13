@@ -697,6 +697,7 @@ module Input_type : sig
     | Joystick_button
     | Joystick_axis
     | External
+    | No_input
 end
 
 module Input_mode : sig
@@ -1249,6 +1250,28 @@ module Input_event : sig
   val get_input_name : payload -> string
   (** [get_input_name payload] is the input name for the input event which sent
       [payload]. *)
+
+  (** {2 Input event details}
+
+      Each of the following functions has a singular form for convenience when
+      inputs only have one key involved and a plural form for compound inputs
+      with multiple keys, buttons or axes involved.
+
+      Calling the singular form of the singular [get] functions below is
+      slightly more efficient than and functionally equivalent to using the
+      plural form when only a single input is involved. *)
+
+  val get_input_type : ?i:int -> payload -> Input_type.t
+  val get_input_types : payload -> Input_type.t array
+
+  val get_input_id : ?i:int -> payload -> int
+  val get_input_ids : payload -> int array
+
+  val get_input_mode : ?i:int -> payload -> Input_mode.t
+  val get_input_modes : payload -> Input_mode.t array
+
+  val get_input_value : ?i:int -> payload -> float
+  val get_input_values : payload -> float array
 end
 
 module Object_event : sig

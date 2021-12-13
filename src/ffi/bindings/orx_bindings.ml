@@ -1218,6 +1218,18 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_input_name (payload : payload) : string =
       Ctypes.getf !@payload T.Input_event.Payload.input_name
+
+    let get_input_type (payload : payload) =
+      Ctypes.getf !@payload T.Input_event.Payload.input_type
+
+    let get_input_id (payload : payload) =
+      Ctypes.getf !@payload T.Input_event.Payload.id
+
+    let get_input_mode (payload : payload) =
+      Ctypes.getf !@payload T.Input_event.Payload.mode
+
+    let get_input_value (payload : payload) =
+      Ctypes.getf !@payload T.Input_event.Payload.value
   end
 
   module Object_event = struct

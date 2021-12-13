@@ -14,7 +14,6 @@ module Shader_param_type = Orx_gen.Shader_param_type
 module Anim_event = Orx_gen.Anim_event
 module Config_event = Orx_gen.Config_event
 module Fx_event = Orx_gen.Fx_event
-module Input_event = Orx_gen.Input_event
 module Object_event = Orx_gen.Object_event
 module Physics_event = Orx_gen.Physics_event
 module Sound_event = Orx_gen.Sound_event

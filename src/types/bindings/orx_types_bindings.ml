@@ -308,6 +308,7 @@ module Bindings (F : Ctypes.TYPE) = struct
       | Joystick_button
       | Joystick_axis
       | External
+      | No_input
 
     let keyboard_key = F.constant "orxINPUT_TYPE_KEYBOARD_KEY" F.int64_t
     let mouse_button = F.constant "orxINPUT_TYPE_MOUSE_BUTTON" F.int64_t
@@ -315,6 +316,7 @@ module Bindings (F : Ctypes.TYPE) = struct
     let joystick_button = F.constant "orxINPUT_TYPE_JOYSTICK_BUTTON" F.int64_t
     let joystick_axis = F.constant "orxINPUT_TYPE_JOYSTICK_AXIS" F.int64_t
     let external_ = F.constant "orxINPUT_TYPE_EXTERNAL" F.int64_t
+    let no_input = F.constant "orxINPUT_TYPE_NONE" F.int64_t
 
     let map_to_constant =
       [
@@ -324,6 +326,7 @@ module Bindings (F : Ctypes.TYPE) = struct
         (Joystick_button, joystick_button);
         (Joystick_axis, joystick_axis);
         (External, external_);
+        (No_input, no_input);
       ]
 
     let t =
