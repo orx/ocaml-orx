@@ -260,20 +260,41 @@ module Obox : sig
       From https://orx-project.org/orx/doc/html/group__orx_o_box.html *)
 
   type t
+  (** Type of an oriented box *)
 
-  val make : pos:Vector.t -> pivot:Vector.t -> size:Vector.t -> float -> t
+  val make : pos:Vector.t -> pivot:Vector.t -> size:Vector.t -> angle:float -> t
+  (** [make ~pos ~pivot ~size ~angle] creates an oriented box with the given
+      specs. *)
+
+  val set_2d :
+    t -> pos:Vector.t -> pivot:Vector.t -> size:Vector.t -> angle:float -> unit
+  (** [set_2d obox ~pos ~pivot ~size ~angle] sets [obox] to the given specs. *)
 
   val copy : t -> t
+  (** [copy obox] is a fresh {!t} with the same specs as [obox]. *)
 
   val get_center : t -> Vector.t
+  (** [get_center obox] is the center of [obox]. *)
 
   val move : t -> Vector.t -> t
+  (** [move obox vec] is a fresh {!t} which is [obox] moved by [vec]. *)
+
+  val move' : t -> Vector.t -> unit
+  (** [move' obox vec] moves [obox] by [vec]. *)
 
   val rotate_2d : t -> float -> t
+  (** [rotate_2d obox angle] is a fresh {!t} which is [obox] rotated by [angle].
+      [angle] is in radiians. *)
+
+  val rotate_2d' : t -> float -> unit
+  (** [rotate_2d' obox angle] rotates [obox] by [angle]. [angle] is in radiians. *)
 
   val is_inside : t -> Vector.t -> bool
+  (** [is_inside obox vec] is [true] if [vec] is inside [obox]. *)
 
   val is_inside_2d : t -> Vector.t -> bool
+  (** [is_inside_2d obox vec] is [true] if [vec] is inside [obox]. The [z] of
+      the [obox] and [vec] are ignored. *)
 end
 
 module Module_id : sig

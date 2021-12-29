@@ -2,9 +2,13 @@ open Common
 
 include Orx_gen.Obox
 
-let make ~pos ~pivot ~size angle : t =
-  let ob = allocate_raw () in
+let set_2d (ob : t) ~pos ~pivot ~size ~angle =
   let (_ : t) = set_2d ob pos pivot size angle in
+  ()
+
+let make ~pos ~pivot ~size ~angle : t =
+  let ob = allocate_raw () in
+  set_2d ob ~pos ~pivot ~size ~angle;
   ob
 
 let copy (ob : t) =
@@ -17,10 +21,18 @@ let get_center (ob : t) : Vector.t =
   let (_ : Vector.t) = get_center ob center in
   center
 
+let move' (ob : t) (v : Vector.t) : unit =
+  let (_ : t) = move ob ob v in
+  ()
+
 let move (ob : t) (v : Vector.t) : t =
   let moved : t = allocate_raw () in
   let (_ : t) = move moved ob v in
   moved
+
+let rotate_2d' (ob : t) angle : unit =
+  let (_ : t) = rotate_2d ob ob angle in
+  ()
 
 let rotate_2d (ob : t) angle : t =
   let rotated : t = allocate_raw () in
