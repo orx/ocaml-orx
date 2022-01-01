@@ -62,7 +62,6 @@ jobs:
         env:
           ORX: ${{ env.ORX }}
 
-
   macos:
     runs-on: macos-latest
 
@@ -80,47 +79,37 @@ jobs:
     steps:
       - name: Checkout ocaml-orx
         uses: actions/checkout@v2
+        with:
+          path: ocaml-orx
 
-      - name: List files
-        run: ls
-
-      - name: Current directory
-        run: pwd
-      
       - name: Checkout orx
         uses: actions/checkout@v2
         with:
           repository: orx/orx
           path: orx
 
-      # - name: orx setup
-      #   run: ./setup.sh
+      - name: orx setup
+        working-directory: orx
+        run: ./setup.sh
 
-      # - name: orx build (gmake)
-      #   working-directory: code/build/mac/gmake
-      #   run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+      - name: orx build (gmake)
+        working-directory: orx/code/build/mac/gmake
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
       - name: Set ORX environment
         run: echo "ORX=$GITHUB_WORKSPACE/orx/code" >> $GITHUB_ENV
 
-      - name: List files
-        run: ls
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocamlversion }}
 
-      - name: Current directory
-        run: pwd
+      - name: Install opam dependencies
+        working-directory: ocaml-orx
+        run: opam install . --deps-only --with-test
 
-      - name: List files under ORX environment
-        run: ls ${{ env.ORX }}
-
-      # - name: Setup OCaml
-      #   uses: ocaml/setup-ocaml@v2
-      #   with:
-      #     ocaml-compiler: ${{ matrix.ocamlversion }}
-
-      # - name: Install opam dependencies
-      #   run: opam install . --deps-only --with-test
-
-      # - name: Build ocaml-orx
-      #   run: opam exec -- dune build
-      #   env:
-      #     ORX: ${{ env.ORX }}
+      - name: Build ocaml-orx
+        working-directory: ocaml-orx
+        run: opam exec -- dune build
+        env:
+          ORX: ${{ env.ORX }}
