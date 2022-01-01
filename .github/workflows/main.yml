@@ -14,7 +14,6 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   windows:
-    if: ${{ false }}
     # The type of runner that the job will run on
     runs-on: windows-latest
 
@@ -30,24 +29,27 @@ jobs:
           - 4.13.x
 
     steps:
-      - name: Checkout latest orx
+      - name: Checkout ocaml-orx
+        uses: actions/checkout@v2
+        with:
+          path: ocaml-orx
+
+      - name: Checkout orx
         uses: actions/checkout@v2
         with:
           repository: orx/orx
-          ref: master
+          path: orx
 
       - name: orx setup
+        working-directory: orx
         run: ./setup.bat
 
       - name: orx build (gmake)
-        working-directory: code/build/windows/gmake
+        working-directory: orx/code/build/windows/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
       - name: Set ORX environment
-        run: echo "ORX=${{ github.workspace }}/code" >> $GITHUB_ENV
-    
-      - name: Checkout ocaml-orx
-        uses: actions/checkout@v2
+        run: echo "ORX=${{ github.workspace }}/orx/code" >> $GITHUB_ENV
 
       - name: Setup OCaml
         uses: ocaml/setup-ocaml@v2
@@ -55,9 +57,11 @@ jobs:
           ocaml-compiler: ${{ matrix.ocamlversion }}
 
       - name: Install opam dependencies
+        working-directory: ocaml-orx
         run: opam install . --deps-only --with-test
 
       - name: Build ocaml-orx
+        working-directory: ocaml-orx
         run: opam exec -- dune build
         env:
           ORX: ${{ env.ORX }}
@@ -97,7 +101,7 @@ jobs:
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
       - name: Set ORX environment
-        run: echo "ORX=$GITHUB_WORKSPACE/orx/code" >> $GITHUB_ENV
+        run: echo "ORX=${{ github.workspace }}/orx/code" >> $GITHUB_ENV
 
       - name: Setup OCaml
         uses: ocaml/setup-ocaml@v2
