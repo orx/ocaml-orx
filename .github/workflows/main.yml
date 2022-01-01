@@ -41,6 +41,9 @@ jobs:
       - name: orx build (gmake)
         working-directory: code/build/windows/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+
+      - name: Set ORX environment
+        run: echo "ORX=${{ github.workspace }}/code" >> $GITHUB_ENV
     
       - name: Checkout ocaml-orx
         uses: actions/checkout@v2
@@ -56,7 +59,7 @@ jobs:
       - name: Build ocaml-orx
         run: opam exec -- dune build
         env:
-          ORX: ${{ github.workspace }}/code
+          ORX: ${{ env.ORX }}
 
 
   macos:
@@ -87,6 +90,9 @@ jobs:
         working-directory: code/build/mac/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
+      - name: Set ORX environment
+        run: echo "ORX=${{ github.workspace }}/code" >> $GITHUB_ENV
+
       - name: Checkout ocaml-orx
         uses: actions/checkout@v2
 
@@ -101,5 +107,4 @@ jobs:
       - name: Build ocaml-orx
         run: opam exec -- dune build
         env:
-          ORX: ${{ github.workspace }}/code
-
+          ORX: ${{ env.ORX }}
