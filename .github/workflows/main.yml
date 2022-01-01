@@ -55,6 +55,9 @@ jobs:
 
       - name: Build ocaml-orx
         run: opam exec -- dune build
+        env:
+          ORX: ${{ github.workspace }}/code
+
 
   macos:
     runs-on: macos-latest
@@ -95,3 +98,6 @@ jobs:
 
       - name: Build ocaml-orx
         run: opam exec -- dune build
+        env:
+          ORX: ${{ github.workspace }}/code
+
