@@ -58,7 +58,7 @@ jobs:
 
       - name: Install system dependencies
         working-directory: ocaml-orx
-        run: opam depext . -i --with-test
+        run: opam depext conf-pkg-config conf-libffi --with-test
 
       - name: Install opam dependencies
         working-directory: ocaml-orx
