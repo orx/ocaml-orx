@@ -78,11 +78,20 @@ jobs:
           - 4.13.x
 
     steps:
-      - name: Checkout latest orx
+      - name: Checkout ocaml-orx
+        uses: actions/checkout@v2
+
+      - name: List files
+        run: ls
+
+      - name: Current directory
+        run: pwd
+      
+      - name: Checkout orx
         uses: actions/checkout@v2
         with:
           repository: orx/orx
-          ref: master
+          path: orx
 
       # - name: orx setup
       #   run: ./setup.sh
@@ -91,18 +100,9 @@ jobs:
       #   working-directory: code/build/mac/gmake
       #   run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
-      - name: List files
-        run: ls
-
-      - name: Current directory
-        run: pwd
-
       - name: Set ORX environment
-        run: echo "ORX=$GITHUB_WORKSPACE/code" >> $GITHUB_ENV
+        run: echo "ORX=$GITHUB_WORKSPACE/orx/code" >> $GITHUB_ENV
 
-      - name: Checkout ocaml-orx
-        uses: actions/checkout@v2
-      
       - name: List files
         run: ls
 
