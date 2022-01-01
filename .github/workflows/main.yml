@@ -70,6 +70,8 @@ jobs:
           #- release
         gmakeplatform:
           - 64
+        ocamlversion:
+          - 4.13.x
 
     steps:
       - name: Checkout latest orx
