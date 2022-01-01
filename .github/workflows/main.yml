@@ -56,6 +56,10 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocamlversion }}
 
+      - name: Install system dependencies
+        working-directory: ocaml-orx
+        run: opam depext . --with-test
+
       - name: Install opam dependencies
         working-directory: ocaml-orx
         run: opam install . --deps-only --with-test
