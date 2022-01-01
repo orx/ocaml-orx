@@ -98,7 +98,7 @@ jobs:
         run: pwd
 
       - name: Set ORX environment
-        run: echo "ORX=$GITHUB_WORKSPACE/orx/code" && exit 1
+        run: echo "ORX=$GITHUB_WORKSPACE/code" >> $GITHUB_ENV
 
       - name: Checkout ocaml-orx
         uses: actions/checkout@v2
@@ -108,6 +108,9 @@ jobs:
 
       - name: Current directory
         run: pwd
+
+      - name: List files under ORX environment
+        run: ls ${{ env.ORX }}
 
       # - name: Setup OCaml
       #   uses: ocaml/setup-ocaml@v2
