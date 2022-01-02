@@ -1,0 +1,121 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  windows:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        gmakeconfig:
+          - debug
+          #- profile
+          #- release
+        gmakeplatform:
+          - 64
+        ocamlversion:
+          - 4.13.x
+
+    steps:
+      - name: Checkout ocaml-orx
+        uses: actions/checkout@v2
+        with:
+          path: ocaml-orx
+
+      - name: Checkout orx
+        uses: actions/checkout@v2
+        with:
+          repository: orx/orx
+          path: orx
+
+      - name: orx setup
+        working-directory: orx
+        run: ./setup.bat
+
+      - name: orx build (gmake)
+        working-directory: orx/code/build/windows/gmake
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+
+      - name: Set ORX environment
+        run: echo "ORX=${{ github.workspace }}/orx/code" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocamlversion }}
+          opam-local-packages: ocaml-orx/*.opam
+
+      - name: Install opam dependencies
+        working-directory: ocaml-orx
+        run: opam install . --deps-only --with-test
+
+      - name: Build ocaml-orx
+        working-directory: ocaml-orx
+        run: opam exec -- dune build
+        env:
+          ORX: ${{ env.ORX }}
+
+  macos:
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        gmakeconfig:
+          - debug
+          #- profile
+          #- release
+        gmakeplatform:
+          - 64
+        ocamlversion:
+          - 4.13.x
+
+    steps:
+      - name: Checkout ocaml-orx
+        uses: actions/checkout@v2
+        with:
+          path: ocaml-orx
+
+      - name: Checkout orx
+        uses: actions/checkout@v2
+        with:
+          repository: orx/orx
+          path: orx
+
+      - name: orx setup
+        working-directory: orx
+        run: ./setup.sh
+
+      - name: orx build (gmake)
+        working-directory: orx/code/build/mac/gmake
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+
+      - name: Set ORX environment
+        run: echo "ORX=${{ github.workspace }}/orx/code" >> $GITHUB_ENV
+
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocamlversion }}
+          opam-local-packages: ocaml-orx/*.opam
+
+      - name: Install opam dependencies
+        working-directory: ocaml-orx
+        run: opam install . --deps-only --with-test
+
+      - name: Build ocaml-orx
+        working-directory: ocaml-orx
+        run: opam exec -- dune build
+        env:
+          ORX: ${{ env.ORX }}
