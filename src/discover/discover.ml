@@ -29,8 +29,12 @@ module Platform = struct
       close_out fd;
       file
     in
+    let header_basename = Filename.basename header in
+    let header_path = Filename.dirname header in
+    let c_flags = [ "-I"; header_path ] in
+    let includes = [ header_basename ] in
     let platform =
-      C.C_define.import c ~includes:[ header ] [ ("PLATFORM_NAME", String) ]
+      C.C_define.import c ~c_flags ~includes [ ("PLATFORM_NAME", String) ]
     in
     match platform with
     | [ (_, String "linux") ] -> Linux
