@@ -55,10 +55,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocamlversion }}
-
-      - name: Install system dependencies
-        working-directory: ocaml-orx
-        run: opam depext conf-pkg-config conf-libffi --with-test
+          opam-local-packages: ocaml-orx/*.opam
 
       - name: Install opam dependencies
         working-directory: ocaml-orx
@@ -111,6 +108,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocamlversion }}
+          opam-local-packages: ocaml-orx/*.opam
 
       - name: Install opam dependencies
         working-directory: ocaml-orx
