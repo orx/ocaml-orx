@@ -25,10 +25,7 @@ ML_ORX_COMMAND_VAR_GET(orxFLOAT, float, fValue)
 ML_ORX_COMMAND_VAR_GET(orxBOOL, bool, bValue)
 ML_ORX_COMMAND_VAR_GET(orxU64, guid, u64Value)
 
-#define ML_ORX_COMMAND_VAR_SET(FIELD_TYPE, NAME, FIELD) \
-static orxINLINE void ml_orx_command_var_set_##NAME(orxCOMMAND_VAR *v, FIELD_TYPE vv) { \
-  v->FIELD = vv; \
-}
+#define ML_ORX_COMMAND_VAR_SET(FIELD_TYPE, NAME, FIELD) static orxINLINE void ml_orx_command_var_set_##NAME(orxCOMMAND_VAR *v, FIELD_TYPE vv) { v->FIELD = vv; }
 ML_ORX_COMMAND_VAR_SET(orxVECTOR, vector, vValue)
 ML_ORX_COMMAND_VAR_SET(orxSTRING, string, zValue)
 ML_ORX_COMMAND_VAR_SET(orxS64, int, s64Value)
@@ -47,32 +44,9 @@ static orxINLINE void ml_orx_shader_param_set_vector(orxSHADER_EVENT_PAYLOAD *pa
   orxASSERT(payload->eParamType == orxSHADER_PARAM_TYPE_VECTOR);
   orxVector_Copy(&(payload->vValue), v);
 }
-
-/* Event handlers */
-
-orxSTATUS ml_orx_event_add_handler(orxEVENT_TYPE event_type, orxEVENT_HANDLER event_handler, orxU32 add_id_flags, orxU32 remove_id_flags) {
-  orxSTATUS result = orxSTATUS_SUCCESS;
-  result = orxEvent_AddHandler(event_type, event_handler);
-  if (result == orxSTATUS_SUCCESS) {
-    result = orxEvent_SetHandlerIDFlags(event_handler, event_type, NULL, add_id_flags, remove_id_flags);
-  }
-  return result;
-}
-
-/* Main engine entrypoint */
-
-void ml_orx_execute(int argc, char **argv,
-                    orxMODULE_INIT_FUNCTION init,
-                    orxMODULE_RUN_FUNCTION run,
-                    orxMODULE_EXIT_FUNCTION exit) {
-    orx_Execute(argc,
-                argv,
-                init,
-                run,
-                exit);
-    return;
-}
 |}
+
+let prologue = String.split_on_char '\n' prologue |> List.map String.trim
 
 let () =
   let (generate_ml, generate_c) = (ref false, ref false) in
@@ -92,5 +66,5 @@ let () =
   | (true, false) ->
     Cstubs.write_ml Format.std_formatter ~prefix (module Orx_bindings.Bindings)
   | (false, true) ->
-    print_endline prologue;
+    List.iter print_endline prologue;
     Cstubs.write_c Format.std_formatter ~prefix (module Orx_bindings.Bindings)
