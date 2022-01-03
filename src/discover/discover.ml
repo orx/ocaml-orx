@@ -57,13 +57,13 @@ let () =
       let platform = Platform.detect c in
       let orx_c_link_dir = orx_dir /+ "lib" /+ "dynamic" in
       let orx_c_library =
-        let extension =
+        let (prefix, extension) =
           match platform with
-          | Linux -> "so"
-          | Macos -> "dylib"
-          | Windows -> "dll"
+          | Linux -> ("lib", "so")
+          | Macos -> ("lib", "dylib")
+          | Windows -> ("", "dll")
         in
-        "liborxd." ^ extension
+        prefix ^ "orxd." ^ extension
       in
       let orx_c_library_location = orx_c_link_dir /+ orx_c_library in
       let orx_c_link_libs =
