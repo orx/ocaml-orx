@@ -43,36 +43,54 @@ module Platform = struct
     | _ -> failwith "Unsupported platform or operating system"
 end
 
-let orx_env () =
-  match Sys.getenv_opt "ORX" with
-  | Some orx -> orx
-  | None -> C.die "The ORX environment variable must be set."
+module Orx_info = struct
+  let get_env () =
+    match Sys.getenv_opt "ORX" with
+    | Some orx -> orx
+    | None -> C.die "The ORX environment variable must be set."
+
+  type lib = {
+    variant : string;
+    basename : string;
+    path : string;
+  }
+
+  let make_lib variant path =
+    { variant; path; basename = Filename.basename path }
+
+  let get_lib configurator lib_dir =
+    let platform = Platform.detect configurator in
+    let (prefix, extension) =
+      match platform with
+      | Linux -> ("lib", "so")
+      | Macos -> ("lib", "dylib")
+      | Windows -> ("", "dll")
+    in
+    (* Find debug, profile or release version of the orx library *)
+    let variants = [ "orxd"; "orxp"; "orx" ] in
+    let path v = lib_dir /+ Printf.sprintf "%s%s.%s" prefix v extension in
+    let paths = List.map (fun v -> make_lib v (path v)) variants in
+    match List.find_opt (fun lib -> Sys.file_exists lib.path) paths with
+    | None -> C.die "The orx library was not found under %s" lib_dir
+    | Some lib -> lib
+end
 
 let add_cclib (flags : string list) : string list =
   List.map (fun flag -> [ "-cclib"; flag ]) flags |> List.flatten
 
 let () =
   C.main ~name:"orx" (fun c ->
-      let orx_dir = orx_env () in
+      let orx_dir = Orx_info.get_env () in
       let platform = Platform.detect c in
       let orx_c_link_dir = orx_dir /+ "lib" /+ "dynamic" in
-      let orx_c_library =
-        let (prefix, extension) =
-          match platform with
-          | Linux -> ("lib", "so")
-          | Macos -> ("lib", "dylib")
-          | Windows -> ("", "dll")
-        in
-        prefix ^ "orxd." ^ extension
-      in
-      let orx_c_library_location = orx_c_link_dir /+ orx_c_library in
+      let orx_c_library = Orx_info.get_lib c orx_c_link_dir in
       let orx_c_link_libs =
+        let lorx = Printf.sprintf "-l%s" orx_c_library.variant in
         match platform with
-        | Linux -> [ "-lorxd"; "-ldl"; "-lm"; "-lrt" ]
-        | Macos -> [ "-rpath"; orx_c_link_dir; "-lorxd"; "-ldl"; "-lm" ]
-        | Windows -> [ "-lorxd"; "-lm" ]
+        | Linux -> [ lorx; "-ldl"; "-lm"; "-lrt" ]
+        | Macos -> [ lorx; "-ldl"; "-lm" ]
+        | Windows -> [ lorx; "-lm" ]
       in
-
       let orx_c_link_flags = ("-L" ^ orx_c_link_dir) :: orx_c_link_libs in
       let orx_c_include_dir = "-I" ^ (orx_dir /+ "include") in
       let orx_ocaml_link_flags =
@@ -82,9 +100,8 @@ let () =
       in
       C.Flags.write_lines "orx-c-include-flags.txt" [ orx_c_include_dir ];
       C.Flags.write_lines "orx-c-link-flags.txt" orx_c_link_flags;
-      C.Flags.write_lines "orx-c-library.txt" [ orx_c_library ];
-      C.Flags.write_lines "orx-c-library-location.txt"
-        [ orx_c_library_location ];
+      C.Flags.write_lines "orx-c-library.txt" [ orx_c_library.basename ];
+      C.Flags.write_lines "orx-c-library-location.txt" [ orx_c_library.path ];
       C.Flags.write_sexp "orx-c-include-flags.sexp" [ orx_c_include_dir ];
       C.Flags.write_sexp "orx-c-link-flags.sexp" orx_c_link_flags;
       C.Flags.write_sexp "orx-ocaml-link-flags.sexp"
