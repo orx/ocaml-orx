@@ -21,6 +21,6 @@
    (run
     install_name_tool
     -change
-    @executable_path/liborxd.dylib
+    @executable_path/%{read-lines:../../discover/orx-c-library.txt}
     %{read-lines:../../discover/orx-c-library-location.txt}
     %{targets}))))
