@@ -1,20 +1,24 @@
-.PHONY: all doc repl clean gh-pages
-
+.PHONY: all
 all:
 	dune build
 
+.PHONY: doc
 doc:
 	dune build @doc
 
+.PHONY: repl
 repl:
 	dune utop src
 
+.PHONY: fmt
 fmt:
 	dune build @fmt --auto-promote
 
+.PHONY: clean
 clean:
 	dune clean
 
+.PHONY: gh-pages
 gh-pages: doc
 	git clone `git config --get remote.origin.url` .gh-pages --reference .
 	git -C .gh-pages checkout --orphan gh-pages
