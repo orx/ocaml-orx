@@ -909,6 +909,8 @@ module Object : sig
 
   val set_clock_recursive : t -> Clock.t option -> unit
 
+  val get_clock : t -> Clock.t option
+
   (** {2 FX} *)
 
   val add_fx : t -> string -> Status.t

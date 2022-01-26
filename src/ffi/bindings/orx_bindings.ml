@@ -815,6 +815,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let set_clock_recursive =
       c "orxObject_SetClockRecursive" (t @-> Clock.t_opt @-> returning void)
 
+    let get_clock = c "orxObject_GetClock" (t @-> returning Clock.t_opt)
+
     (* Bounding box *)
     let get_bounding_box =
       c "orxObject_GetBoundingBox" (t @-> Obox.t @-> returning Obox.t_opt)
