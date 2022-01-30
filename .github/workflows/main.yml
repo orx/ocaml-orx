@@ -146,6 +146,12 @@ jobs:
           repository: orx/orx
           path: orx
 
+      - name: Update apt repo
+        run: sudo apt-get -qq update
+
+      - name: Install extra OS deps for orx
+        run: sudo apt-get -y install freeglut3-dev libxrandr-dev
+
       - name: orx setup
         working-directory: orx
         run: ./setup.sh
