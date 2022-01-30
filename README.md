@@ -1,5 +1,7 @@
 # ocaml-orx - OCaml bindings to the Orx game library
 
+[![Build](https://github.com/orx/ocaml-orx/actions/workflows/main.yml/badge.svg)](https://github.com/orx/ocaml-orx/actions/workflows/main.yml)
+
 [Orx] is "an open source, portable, lightweight, plugin-based, data-driven and
 extremely easy to use 2D-oriented game engine."  Orx itself is written in C.
 
