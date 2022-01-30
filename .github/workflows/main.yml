@@ -20,8 +20,6 @@ jobs:
     strategy:
       matrix:
         gmakeconfig:
-          - debug
-          - profile
           - release
         gmakeplatform:
           - 64
@@ -73,8 +71,6 @@ jobs:
     strategy:
       matrix:
         gmakeconfig:
-          - debug
-          - profile
           - release
         gmakeplatform:
           - 64
@@ -126,8 +122,6 @@ jobs:
     strategy:
       matrix:
         gmakeconfig:
-          - debug
-          - profile
           - release
         gmakeplatform:
           - 64
