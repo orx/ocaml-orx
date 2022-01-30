@@ -15,8 +15,8 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         os:
           - ubuntu-latest
           - macos-latest
