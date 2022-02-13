@@ -75,6 +75,36 @@ module Orx_info = struct
     | Some lib -> lib
 end
 
+module Orx_lib_staging = struct
+  let lib_target_dirs =
+    (* Several levels of directory to go up before we get to the source tree *)
+    let dots = String.concat Filename.dir_sep [ ".."; ".."; ".."; ".." ] in
+    List.map
+      (fun parts -> List.fold_left Filename.concat dots parts)
+      [
+        [ "examples"; "tutorial" ];
+        [ "examples"; "ocaml"; "top_down_movement"; "src" ];
+        [ "examples"; "wiki"; "beginners_guide" ];
+      ]
+
+  let read_file path =
+    let ic = open_in_bin path in
+    let len = in_channel_length ic in
+    let content = really_input_string ic len in
+    close_in ic;
+    content
+
+  let write_file path ~data =
+    let oc = open_out_bin path in
+    output_string oc data;
+    close_out oc
+
+  let stage_orx_lib (lib : Orx_info.lib) =
+    let lib_content = read_file lib.path in
+    let targets = List.map (fun path -> path /+ lib.basename) lib_target_dirs in
+    List.iter (fun target -> write_file target ~data:lib_content) targets
+end
+
 let add_cclib (flags : string list) : string list =
   List.map (fun flag -> [ "-cclib"; flag ]) flags |> List.flatten
 
@@ -84,6 +114,7 @@ let () =
       let platform = Platform.detect c in
       let orx_c_link_dir = orx_dir /+ "lib" /+ "dynamic" in
       let orx_c_library = Orx_info.get_lib c orx_c_link_dir in
+      Orx_lib_staging.stage_orx_lib orx_c_library;
       let orx_c_link_libs =
         let lorx = Printf.sprintf "-l%s" orx_c_library.variant in
         match platform with

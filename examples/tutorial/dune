@@ -5,6 +5,7 @@
   tutorial_07_fx
   tutorial_08_physics
   tutorial_09_scrolling)
+ (promote (until-clean))
  (libraries orx))
 
 (alias
@@ -15,27 +16,3 @@
   tutorial_07_fx.exe
   tutorial_08_physics.exe
   tutorial_09_scrolling.exe))
-
-(rule
- (alias tutorials)
- (enabled_if
-  (<> %{ocaml-config:system} macosx))
- (target liborxd%{ext_dll})
- (deps
-  (glob_files *.exe))
- (action
-  (copy
-   %{read-lines:../../src/discover/orx-c-library-location.txt}
-   %{target})))
-
-(rule
- (alias tutorials)
- (enabled_if
-  (= %{ocaml-config:system} macosx))
- (target liborxd.dylib)
- (deps
-  (glob_files *.exe))
- (action
-  (copy
-   %{read-lines:../../src/discover/orx-c-library-location.txt}
-   %{target})))
