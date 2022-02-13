@@ -1,8 +1,8 @@
-(executable
- (name beginners_guide)
+(executables
+ (names main)
  (promote (until-clean))
  (libraries orx))
 
 (alias
  (name tutorials)
- (deps beginners_guide.exe))
+ (deps main.exe))
