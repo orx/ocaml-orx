@@ -160,6 +160,8 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let lerp = c "orxVector_Lerp" (t @-> t @-> t @-> float @-> returning t)
 
     let rotate_2d = c "orxVector_2DRotate" (t @-> t @-> float @-> returning t)
+
+    let clamp = c "orxVector_Clamp" (t @-> t @-> t @-> t @-> returning t)
   end
 
   module Structure = struct

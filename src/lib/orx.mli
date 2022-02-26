@@ -243,6 +243,14 @@ module Vector : sig
 
   val lerp : t -> t -> float -> t
 
+  val clamp' : target:t -> t -> min:t -> max:t -> unit
+
+  val clamp : t -> min:t -> max:t -> t
+
+  val clamp_size' : target:t -> t -> min:float -> max:float -> unit
+
+  val clamp_size : t -> min:float -> max:float -> t
+
   val move_x : t -> float -> unit
 
   val move_y : t -> float -> unit

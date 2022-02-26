@@ -104,6 +104,36 @@ let make_two_vec_one_float_op op =
 
 let (lerp', lerp) = make_two_vec_one_float_op lerp
 
+let make_one_vec_two_vec_op op =
+  let f' ~(target : t) (v : t) ~(min : t) ~(max : t) : unit =
+    let (_ : t) = op target v min max in
+    ()
+  in
+  let f (v : t) ~(min : t) ~(max : t) : t =
+    let target : t = allocate_raw () in
+    f' ~target v ~min ~max;
+    target
+  in
+  (f', f)
+
+let (clamp', clamp) = make_one_vec_two_vec_op clamp
+
+let clamp_size' ~target v ~min ~max =
+  let size = get_size v in
+  copy' ~target v;
+  if size < min then (
+    normalize' ~target target;
+    mulf' ~target target min
+  ) else if size > max then (
+    normalize' ~target target;
+    mulf' ~target target max
+  )
+
+let clamp_size v ~min ~max =
+  let target : t = allocate_raw () in
+  clamp_size' ~target v ~min ~max;
+  target
+
 let move_x (v : t) (delta : float) : unit = set_x v (get_x v +. delta)
 
 let move_y (v : t) (delta : float) : unit = set_y v (get_y v +. delta)
