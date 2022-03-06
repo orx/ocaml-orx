@@ -1023,6 +1023,10 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let set_pitch =
       c "orxObject_SetPitch" (t @-> float @-> returning Status.sound_exn)
 
+    let set_panning =
+      c "orxObject_SetPanning"
+        (t @-> float @-> bool @-> returning Status.sound_exn)
+
     let play = c "orxObject_Play" (t @-> returning Status.sound_exn)
 
     let stop = c "orxObject_Stop" (t @-> returning Status.sound_exn)

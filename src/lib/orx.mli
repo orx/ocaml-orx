@@ -1105,6 +1105,8 @@ module Object : sig
 
   val set_pitch : t -> float -> unit
 
+  val set_panning : t -> float -> bool -> unit
+
   val play : t -> unit
 
   val stop : t -> unit
