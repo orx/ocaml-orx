@@ -522,9 +522,8 @@ module Texture : sig
   type t
   (** A single texture *)
 
-  val create_from_file : string -> bool -> t option
-  (** [create_from_file path keep_in_cache] creates a texture from the file at
-      [path].
+  val load : string -> bool -> t option
+  (** [load path keep_in_cache] creates a texture from the file at [path].
 
       @param keep_in_cache
         Specifies if a texture should be kept active in orx's cache even when
