@@ -690,6 +690,11 @@ module Mouse : sig
   val get_position : unit -> Vector.t option
   (** [get_position ()] is the current mouse screen position. *)
 
+  val get_position_exn : unit -> Vector.t
+  (** [get_position_exn ()] is the current mouse screen position.
+
+      @raise Invalid_argument if no mouse position can be retrieved. *)
+
   val get_move_delta : unit -> Vector.t option
   (** [get_move_delta ()] is the position change since the last call to this
       function. *)
