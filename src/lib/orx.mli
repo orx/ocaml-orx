@@ -1549,7 +1549,7 @@ module Camera : sig
   (** [get_position camera] is the position of [camera]. *)
 
   val set_position : t -> Vector.t -> unit
-  (** [get_position camera pos] sets [camera]'s position to [pos]. *)
+  (** [set_position camera pos] sets [camera]'s position to [pos]. *)
 
   val get_rotation : t -> float
   (** [get_rotation camera] is the rotation of [camera] in radians. *)
