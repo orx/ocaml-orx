@@ -768,6 +768,14 @@ module Input : sig
       will generally be [0.0] or [1.0]. For a joystick the value will scale
       according to the position of the stick along the queried axis. *)
 
+  val set_value : string -> float -> Status.t
+  (** [set_value input value] sets [input] to [value]. This impacts only one
+      input for [input]. *)
+
+  val set_permanent_value : string -> float -> Status.t
+  (** [set_permanent_value input value] sets [input] to [value] until reset. Set
+      [value] to [0.0] to reset. *)
+
   val get_binding :
     string -> int -> (Input_type.t * int * Input_mode.t) Status.result
   (** [get_binding input index] gives information on [input]'s type and mode. *)
@@ -775,6 +783,23 @@ module Input : sig
   val get_binding_name : Input_type.t -> int -> Input_mode.t -> string
   (** [get_binding_name input_type binding_id mode] give the name associated
       with [input_type], [binding_id] and [mode]. *)
+
+  (** {2 Input sets} *)
+
+  val get_current_set : unit -> string
+  (** [get_current_set ()] returns the currently selected input set. *)
+
+  val select_set : string -> Status.t
+  (** [select_set input_set] selects [input_set] as the currently active input
+      set. *)
+
+  val enable_set : string -> bool -> Status.t
+  (** [enable_set input_set enabled] enables/disabled [input_set] without
+      selecting it. *)
+
+  val is_set_enabled : string -> bool
+  (** [is_set_enabled input_set] is [true] if [input_set] is enabled, otherwise
+      [false]. *)
 end
 
 module Physics : sig

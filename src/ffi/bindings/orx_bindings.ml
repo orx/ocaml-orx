@@ -1165,6 +1165,21 @@ module Bindings (F : Ctypes.FOREIGN) = struct
 
     let get_value = c "orxInput_GetValue" (string @-> returning float)
 
+    let set_value =
+      c "orxInput_SetValue" (string @-> float @-> returning Status.t)
+
+    let set_permanent_value =
+      c "orxInput_SetPermanentValue" (string @-> float @-> returning Status.t)
+
+    let get_current_set = c "orxInput_GetCurrentSet" (void @-> returning string)
+
+    let select_set = c "orxInput_SelectSet" (string @-> returning Status.t)
+
+    let enable_set =
+      c "orxInput_EnableSet" (string @-> bool @-> returning Status.t)
+
+    let is_set_enabled = c "orxInput_IsSetEnabled" (string @-> returning bool)
+
     let get_binding =
       c "orxInput_GetBinding"
         (string
