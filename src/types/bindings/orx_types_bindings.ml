@@ -424,6 +424,18 @@ module Bindings (F : Ctypes.TYPE) = struct
     let t : t structure = F.structure "__orxANIM_t"
   end
 
+  module Body_part = struct
+    type t
+
+    let t : t structure = F.structure "__orxBODY_PART_t"
+  end
+
+  module Body = struct
+    type t
+
+    let t : t structure = F.structure "__orxBODY_t"
+  end
+
   module Fx_event = struct
     type t =
       | Start
@@ -560,8 +572,8 @@ module Bindings (F : Ctypes.TYPE) = struct
       let t : t structure = F.structure "__orxPHYSICS_EVENT_PAYLOAD_t"
       let position = F.field t "vPosition" Vector.t
       let normal = F.field t "vNormal" Vector.t
-      let sender_part_name = F.field t "zSenderPartName" F.string
-      let recipient_part_name = F.field t "zRecipientPartName" F.string
+      let sender_part = F.field t "pstSenderPart" (F.ptr Body_part.t)
+      let recipient_part = F.field t "pstRecipientPart" (F.ptr Body_part.t)
       let () = F.seal t
     end
   end
@@ -850,18 +862,6 @@ module Bindings (F : Ctypes.TYPE) = struct
     let payload = F.field t "pstPayload" (F.ptr F.void)
     let context = F.field t "pContext" (F.ptr F.void)
     let () = F.seal t
-  end
-
-  module Body_part = struct
-    type t
-
-    let t : t structure = F.structure "__orxBODY_PART_t"
-  end
-
-  module Body = struct
-    type t
-
-    let t : t structure = F.structure "__orxBODY_t"
   end
 
   module Camera = struct

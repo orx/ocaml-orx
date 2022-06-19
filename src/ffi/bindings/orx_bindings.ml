@@ -1273,11 +1273,11 @@ module Bindings (F : Ctypes.FOREIGN) = struct
     let get_normal (payload : payload) : Vector.t =
       !@payload @. T.Physics_event.Payload.normal
 
-    let get_sender_part_name (payload : payload) : string =
-      Ctypes.getf !@payload T.Physics_event.Payload.sender_part_name
+    let get_sender_part (payload : payload) : Body_part.t =
+      Ctypes.getf !@payload T.Physics_event.Payload.sender_part
 
-    let get_recipient_part_name (payload : payload) : string =
-      Ctypes.getf !@payload T.Physics_event.Payload.recipient_part_name
+    let get_recipient_part (payload : payload) : Body_part.t =
+      Ctypes.getf !@payload T.Physics_event.Payload.recipient_part
   end
 
   module Shader_event = struct

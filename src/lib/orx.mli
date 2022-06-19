@@ -1374,13 +1374,13 @@ module Physics_event : sig
   (** [get_normal payload] is the normal vector of the contact for the physics
       event that sent [payload]. *)
 
-  val get_sender_part_name : payload -> string
-  (** [get_sender_part_name payload] is the name of the body part which sent the
-      event which sent [payload]. *)
+  val get_sender_part : payload -> Body_part.t
+  (** [get_sender_part payload] is the body part which sent the event which sent
+      [payload]. *)
 
-  val get_recipient_part_name : payload -> string
-  (** [get_recipient_part_name payload] is the name of the body part which
-      recieved the event which sent [payload]. *)
+  val get_recipient_part : payload -> Body_part.t
+  (** [get_recipient_part payload] is the body part which recieved the event
+      which sent [payload]. *)
 end
 
 module Shader_event : sig
