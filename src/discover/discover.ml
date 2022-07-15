@@ -67,7 +67,7 @@ module Orx_info = struct
       | Windows -> ("", "dll")
     in
     (* Find debug, profile or release version of the orx library *)
-    let variants = [ "orxd"; "orxp"; "orx" ] in
+    let variants = [ "orx"; "orxd"; "orxp" ] in
     let path v = lib_dir /+ Printf.sprintf "%s%s.%s" prefix v extension in
     let paths = List.map (fun v -> make_lib v (path v)) variants in
     match List.find_opt (fun lib -> Sys.file_exists lib.path) paths with
