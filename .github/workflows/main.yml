@@ -23,7 +23,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
+          - windows-2019
         gmakeconfig:
           - release
         gmakeplatform:
@@ -56,12 +56,12 @@ jobs:
       - name: orx setup
         working-directory: orx
         run: ./setup.sh
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-2019'
 
       - name: orx setup
         working-directory: orx
         run: ./setup.bat
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
 
       - name: orx build (gmake)
         working-directory: orx/code/build/linux/gmake
@@ -76,15 +76,15 @@ jobs:
       - name: orx build (gmake)
         working-directory: orx/code/build/windows/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
 
       - name: Set ORX environment
         run: echo "ORX=${{ github.workspace }}/orx/code" >> $GITHUB_ENV
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-2019'
 
       - name: Set ORX environment
         run: echo "ORX=${{ github.workspace }}/orx/code" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
 
       - name: Setup OCaml
         uses: ocaml/setup-ocaml@v2
